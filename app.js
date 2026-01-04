@@ -83,7 +83,7 @@ const POSTS = [
     { username: "hayvanat.bahcesi", avatar: "hayvanatbahcesi", image: "https://picsum.photos/seed/zoo1/600/600", caption: "Aslan görmeye gittik 🦁👀", likes: 612, type: "image" },
     { username: "akvaryum.balik", avatar: "akvaryumbalik", image: "https://picsum.photos/seed/fish1/600/600", caption: "Renkli balıklar yüzüyor 🐠🐟", likes: 456, type: "image" },
     { username: "cicek.bahcesi", avatar: "cicekbahcesi", image: "https://picsum.photos/seed/flowers1/600/600", caption: "Renkli çiçekler açmış 🌺🌸", likes: 423, type: "image" },
-    { username: "skate.videolari", avatar: "skatevideolari", image: "https://picsum.photos/seed/skate1/600/600", video: "https://videos.pexels.com/video-files/3571225/3571225-sd_640_360_30fps.mp4", caption: "Yeni trick! 🛹", likes: 1876, type: "video" }
+    { username: "skate.videolari", avatar: "skatevideolari", image: "https://picsum.photos/seed/skate1/600/600", video: "https://videos.pexels.com/video-files/3015491/3015491-sd_640_360_30fps.mp4", caption: "Yeni trick! 🛹", likes: 1876, type: "video" }
 ];
 
 // Ekran geçişleri
