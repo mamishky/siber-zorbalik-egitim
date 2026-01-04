@@ -1172,6 +1172,7 @@ document.getElementById('finish-session').addEventListener('click', () => {
         currentBullyingType: null,
         currentScenario: null,
         messageIndex: 0,
+        conversationIndex: 0,
         sessionData: [],
         skills: {
             navigation: false,
@@ -1193,7 +1194,8 @@ document.getElementById('finish-session').addEventListener('click', () => {
         pendingMessages: 0,
         messageQueue: [],
         currentMessageIndex: 0,
-        selectedComplaintReason: null
+        selectedComplaintReason: null,
+        conversationHistory: {}
     };
     
     showScreen('welcome-screen');
@@ -1403,8 +1405,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Aktif durumu güncelle
                 document.querySelectorAll('.bottom-nav i').forEach(i => i.classList.remove('active'));
                 icon.classList.add('active');
-                
-                const navType = icon.dataset.nav;
                 
                 // Navigasyon becerisini true yap
                 if (currentSession.sessionType) {
