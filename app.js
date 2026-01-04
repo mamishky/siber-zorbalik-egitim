@@ -14,8 +14,7 @@ let currentSession = {
         reading: false,
         replying: false,
         reporting: false,
-        blocking: false,
-        notifying: false
+        blocking: false
     },
     stats: {
         correct: 0,
@@ -26,8 +25,179 @@ let currentSession = {
     hintTimeout: null,
     messageTimeout: null,
     reportClicked: false,
-    blockClicked: false
+    blockClicked: false,
+    pendingMessages: 0
 };
+
+// Feed için gönderi verileri
+const POSTS = [
+    { username: "ali.yilmaz", avatar: "aliyilmaz", image: "https://picsum.photos/600/600?random=1", caption: "Bugün harika bir gün! 🌟", likes: 245 },
+    { username: "ayse.demir", avatar: "aysedemir", image: "https://picsum.photos/600/600?random=2", caption: "Doğa yürüyüşü çok keyifliydi 🌲", likes: 189 },
+    { username: "mehmet.kaya", avatar: "mehmetkaya", image: "https://picsum.photos/600/600?random=3", caption: "Yeni hobim fotoğrafçılık 📸", likes: 332 },
+    { username: "zeynep.ozturk", avatar: "zeynepozturk", image: "https://picsum.photos/600/600?random=4", caption: "Güneşli bir gün ☀️", likes: 421 },
+    { username: "cem.yildiz", avatar: "cemyildiz", image: "https://picsum.photos/600/600?random=5", caption: "Spor sonrası kendimi harika hissediyorum 💪", likes: 276 },
+    { username: "selin.yildirim", avatar: "selinyildirim", image: "https://picsum.photos/600/600?random=6", caption: "Kahve molası ☕️", likes: 198 },
+    { username: "can.yilmaz", avatar: "canyilmaz", image: "https://picsum.photos/600/600?random=7", caption: "Yeni kitabımı okuyorum 📚", likes: 145 },
+    { username: "gizem.sen", avatar: "gizemsen", image: "https://picsum.photos/600/600?random=8", caption: "Güzel bir akşam yemeği 🍝", likes: 389 },
+    { username: "tarik.barkan", avatar: "tarikbarkan", image: "https://picsum.photos/600/600?random=9", caption: "Konserde muhteşem bir gece 🎵", likes: 512 },
+    { username: "aleyna.tilkici", avatar: "aleynatilkici", image: "https://picsum.photos/600/600?random=10", caption: "Sanat galerisinde 🎨", likes: 298 },
+    { username: "berk.ozturk", avatar: "berkozturk", image: "https://picsum.photos/600/600?random=11", caption: "Bisiklet turu harika geçti 🚴", likes: 223 },
+    { username: "nadise.guzel", avatar: "nadiseguzel", image: "https://picsum.photos/600/600?random=12", caption: "Günbatımı manzarası 🌅", likes: 467 },
+    { username: "barkan.tas", avatar: "barkantas", image: "https://picsum.photos/600/600?random=13", caption: "Yeni projem heyecan verici! 💻", likes: 178 },
+    { username: "hadide.kaya", avatar: "hadidekaya", image: "https://picsum.photos/600/600?random=14", caption: "Müzik yapmak ruhu dinlendiriyor 🎸", likes: 345 },
+    { username: "murat.demirtas", avatar: "muratdemirtas", image: "https://picsum.photos/600/600?random=15", caption: "Parkta güzel bir gün 🌳", likes: 201 },
+    { username: "aleyda.tilki", avatar: "aleydatilki", image: "https://picsum.photos/600/600?random=16", caption: "Yeni elbisem çok güzel 👗", likes: 534 },
+    { username: "arda.turan", avatar: "ardaturan", image: "https://picsum.photos/600/600?random=17", caption: "Futbol oynamayı çok seviyorum ⚽️", likes: 412 },
+    { username: "ece.demir", avatar: "ecedemir", image: "https://picsum.photos/600/600?random=18", caption: "Çiçekler açmış 🌸", likes: 267 },
+    { username: "deniz.akar", avatar: "denizakar", image: "https://picsum.photos/600/600?random=19", caption: "Deniz kenarında huzur 🌊", likes: 398 },
+    { username: "burak.ozkan", avatar: "burakozkan", image: "https://picsum.photos/600/600?random=20", caption: "Arkadaşlarla harika bir gün 🎉", likes: 289 },
+    { username: "merve.karatas", avatar: "mervekaratas", image: "https://picsum.photos/600/600?random=21", caption: "Yeni pastam çok lezzetli 🍰", likes: 356 },
+    { username: "tolga.aydin", avatar: "tolgaaydin", image: "https://picsum.photos/600/600?random=22", caption: "Dağ yürüyüşü manzarası 🏔️", likes: 423 }
+];
+
+// Ekran geçişleri
+function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.remove('active');
+    });
+    document.getElementById(screenId).classList.add('active');
+}
+
+// Feed'i oluştur
+function generateFeed() {
+    const feedContainer = document.getElementById('feed-container');
+    feedContainer.innerHTML = '';
+    
+    POSTS.forEach((post, index) => {
+        const postDiv = document.createElement('div');
+        postDiv.className = 'post';
+        postDiv.innerHTML = `
+            <div class="post-header">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${post.avatar}" alt="${post.username}">
+                <span>${post.username}</span>
+            </div>
+            <div class="post-image">
+                <img src="${post.image}" alt="Post" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <div class="post-actions">
+                <div class="actions-left">
+                    <i class="far fa-heart like-btn" data-post="${index}"></i>
+                    <i class="far fa-comment comment-btn" data-post="${index}"></i>
+                    <i class="far fa-paper-plane share-btn"></i>
+                </div>
+                <i class="far fa-bookmark save-btn save-icon" data-post="${index}"></i>
+            </div>
+            <div class="post-likes" data-post="${index}">${post.likes} beğeni</div>
+            <div class="post-caption">
+                <strong>${post.username}</strong> ${post.caption}
+            </div>
+            <div class="post-comments" data-post="${index}">
+                <div class="comments-list-${index}"></div>
+            </div>
+            <div class="comment-input-container">
+                <input type="text" placeholder="Yorum ekle..." class="comment-input" data-post="${index}" maxlength="100">
+                <button class="comment-submit" data-post="${index}" disabled>Gönder</button>
+            </div>
+        `;
+        feedContainer.appendChild(postDiv);
+    });
+    
+    // Like butonları
+    document.querySelectorAll('.like-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const postIndex = this.dataset.post;
+            this.classList.toggle('liked');
+            this.classList.toggle('fas');
+            this.classList.toggle('far');
+            
+            const likesElement = document.querySelector(`.post-likes[data-post="${postIndex}"]`);
+            let likes = parseInt(likesElement.textContent);
+            if (this.classList.contains('liked')) {
+                likes++;
+            } else {
+                likes--;
+            }
+            likesElement.textContent = `${likes} beğeni`;
+        });
+    });
+    
+    // Kaydet butonları
+    document.querySelectorAll('.save-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            this.classList.toggle('saved');
+            this.classList.toggle('fas');
+            this.classList.toggle('far');
+        });
+    });
+    
+    // Yorum input'ları
+    document.querySelectorAll('.comment-input').forEach(input => {
+        input.addEventListener('input', function() {
+            const submitBtn = document.querySelector(`.comment-submit[data-post="${this.dataset.post}"]`);
+            submitBtn.disabled = this.value.trim() === '';
+        });
+        
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && this.value.trim() !== '') {
+                const submitBtn = document.querySelector(`.comment-submit[data-post="${this.dataset.post}"]`);
+                submitBtn.click();
+            }
+        });
+    });
+    
+    // Yorum gönder butonları
+    document.querySelectorAll('.comment-submit').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const postIndex = this.dataset.post;
+            const input = document.querySelector(`.comment-input[data-post="${postIndex}"]`);
+            const commentText = input.value.trim();
+            
+            if (commentText) {
+                const commentsList = document.querySelector(`.comments-list-${postIndex}`);
+                const commentDiv = document.createElement('div');
+                commentDiv.className = 'post-comment';
+                commentDiv.innerHTML = `<strong>sen</strong> ${commentText}`;
+                commentsList.appendChild(commentDiv);
+                
+                input.value = '';
+                this.disabled = true;
+            }
+        });
+    });
+}
+
+// Hikaye overlay'i aç
+function openStory(username, avatar) {
+    const storyOverlay = document.getElementById('story-overlay');
+    document.getElementById('story-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${avatar}`;
+    document.getElementById('story-username').textContent = username;
+    document.getElementById('story-image').src = `https://picsum.photos/400/700?random=${Math.random()}`;
+    
+    storyOverlay.classList.add('active');
+    
+    // 5 saniye sonra otomatik kapat
+    setTimeout(() => {
+        closeStory();
+    }, 5000);
+}
+
+// Hikaye overlay'i kapat
+function closeStory() {
+    document.getElementById('story-overlay').classList.remove('active');
+}
+
+// Hikaye tıklama event'leri
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.story').forEach(story => {
+        story.addEventListener('click', function() {
+            const storyData = this.dataset.story;
+            const username = this.querySelector('span').textContent;
+            openStory(username, storyData);
+        });
+    });
+    
+    document.getElementById('story-close').addEventListener('click', closeStory);
+});
 
 // Ekran geçişleri
 function showScreen(screenId) {
@@ -59,11 +229,29 @@ document.getElementById('start-session').addEventListener('click', () => {
     currentSession.skills.navigation = true;
     
     showScreen('main-app');
+    generateFeed(); // Feed'i oluştur
     
-    // 10 saniye sonra ilk mesajı göster
+    // 10 saniye sonra ilk mesajı göster (bildirim olarak)
     setTimeout(() => {
-        startFirstScenario();
+        showMessageNotification();
     }, 10000);
+});
+
+// Mesaj bildirimi göster
+function showMessageNotification() {
+    currentSession.pendingMessages++;
+    const badge = document.getElementById('message-badge');
+    badge.textContent = currentSession.pendingMessages;
+    badge.style.display = 'flex';
+}
+
+// Mesaj ikonuna tıklandığında
+document.getElementById('message-icon').addEventListener('click', () => {
+    if (currentSession.pendingMessages > 0) {
+        currentSession.pendingMessages = 0;
+        document.getElementById('message-badge').style.display = 'none';
+        startFirstScenario();
+    }
 });
 
 // Akademisyen Girişi
@@ -163,12 +351,13 @@ function sendMessage() {
         document.getElementById('dm-input-container').style.display = 'none';
         document.getElementById('action-buttons').style.display = 'flex';
         
-        // Butonları sıfırla
+        // Butonları sıfırla - HER İKİ BUTON DA AKTİF BAŞLIYOR
         currentSession.reportClicked = false;
         currentSession.blockClicked = false;
         document.getElementById('report-btn').disabled = false;
-        document.getElementById('block-btn').disabled = true;
-        document.getElementById('notify-btn').disabled = true;
+        document.getElementById('block-btn').disabled = false;
+        document.getElementById('report-btn').classList.remove('blink');
+        document.getElementById('block-btn').classList.remove('blink');
         
         // 5 saniye sonra ipucu göster
         currentSession.hintTimeout = setTimeout(() => {
@@ -225,18 +414,25 @@ document.getElementById('report-btn').addEventListener('click', () => {
     const hintUsed = document.getElementById('hint-overlay').style.display === 'flex';
     document.getElementById('hint-overlay').style.display = 'none';
     
+    // Önce engelle butonuna tıkladıysa uyarı göster
+    if (currentSession.blockClicked && !currentSession.reportClicked) {
+        document.getElementById('hint-overlay').style.display = 'none';
+        showWrongOrderHint('report');
+        return;
+    }
+    
     currentSession.reportClicked = true;
     currentSession.skills.reporting = true;
     
     document.getElementById('report-btn').disabled = true;
-    document.getElementById('block-btn').disabled = false;
+    document.getElementById('report-btn').classList.remove('blink');
     
     const reactionTime = (Date.now() - currentSession.currentMessageStartTime) / 1000;
     saveMessageData('cyberbullying', 'report', reactionTime, hintUsed, true);
     
     currentSession.stats.correct++;
     
-    // İpucu göster
+    // İpucu göster: Şimdi engelle
     showNextStepHint('block');
 });
 
@@ -250,8 +446,8 @@ document.getElementById('block-btn').addEventListener('click', () => {
     document.getElementById('hint-overlay').style.display = 'none';
     
     if (!currentSession.reportClicked) {
-        // Önce şikayet etmeden engelleyemez
-        alert('Önce şikayet etmelisiniz!');
+        // Önce şikayet etmeden engelleyemez - yanlış sıra
+        showWrongOrderHint('block');
         return;
     }
     
@@ -259,47 +455,48 @@ document.getElementById('block-btn').addEventListener('click', () => {
     currentSession.skills.blocking = true;
     
     document.getElementById('block-btn').disabled = true;
-    document.getElementById('notify-btn').disabled = false;
+    document.getElementById('block-btn').classList.remove('blink');
     
     const reactionTime = (Date.now() - currentSession.currentMessageStartTime) / 1000;
     saveMessageData('cyberbullying', 'block', reactionTime, hintUsed, true);
     
     currentSession.stats.correct++;
     
-    // İpucu göster
-    showNextStepHint('notify');
-});
-
-// Yetişkine bildir butonu
-document.getElementById('notify-btn').addEventListener('click', () => {
-    if (currentSession.hintTimeout) {
-        clearTimeout(currentSession.hintTimeout);
-    }
-    
-    const hintUsed = document.getElementById('hint-overlay').style.display === 'flex';
-    document.getElementById('hint-overlay').style.display = 'none';
-    
-    if (!currentSession.blockClicked) {
-        // Önce engellemeden bildiremez
-        alert('Önce engellemelisiniz!');
-        return;
-    }
-    
-    currentSession.skills.notifying = true;
-    
-    document.getElementById('notify-btn').disabled = true;
-    
-    const reactionTime = (Date.now() - currentSession.currentMessageStartTime) / 1000;
-    saveMessageData('cyberbullying', 'notify', reactionTime, hintUsed, true);
-    
-    currentSession.stats.correct++;
-    
-    // 10 saniye sonra sonraki mesaj
+    // Mesaj tamamlandı, sonraki mesaja geç
     currentSession.messageIndex++;
     setTimeout(() => {
         sendMessage();
-    }, 10000);
+    }, 2000);
 });
+
+// Yanlış sıra ipucu göster
+function showWrongOrderHint(wrongButton) {
+    let hintText = '';
+    let blinkButton = null;
+    
+    if (wrongButton === 'block') {
+        hintText = 'Önce şikayet etmelisin! ŞİKAYET ET butonuna bas.';
+        blinkButton = document.getElementById('report-btn');
+    } else if (wrongButton === 'report') {
+        hintText = 'Zaten şikayet ettin! Şimdi ENGELLE butonuna bas.';
+        blinkButton = document.getElementById('block-btn');
+    }
+    
+    document.getElementById('hint-text').textContent = hintText;
+    document.getElementById('hint-overlay').style.display = 'flex';
+    
+    if (blinkButton) {
+        blinkButton.classList.add('blink');
+    }
+    
+    // BUTONLAR TIKLANABİLİR KALIYOR - ipucu 3 saniye sonra kaybolacak
+    currentSession.hintTimeout = setTimeout(() => {
+        document.getElementById('hint-overlay').style.display = 'none';
+        if (blinkButton) {
+            blinkButton.classList.remove('blink');
+        }
+    }, 3000);
+}
 
 // İpucu göster
 function showHint() {
@@ -319,9 +516,6 @@ function showHint() {
     } else if (!currentSession.blockClicked) {
         hintText = 'Şimdi bu kişiyi ENGELLE butonuna basarak engelle.';
         blinkButton = document.getElementById('block-btn');
-    } else {
-        hintText = 'Son olarak bu durumu YETİŞKİNE BİLDİR butonuna basarak bildir.';
-        blinkButton = document.getElementById('notify-btn');
     }
     
     document.getElementById('hint-text').textContent = hintText;
@@ -330,6 +524,8 @@ function showHint() {
     if (blinkButton) {
         blinkButton.classList.add('blink');
     }
+    
+    // İpucu gösterildiğinde BUTONLAR TIKLANABİLİR KALIYOR
 }
 
 // Sonraki adım ipucu
@@ -341,9 +537,6 @@ function showNextStepHint(step) {
         if (step === 'block') {
             hintText = 'Şimdi bu kişiyi ENGELLE butonuna basarak engelle.';
             blinkButton = document.getElementById('block-btn');
-        } else if (step === 'notify') {
-            hintText = 'Son olarak bu durumu YETİŞKİNE BİLDİR butonuna basarak bildir.';
-            blinkButton = document.getElementById('notify-btn');
         }
         
         document.getElementById('hint-text').textContent = hintText;
@@ -355,8 +548,11 @@ function showNextStepHint(step) {
         
         currentSession.hintTimeout = setTimeout(() => {
             document.getElementById('hint-overlay').style.display = 'none';
+            if (blinkButton) {
+                blinkButton.classList.remove('blink');
+            }
         }, 5000);
-    }, 5000);
+    }, 2000);
 }
 
 // Veri kaydet
@@ -426,9 +622,6 @@ function showSummary() {
     document.getElementById('skill-blocking').textContent = currentSession.skills.blocking ? '✓' : '✗';
     document.getElementById('skill-blocking').className = currentSession.skills.blocking ? 'skill-positive' : 'skill-negative';
     
-    document.getElementById('skill-notifying').textContent = currentSession.skills.notifying ? '✓' : '✗';
-    document.getElementById('skill-notifying').className = currentSession.skills.notifying ? 'skill-positive' : 'skill-negative';
-    
     showScreen('summary-screen');
 }
 
@@ -450,8 +643,7 @@ document.getElementById('finish-session').addEventListener('click', () => {
             reading: false,
             replying: false,
             reporting: false,
-            blocking: false,
-            notifying: false
+            blocking: false
         },
         stats: {
             correct: 0,
@@ -462,7 +654,8 @@ document.getElementById('finish-session').addEventListener('click', () => {
         hintTimeout: null,
         messageTimeout: null,
         reportClicked: false,
-        blockClicked: false
+        blockClicked: false,
+        pendingMessages: 0
     };
     
     showScreen('welcome-screen');
@@ -579,5 +772,25 @@ document.getElementById('clear-data').addEventListener('click', () => {
         localStorage.removeItem('siberguven_data');
         loadAdminData();
         alert('Tüm veriler temizlendi!');
+    }
+});
+
+// Alt navigasyon butonları
+document.addEventListener('DOMContentLoaded', () => {
+    const bottomNav = document.querySelector('.bottom-nav');
+    if (bottomNav) {
+        const icons = bottomNav.querySelectorAll('i');
+        icons.forEach((icon, index) => {
+            icon.addEventListener('click', () => {
+                // Aktif durumu güncelle
+                icons.forEach(i => i.classList.remove('active'));
+                icon.classList.add('active');
+                
+                // Navigasyon becerisini true yap
+                if (currentSession.sessionType) {
+                    currentSession.skills.navigation = true;
+                }
+            });
+        });
     }
 });

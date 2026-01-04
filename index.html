@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SiberGüven - Siber Zorbalık Farkındalık Eğitimi</title>
+    <title>Instagram - Siber Zorbalık Farkındalık Eğitimi</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -85,63 +85,86 @@
     <div id="main-app" class="screen">
         <!-- Üst Bar -->
         <header class="top-bar">
-            <div class="logo-text">SiberGüven</div>
+            <div class="logo-container">
+                <i class="fab fa-instagram"></i>
+                <div class="logo-text">Instagram</div>
+            </div>
             <div class="top-icons">
                 <i class="far fa-heart"></i>
-                <i class="fab fa-facebook-messenger"></i>
+                <div class="message-icon-container">
+                    <i class="fab fa-facebook-messenger" id="message-icon"></i>
+                    <span class="message-badge" id="message-badge" style="display: none;">0</span>
+                </div>
             </div>
         </header>
 
         <!-- Hikayeler -->
         <div class="stories-container">
-            <div class="story">
+            <div class="story" data-story="senin">
                 <div class="story-avatar">
                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user1" alt="Story">
                 </div>
                 <span>Senin</span>
             </div>
-            <div class="story">
+            <div class="story" data-story="ali.yilmaz">
                 <div class="story-avatar">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user2" alt="Story">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=aliyilmaz" alt="Story">
                 </div>
-                <span>ahmet_23</span>
+                <span>ali.yilmaz</span>
             </div>
-            <div class="story">
+            <div class="story" data-story="ayse.demir">
                 <div class="story-avatar">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user3" alt="Story">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=aysedemir" alt="Story">
                 </div>
-                <span>ayse_45</span>
+                <span>ayse.demir</span>
             </div>
-            <div class="story">
+            <div class="story" data-story="mehmet.kaya">
                 <div class="story-avatar">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user4" alt="Story">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=mehmetkaya" alt="Story">
                 </div>
-                <span>mehmet_67</span>
+                <span>mehmet.kaya</span>
+            </div>
+            <div class="story" data-story="zeynep.ozturk">
+                <div class="story-avatar">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=zeynepozturk" alt="Story">
+                </div>
+                <span>zeynep.ozturk</span>
+            </div>
+            <div class="story" data-story="cem.yildiz">
+                <div class="story-avatar">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=cemyildiz" alt="Story">
+                </div>
+                <span>cem.yildiz</span>
+            </div>
+            <div class="story" data-story="selin.yildirim">
+                <div class="story-avatar">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=selinyildirim" alt="Story">
+                </div>
+                <span>selin.yildirim</span>
+            </div>
+            <div class="story" data-story="can.yilmaz">
+                <div class="story-avatar">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=canyilmaz" alt="Story">
+                </div>
+                <span>can.yilmaz</span>
+            </div>
+            <div class="story" data-story="gizem.sen">
+                <div class="story-avatar">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=gizemsen" alt="Story">
+                </div>
+                <span>gizem.sen</span>
+            </div>
+            <div class="story" data-story="tarik.barkan">
+                <div class="story-avatar">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=tarikbarkan" alt="Story">
+                </div>
+                <span>tarik.barkan</span>
             </div>
         </div>
 
         <!-- Feed -->
-        <div class="feed-container">
-            <div class="post">
-                <div class="post-header">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user5" alt="User">
-                    <span>zeynep_89</span>
-                </div>
-                <div class="post-image">
-                    <div class="placeholder-image">
-                        <i class="fas fa-image"></i>
-                    </div>
-                </div>
-                <div class="post-actions">
-                    <i class="far fa-heart"></i>
-                    <i class="far fa-comment"></i>
-                    <i class="far fa-paper-plane"></i>
-                </div>
-                <div class="post-likes">245 beğeni</div>
-                <div class="post-caption">
-                    <strong>zeynep_89</strong> Bugün harika bir gün geçirdim! 🌟
-                </div>
-            </div>
+        <div class="feed-container" id="feed-container">
+            <!-- Posts will be generated by JavaScript -->
         </div>
 
         <!-- Alt Navigasyon -->
@@ -179,11 +202,8 @@
             <button class="action-btn report-btn" id="report-btn">
                 <i class="fas fa-flag"></i> ŞİKAYET ET
             </button>
-            <button class="action-btn block-btn" id="block-btn" disabled>
+            <button class="action-btn block-btn" id="block-btn">
                 <i class="fas fa-ban"></i> ENGELLE
-            </button>
-            <button class="action-btn notify-btn" id="notify-btn" disabled>
-                <i class="fas fa-user-shield"></i> YETİŞKİNE BİLDİR
             </button>
         </div>
 
@@ -246,15 +266,28 @@
                             <td>Zorbalığı yapan kişiyi engelleme</td>
                             <td id="skill-blocking">-</td>
                         </tr>
-                        <tr>
-                            <td>Yetişkine bildirme</td>
-                            <td id="skill-notifying">-</td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
 
             <button class="btn-primary" id="finish-session">Bitir</button>
+        </div>
+    </div>
+
+    <!-- Story Overlay -->
+    <div class="story-overlay" id="story-overlay">
+        <div class="story-progress">
+            <div class="story-progress-bar"></div>
+        </div>
+        <div class="story-header">
+            <div class="story-user-info">
+                <img id="story-avatar" src="" alt="User">
+                <span id="story-username"></span>
+            </div>
+            <i class="fas fa-times story-close" id="story-close"></i>
+        </div>
+        <div class="story-content">
+            <img id="story-image" src="" alt="Story">
         </div>
     </div>
 
