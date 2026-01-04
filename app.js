@@ -591,21 +591,25 @@ document.getElementById('dm-input').addEventListener('keypress', (e) => {
 
 // Ana sayfaya dön (home icon click)
 function returnToFeed() {
+    const currentScreen = document.querySelector('.screen.active');
     showScreen('main-app');
     
-    // Mesaj indeksini artır
-    currentSession.currentMessageIndex++;
-    
-    // 10 saniye sonra sonraki mesajı gönder
-    if (currentSession.currentMessageIndex < currentSession.messageQueue.length) {
-        currentSession.messageTimeout = setTimeout(() => {
-            sendNextMessageNotification();
-        }, 10000);
-    } else {
-        // Tüm mesajlar tamamlandı
-        setTimeout(() => {
-            showSummary();
-        }, 2000);
+    // Sadece DM ekranından geliyorsak mesaj indeksini artır
+    if (currentScreen && currentScreen.id === 'dm-screen') {
+        // Mesaj indeksini artır
+        currentSession.currentMessageIndex++;
+        
+        // 10 saniye sonra sonraki mesajı gönder
+        if (currentSession.currentMessageIndex < currentSession.messageQueue.length) {
+            currentSession.messageTimeout = setTimeout(() => {
+                sendNextMessageNotification();
+            }, 10000);
+        } else {
+            // Tüm mesajlar tamamlandı
+            setTimeout(() => {
+                showSummary();
+            }, 2000);
+        }
     }
 }
 
@@ -1053,6 +1057,14 @@ document.getElementById('clear-data').addEventListener('click', () => {
 
 // Alt navigasyon butonları
 document.addEventListener('DOMContentLoaded', () => {
+    // Reels close button
+    const reelsCloseBtn = document.getElementById('reels-close-btn');
+    if (reelsCloseBtn) {
+        reelsCloseBtn.addEventListener('click', () => {
+            showScreen('main-app');
+        });
+    }
+    
     const bottomNav = document.querySelector('.bottom-nav');
     if (bottomNav) {
         const icons = bottomNav.querySelectorAll('i[data-nav]');

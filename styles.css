@@ -239,9 +239,9 @@ body {
 }
 
 .logo-text {
-    font-family: 'Pacifico', cursive;
-    font-size: 24px;
-    font-weight: 600;
+    font-family: 'Satisfy', cursive;
+    font-size: 28px;
+    font-weight: normal;
 }
 
 .top-icons {
@@ -614,6 +614,35 @@ body {
 #reels-screen {
     background: #000;
     position: relative;
+}
+
+.reels-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 20px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 100%);
+    z-index: 101;
+}
+
+.reels-close-btn {
+    position: absolute;
+    left: 20px;
+    font-size: 28px;
+    color: white;
+    cursor: pointer;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+
+.reels-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
 .reels-container {
