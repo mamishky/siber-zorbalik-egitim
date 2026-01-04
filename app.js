@@ -52,38 +52,38 @@ const POSTS = [
     // Hayvanlar
     { username: "sevimli.kedicik", avatar: "sevimlikedicik", image: "https://picsum.photos/seed/cat1/600/600", caption: "Minnoş kedim uyuyor 🐱💤", likes: 342, type: "image" },
     { username: "kopek.dostu", avatar: "kopekdostu", image: "https://picsum.photos/seed/dog1/600/600", caption: "Yavru köpeğim çok oyuncu! 🐕🎾", likes: 521, type: "image" },
-    { username: "hayvan.videolari", avatar: "hayvanvideolari", image: "https://picsum.photos/seed/animals1/600/600", caption: "Sevimli hayvan videosu 🐾", likes: 876, type: "video" },
+    { username: "hayvan.videolari", avatar: "hayvanvideolari", image: "https://picsum.photos/seed/animals1/600/600", video: "https://videos.pexels.com/video-files/856973/856973-sd_640_360_30fps.mp4", caption: "Sevimli hayvan videosu 🐾", likes: 876, type: "video" },
     { username: "tavsan.cicek", avatar: "tavsancicek", image: "https://picsum.photos/seed/rabbit1/600/600", caption: "Tavşanım havuç yiyor 🐰🥕", likes: 398, type: "image" },
     
     // Renkler ve Eğlence
     { username: "gokkusagi.dunyasi", avatar: "gokkusagidunyasi", image: "https://picsum.photos/seed/rainbow1/600/600", caption: "Gökkuşağı çok renkli 🌈☀️", likes: 612, type: "image" },
-    { username: "parti.videolari", avatar: "partivideolari", image: "https://picsum.photos/seed/party1/600/600", caption: "Doğum günü partisi! 🎉🎈", likes: 945, type: "video" },
+    { username: "parti.videolari", avatar: "partivideolari", image: "https://picsum.photos/seed/party1/600/600", video: "https://videos.pexels.com/video-files/857251/857251-sd_640_360_30fps.mp4", caption: "Doğum günü partisi! 🎉🎈", likes: 945, type: "video" },
     { username: "balon.partisi", avatar: "balonpartisi", image: "https://picsum.photos/seed/balloons1/600/600", caption: "Renkli balonlarla parti! 🎈🎉", likes: 489, type: "image" },
     { username: "pasta.dunyasi", avatar: "pastadunyasi", image: "https://picsum.photos/seed/cake1/600/600", caption: "Doğum günü pastası hazır 🎂🎊", likes: 576, type: "image" },
     
     // Oyunlar ve Sporlar
     { username: "oyun.zamani", avatar: "oyunzamani", image: "https://picsum.photos/seed/game1/600/600", caption: "Yeni oyunum çok eğlenceli 🎮🕹️", likes: 445, type: "image" },
-    { username: "futbol.goller", avatar: "futbolgoller", image: "https://picsum.photos/seed/soccer1/600/600", caption: "Harika gol anı! ⚽🔥", likes: 1234, type: "video" },
+    { username: "futbol.goller", avatar: "futbolgoller", image: "https://picsum.photos/seed/soccer1/600/600", video: "https://videos.pexels.com/video-files/856641/856641-sd_640_360_30fps.mp4", caption: "Harika gol anı! ⚽🔥", likes: 1234, type: "video" },
     { username: "futbol.yildizi", avatar: "futbolyildizi", image: "https://picsum.photos/seed/soccer2/600/600", caption: "Futbol oynamak çok keyifli! ⚽🏆", likes: 523, type: "image" },
     { username: "basketbol.asa", avatar: "basketbolasa", image: "https://picsum.photos/seed/basketball1/600/600", caption: "Basket atışı yaptım! 🏀🎯", likes: 412, type: "image" },
     
     // Müzik ve Dans
-    { username: "dans.show", avatar: "dansshow", image: "https://picsum.photos/seed/dance1/600/600", caption: "Yeni dans hareketim 💃✨", likes: 2156, type: "video" },
+    { username: "dans.show", avatar: "dansshow", image: "https://picsum.photos/seed/dance1/600/600", video: "https://videos.pexels.com/video-files/3571264/3571264-sd_640_360_30fps.mp4", caption: "Yeni dans hareketim 💃✨", likes: 2156, type: "video" },
     { username: "renk.paleti", avatar: "renkpaleti", image: "https://picsum.photos/seed/paint1/600/600", caption: "Resim yapmayı seviyorum 🎨🖌️", likes: 387, type: "image" },
     { username: "muzik.dunyasi", avatar: "muzikdunyasi", image: "https://picsum.photos/seed/music1/600/600", caption: "Gitar çalmayı öğreniyorum 🎵🎸", likes: 498, type: "image" },
     
     // Doğa ve Dışarı
     { username: "plaj.keyfi", avatar: "plajkeyfi", image: "https://picsum.photos/seed/beach1/600/600", caption: "Deniz ve kumda oynamak 🏖️🌊", likes: 589, type: "image" },
-    { username: "lunapark.eglence", avatar: "lunaparkeglence", image: "https://picsum.photos/seed/amusement1/600/600", caption: "Lunapark anıları! 🎡", likes: 1567, type: "video" },
+    { username: "lunapark.eglence", avatar: "lunaparkeglence", image: "https://picsum.photos/seed/amusement1/600/600", video: "https://videos.pexels.com/video-files/2093313/2093313-sd_640_360_30fps.mp4", caption: "Lunapark anıları! 🎡", likes: 1567, type: "video" },
     { username: "lunapark.macerasi", avatar: "lunaparkmacerasi", image: "https://picsum.photos/seed/amusement2/600/600", caption: "Lunapark çok eğlenceli! 🎡🎢", likes: 671, type: "image" },
     { username: "sirk.gozu", avatar: "sirkgozu", image: "https://picsum.photos/seed/circus1/600/600", caption: "Sirkte palyaçolar gördüm 🎪🤡", likes: 534, type: "image" },
     
     // Daha fazla içerik
-    { username: "komik.anlar", avatar: "komikanlar", image: "https://picsum.photos/seed/funny1/600/600", caption: "Çok komik an! 😂", likes: 2341, type: "video" },
+    { username: "komik.anlar", avatar: "komikanlar", image: "https://picsum.photos/seed/funny1/600/600", video: "https://videos.pexels.com/video-files/3571225/3571225-sd_640_360_30fps.mp4", caption: "Çok komik an! 😂", likes: 2341, type: "video" },
     { username: "hayvanat.bahcesi", avatar: "hayvanatbahcesi", image: "https://picsum.photos/seed/zoo1/600/600", caption: "Aslan görmeye gittik 🦁👀", likes: 612, type: "image" },
     { username: "akvaryum.balik", avatar: "akvaryumbalik", image: "https://picsum.photos/seed/fish1/600/600", caption: "Renkli balıklar yüzüyor 🐠🐟", likes: 456, type: "image" },
     { username: "cicek.bahcesi", avatar: "cicekbahcesi", image: "https://picsum.photos/seed/flowers1/600/600", caption: "Renkli çiçekler açmış 🌺🌸", likes: 423, type: "image" },
-    { username: "skate.videolari", avatar: "skatevideolari", image: "https://picsum.photos/seed/skate1/600/600", caption: "Yeni trick! 🛹", likes: 1876, type: "video" }
+    { username: "skate.videolari", avatar: "skatevideolari", image: "https://picsum.photos/seed/skate1/600/600", video: "https://videos.pexels.com/video-files/3571225/3571225-sd_640_360_30fps.mp4", caption: "Yeni trick! 🛹", likes: 1876, type: "video" }
 ];
 
 // Ekran geçişleri
@@ -108,10 +108,15 @@ function generateFeed() {
         if (post.type === 'video') {
             mediaContent = `
                 <div class="post-video" data-post="${index}">
-                    <img src="${post.image}" alt="Post" style="width: 100%; height: 100%; object-fit: cover;">
-                    <div class="video-overlay" data-post="${index}">
-                        <i class="fas fa-play-circle"></i>
-                    </div>
+                    <video 
+                        src="${post.video}" 
+                        autoplay 
+                        loop 
+                        muted 
+                        playsinline
+                        class="post-video-element"
+                        style="width: 100%; height: 100%; object-fit: cover;"
+                    ></video>
                 </div>
             `;
         } else {
@@ -149,14 +154,6 @@ function generateFeed() {
             </div>
         `;
         feedContainer.appendChild(postDiv);
-    });
-    
-    // Video overlay click handlers
-    document.querySelectorAll('.video-overlay').forEach(overlay => {
-        overlay.addEventListener('click', function() {
-            this.classList.toggle('playing');
-            // Video simülasyonu - gerçek videoda bu video.play() olurdu
-        });
     });
     
     // Like butonları
