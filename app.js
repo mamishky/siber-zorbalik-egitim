@@ -29,8 +29,41 @@ let currentSession = {
     pendingMessages: 0,
     messageQueue: [],
     currentMessageIndex: 0,
-    selectedComplaintReason: null
+    selectedComplaintReason: null,
+    conversationHistory: {} // Stores message history by sender
 };
+
+// Persistent message history functions
+function getParticipantStorageKey(participantName) {
+    return `siberg uven_messages_${participantName.toLowerCase().trim()}`;
+}
+
+function loadMessageHistory(participantName) {
+    const storageKey = getParticipantStorageKey(participantName);
+    const stored = localStorage.getItem(storageKey);
+    if (stored) {
+        return JSON.parse(stored);
+    }
+    return {};
+}
+
+function saveMessageHistory(participantName, history) {
+    const storageKey = getParticipantStorageKey(participantName);
+    localStorage.setItem(storageKey, JSON.stringify(history));
+}
+
+function saveConversationState(sender, conversation, status, blockedAt = null) {
+    if (!currentSession.participantName) return;
+    
+    const history = loadMessageHistory(currentSession.participantName);
+    history[sender] = {
+        conversation: conversation,
+        status: status, // 'completed' or 'blocked'
+        blockedAt: blockedAt,
+        timestamp: new Date().toISOString()
+    };
+    saveMessageHistory(currentSession.participantName, history);
+}
 
 // Real Instagram DM notification sound (base64 encoded)
 // This is a realistic notification beep that sounds like Instagram
@@ -220,34 +253,142 @@ function generateFeed() {
     });
 }
 
+// Story state management
+let storyState = {
+    currentStoryIndex: 0,
+    stories: [
+        { username: 'senin', avatar: 'user1', watched: false },
+        { username: 'ali.yilmaz', avatar: 'aliyilmaz', watched: false },
+        { username: 'ayse.demir', avatar: 'aysedemir', watched: false },
+        { username: 'mehmet.kaya', avatar: 'mehmetkaya', watched: false },
+        { username: 'zeynep.ozturk', avatar: 'zeynepozturk', watched: false },
+        { username: 'cem.yildiz', avatar: 'cemyildiz', watched: false },
+        { username: 'selin.yildirim', avatar: 'selinyildirim', watched: false },
+        { username: 'can.yilmaz', avatar: 'canyilmaz', watched: false },
+        { username: 'gizem.sen', avatar: 'gizemsen', watched: false },
+        { username: 'tarik.barkan', avatar: 'tarikbarkan', watched: false }
+    ],
+    autoplayTimeout: null,
+    progressTimeout: null
+};
+
+// Load story watched states from localStorage
+function loadStoryStates() {
+    const saved = localStorage.getItem('siberguven_stories');
+    if (saved) {
+        const savedStories = JSON.parse(saved);
+        storyState.stories = storyState.stories.map(story => {
+            const savedStory = savedStories.find(s => s.username === story.username);
+            return savedStory ? { ...story, watched: savedStory.watched } : story;
+        });
+    }
+    updateStoryAvatars();
+}
+
+// Save story watched states to localStorage
+function saveStoryStates() {
+    localStorage.setItem('siberguven_stories', JSON.stringify(storyState.stories));
+}
+
+// Update story avatar classes based on watched state
+function updateStoryAvatars() {
+    document.querySelectorAll('.story').forEach((storyEl, index) => {
+        const avatar = storyEl.querySelector('.story-avatar');
+        if (storyState.stories[index] && storyState.stories[index].watched) {
+            avatar.classList.remove('unwatched');
+            avatar.classList.add('watched');
+        } else {
+            avatar.classList.remove('watched');
+            avatar.classList.add('unwatched');
+        }
+    });
+}
+
 // Hikaye overlay'i aç
-function openStory(username, avatar) {
+function openStory(username, avatar, storyIndex) {
+    storyState.currentStoryIndex = storyIndex;
+    const story = storyState.stories[storyIndex];
+    
     const storyOverlay = document.getElementById('story-overlay');
     document.getElementById('story-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${avatar}`;
     document.getElementById('story-username').textContent = username;
-    document.getElementById('story-image').src = `https://picsum.photos/400/700?random=${Math.random()}`;
+    document.getElementById('story-image').src = `https://picsum.photos/400/700?random=${storyIndex}`;
+    
+    // Create progress segments
+    const progressContainer = document.getElementById('story-progress-container');
+    progressContainer.innerHTML = '';
+    
+    // Single segment for single story
+    const segment = document.createElement('div');
+    segment.className = 'story-progress-segment';
+    const bar = document.createElement('div');
+    bar.className = 'story-progress-bar';
+    segment.appendChild(bar);
+    progressContainer.appendChild(segment);
     
     storyOverlay.classList.add('active');
     
-    // 5 saniye sonra otomatik kapat
-    setTimeout(() => {
-        closeStory();
+    // Mark as watched
+    story.watched = true;
+    saveStoryStates();
+    updateStoryAvatars();
+    
+    // Auto advance after 5 seconds
+    storyState.autoplayTimeout = setTimeout(() => {
+        nextStory();
     }, 5000);
+}
+
+// Next story
+function nextStory() {
+    clearTimeout(storyState.autoplayTimeout);
+    
+    if (storyState.currentStoryIndex < storyState.stories.length - 1) {
+        const nextIndex = storyState.currentStoryIndex + 1;
+        const nextStory = storyState.stories[nextIndex];
+        openStory(nextStory.username, nextStory.avatar, nextIndex);
+    } else {
+        closeStory();
+    }
+}
+
+// Previous story
+function previousStory() {
+    clearTimeout(storyState.autoplayTimeout);
+    
+    if (storyState.currentStoryIndex > 0) {
+        const prevIndex = storyState.currentStoryIndex - 1;
+        const prevStory = storyState.stories[prevIndex];
+        openStory(prevStory.username, prevStory.avatar, prevIndex);
+    }
 }
 
 // Hikaye overlay'i kapat
 function closeStory() {
+    clearTimeout(storyState.autoplayTimeout);
     document.getElementById('story-overlay').classList.remove('active');
 }
 
 // Hikaye tıklama event'leri
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.story').forEach(story => {
+    // Load story states on page load
+    loadStoryStates();
+    
+    document.querySelectorAll('.story').forEach((story, index) => {
         story.addEventListener('click', function() {
             const storyData = this.dataset.story;
             const username = this.querySelector('span').textContent;
-            openStory(username, storyData);
+            openStory(username, storyData, index);
         });
+    });
+    
+    // Story navigation
+    document.getElementById('story-nav-left').addEventListener('click', () => {
+        previousStory();
+    });
+    
+    document.getElementById('story-nav-right').addEventListener('click', () => {
+        nextStory();
     });
     
     document.getElementById('story-close').addEventListener('click', closeStory);
@@ -335,20 +476,29 @@ function renderInboxList() {
     const inboxList = document.getElementById('inbox-list');
     inboxList.innerHTML = '';
     
+    // Load message history for this participant
+    const messageHistory = loadMessageHistory(currentSession.participantName);
+    
     // Her mesaj için bir inbox item oluştur
     currentSession.messageQueue.forEach((scenario, index) => {
         const isUnread = index >= currentSession.currentMessageIndex && currentSession.pendingMessages > 0;
         const isPast = index < currentSession.currentMessageIndex;
         
+        // Check if this sender is blocked
+        const senderHistory = messageHistory[scenario.sender];
+        const isBlocked = senderHistory && senderHistory.status === 'blocked';
+        
         // Sadece mevcut veya geçmiş mesajları göster
         if (index <= currentSession.currentMessageIndex || isPast) {
             const item = document.createElement('div');
-            item.className = `inbox-item ${isUnread ? 'unread' : ''}`;
+            item.className = `inbox-item ${isUnread ? 'unread' : ''} ${isBlocked ? 'blocked' : ''}`;
             item.dataset.index = index;
             
             // Mesaj önizlemesi için ilk mesajı al
             let previewText = '';
-            if (scenario.messages && scenario.messages.length > 0) {
+            if (isBlocked) {
+                previewText = '🔴 ENGELLENDİ';
+            } else if (scenario.messages && scenario.messages.length > 0) {
                 previewText = scenario.messages[0].text || '';
                 // Uzun mesajları kısalt
                 if (previewText.length > 40) {
@@ -360,11 +510,11 @@ function renderInboxList() {
                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}" alt="${scenario.sender}">
                 <div class="inbox-item-content">
                     <div class="inbox-item-header">
-                        <span class="inbox-sender">${scenario.sender}</span>
+                        <span class="inbox-sender">${scenario.sender}${isBlocked ? ' <span class="blocked-label">🔴 ENGELLENDİ</span>' : ''}</span>
                         <span class="inbox-time">Şimdi</span>
                     </div>
-                    <div class="inbox-message-preview">
-                        ${isUnread ? '<span class="unread-dot"></span>' : ''}
+                    <div class="inbox-message-preview ${isBlocked ? 'blocked-preview' : ''}">
+                        ${isUnread && !isBlocked ? '<span class="unread-dot"></span>' : ''}
                         ${previewText}
                     </div>
                 </div>
@@ -372,7 +522,11 @@ function renderInboxList() {
             
             // Tıklama eventi
             item.addEventListener('click', () => {
-                openConversationFromInbox(index);
+                if (isBlocked) {
+                    alert('Bu kullanıcı engellenmiştir.');
+                } else {
+                    openConversationFromInbox(index);
+                }
             });
             
             inboxList.appendChild(item);
@@ -556,6 +710,16 @@ document.getElementById('dm-send').addEventListener('click', () => {
     // Input alanını gizle
     document.getElementById('dm-input-container').style.display = 'none';
     
+    // Save completed conversation to message history
+    const scenario = currentSession.currentScenario;
+    const allMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
+        text: msg.querySelector('.message-content').textContent,
+        sender: msg.classList.contains('sent') ? 'user' : scenario.sender,
+        time: msg.querySelector('.message-time').textContent
+    }));
+    
+    saveConversationState(scenario.sender, allMessages, 'completed');
+    
     // Sohbet tamamlandı - kullanıcı doğal olarak geri veya home tuşuyla dönecek
 });
 
@@ -637,6 +801,17 @@ document.getElementById('block-btn').addEventListener('click', () => {
     saveMessageData('cyberbullying', 'block', reactionTime, hintUsed, true);
     
     currentSession.stats.correct++;
+    
+    // Save blocked status to message history
+    const scenario = currentSession.currentScenario;
+    const messagesContainer = document.getElementById('dm-messages');
+    const allMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
+        text: msg.querySelector('.message-content').textContent,
+        sender: msg.classList.contains('sent') ? 'user' : scenario.sender,
+        time: msg.querySelector('.message-time').textContent
+    }));
+    
+    saveConversationState(scenario.sender, allMessages, 'blocked', new Date().toISOString());
     
     // Teşekkür mesajını göster
     document.getElementById('thank-you-modal').style.display = 'flex';

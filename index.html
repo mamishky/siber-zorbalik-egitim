@@ -346,8 +346,8 @@
 
     <!-- Story Overlay -->
     <div class="story-overlay" id="story-overlay">
-        <div class="story-progress">
-            <div class="story-progress-bar"></div>
+        <div class="story-progress-container" id="story-progress-container">
+            <!-- Progress segments will be added dynamically -->
         </div>
         <div class="story-header">
             <div class="story-user-info">
@@ -356,8 +356,10 @@
             </div>
             <i class="fas fa-times story-close" id="story-close"></i>
         </div>
-        <div class="story-content">
+        <div class="story-content" id="story-content">
+            <div class="story-nav-left" id="story-nav-left"></div>
             <img id="story-image" src="" alt="Story">
+            <div class="story-nav-right" id="story-nav-right"></div>
         </div>
     </div>
 
