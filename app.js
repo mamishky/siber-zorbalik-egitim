@@ -26,8 +26,26 @@ let currentSession = {
     messageTimeout: null,
     reportClicked: false,
     blockClicked: false,
-    pendingMessages: 0
+    pendingMessages: 0,
+    messageQueue: [],
+    currentMessageIndex: 0,
+    selectedComplaintReason: null
 };
+
+// Notification sound (simple beep using base64 encoded MP3)
+// This is a short notification beep sound
+const notificationSound = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBzKM0fPTgjMGHG7A7+OZUQ0PVKzn77BYGAk+k9jzzn0pBSl+zPLaizsIGGS56+ihUQ0OT6Xj8LljHQU2jdXzzn8rBSh8yvLaizwIGWO56+mjUw0OTaLh8LpmHgU1i9Pz0IEtBiV8yfLbjz0IGmS46+mjVQ0OTJ/g8LxrIQU4jtXz0oMvBiR6x/LcjjwIHGa36+ijWA0NS5zh8L1sIgU6kdXz04QwBSN5xvLdjT0IHWa26+mkWQ0NS5zh8L5uIwU8ktXz1IYxBiJ4xfLejT4IHmW16+mlWw0NSprf8MBvJAU+ldXz1oU');
+
+function playNotificationSound() {
+    try {
+        notificationSound.currentTime = 0;
+        notificationSound.play().catch(err => {
+            console.log('Could not play sound:', err);
+        });
+    } catch (e) {
+        console.log('Sound playback error:', e);
+    }
+}
 
 // Feed için gönderi verileri - Çocuk dostu içerikler
 const POSTS = [
@@ -254,21 +272,37 @@ document.getElementById('start-session').addEventListener('click', () => {
     // Navigasyon becerisini başlangıçta true yap
     currentSession.skills.navigation = true;
     
+    // Mesaj kuyruğunu hazırla
+    const scenarios = SCENARIOS[sessionType][bullyingType];
+    currentSession.messageQueue = scenarios;
+    currentSession.currentMessageIndex = 0;
+    
     showScreen('main-app');
     generateFeed(); // Feed'i oluştur
     
     // 10 saniye sonra ilk mesajı göster (bildirim olarak)
-    setTimeout(() => {
-        showMessageNotification();
+    currentSession.messageTimeout = setTimeout(() => {
+        sendNextMessageNotification();
     }, 10000);
 });
 
 // Mesaj bildirimi göster
-function showMessageNotification() {
+function sendNextMessageNotification() {
+    if (currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
+        // Tüm mesajlar tamamlandı
+        setTimeout(() => {
+            showSummary();
+        }, 2000);
+        return;
+    }
+    
     currentSession.pendingMessages++;
     const badge = document.getElementById('message-badge');
     badge.textContent = currentSession.pendingMessages;
     badge.style.display = 'flex';
+    
+    // Bildirim sesini çal
+    playNotificationSound();
 }
 
 // Mesaj ikonuna tıklandığında
@@ -276,7 +310,10 @@ document.getElementById('message-icon').addEventListener('click', () => {
     if (currentSession.pendingMessages > 0) {
         currentSession.pendingMessages = 0;
         document.getElementById('message-badge').style.display = 'none';
-        startFirstScenario();
+        
+        // Mevcut mesajı aç
+        const scenario = currentSession.messageQueue[currentSession.currentMessageIndex];
+        openSpecificDM(scenario);
     }
 });
 
@@ -305,70 +342,23 @@ document.getElementById('logout').addEventListener('click', () => {
     showScreen('welcome-screen');
 });
 
-// İlk senaryoyu başlat
-function startFirstScenario() {
-    // Get all scenarios for the selected bullying type
-    const scenarios = SCENARIOS[currentSession.sessionType][currentSession.currentBullyingType];
-    
-    // Open message inbox
-    openMessageInbox(scenarios);
-}
-
-// Mesaj inbox'ı aç
-function openMessageInbox(scenarios) {
-    showScreen('dm-screen');
-    
-    // Clear DM screen
-    document.getElementById('dm-messages').innerHTML = '';
-    document.getElementById('dm-input-container').style.display = 'none';
-    document.getElementById('action-buttons').style.display = 'none';
-    
-    // Show inbox header
-    document.getElementById('dm-username').textContent = 'Mesajlar';
-    document.getElementById('dm-avatar').src = 'https://api.dicebear.com/7.x/avataaars/svg?seed=inbox';
-    
-    // Create message list
-    const messagesContainer = document.getElementById('dm-messages');
-    messagesContainer.innerHTML = '<div class="inbox-list"></div>';
-    const inboxList = messagesContainer.querySelector('.inbox-list');
-    
-    scenarios.forEach((scenario, index) => {
-        const messagePreview = document.createElement('div');
-        messagePreview.className = 'inbox-item unread';
-        messagePreview.innerHTML = `
-            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}" alt="${scenario.sender}">
-            <div class="inbox-item-content">
-                <div class="inbox-item-header">
-                    <span class="inbox-sender">${scenario.sender}</span>
-                    <span class="unread-indicator">●</span>
-                </div>
-                <div class="inbox-message-preview">${scenario.messages[0].text.substring(0, 50)}...</div>
-            </div>
-        `;
-        
-        messagePreview.addEventListener('click', () => {
-            currentSession.currentScenarioIndex = index;
-            openSpecificDM(scenario, index, scenarios);
-        });
-        
-        inboxList.appendChild(messagePreview);
-    });
+// Belirli bir DM'i aç
+function openSpecificDM(scenario) {
+    currentSession.currentScenario = scenario;
+    currentSession.messageIndex = 0;
     
     // Mark reading skill as true
     currentSession.skills.reading = true;
-}
-
-// Belirli bir DM'i aç
-function openSpecificDM(scenario, scenarioIndex, allScenarios) {
-    currentSession.currentScenario = scenario;
-    currentSession.messageIndex = 0;
-    currentSession.allScenarios = allScenarios;
-    currentSession.currentScenarioIndex = scenarioIndex;
+    
+    showScreen('dm-screen');
     
     document.getElementById('dm-username').textContent = scenario.sender;
     document.getElementById('dm-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}`;
     
     document.getElementById('dm-messages').innerHTML = '';
+    document.getElementById('dm-input-container').style.display = 'none';
+    document.getElementById('action-buttons').style.display = 'none';
+    document.getElementById('return-to-feed-container').style.display = 'none';
     
     // Send the message after a delay
     setTimeout(() => {
@@ -378,12 +368,8 @@ function openSpecificDM(scenario, scenarioIndex, allScenarios) {
 
 // Geri butonları
 document.getElementById('back-to-feed').addEventListener('click', () => {
-    // If we're in a specific DM, go back to inbox
-    if (currentSession.allScenarios) {
-        openMessageInbox(currentSession.allScenarios);
-    } else {
-        showScreen('main-app');
-    }
+    // Ana sayfaya dön
+    returnToFeed();
 });
 
 // Mesaj gönder
@@ -392,8 +378,6 @@ function sendMessage() {
     const message = scenario.messages[currentSession.messageIndex];
     
     if (!message) {
-        // Bu kişiden daha fazla mesaj yok, sonraki kişiye geç
-        nextPerson();
         return;
     }
     
@@ -423,9 +407,10 @@ function sendMessage() {
         document.getElementById('dm-input-container').style.display = 'none';
         document.getElementById('action-buttons').style.display = 'flex';
         
-        // Butonları sıfırla - HER İKİ BUTON DA AKTİF BAŞLIYOR
+        // Butonları sıfırla
         currentSession.reportClicked = false;
         currentSession.blockClicked = false;
+        currentSession.selectedComplaintReason = null;
         document.getElementById('report-btn').disabled = false;
         document.getElementById('block-btn').disabled = false;
         document.getElementById('report-btn').classList.remove('blink');
@@ -470,32 +455,63 @@ document.getElementById('dm-send').addEventListener('click', () => {
     
     currentSession.stats.correct++;
     
-    // Sonraki kişiye geç
-    nextPerson();
+    // Input alanını gizle
+    document.getElementById('dm-input-container').style.display = 'none';
+    
+    // Rastgele kapanış mesajı gönder
+    setTimeout(() => {
+        const closingMessage = CLOSING_MESSAGES[Math.floor(Math.random() * CLOSING_MESSAGES.length)];
+        const scenario = currentSession.currentScenario;
+        
+        const closingDiv = document.createElement('div');
+        closingDiv.className = 'message';
+        closingDiv.innerHTML = `
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}" alt="Avatar" class="message-avatar">
+            <div>
+                <div class="message-content">${closingMessage}</div>
+                <div class="message-time">${new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</div>
+            </div>
+        `;
+        
+        messagesContainer.appendChild(closingDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+        // "Ana Sayfaya Dön" butonunu göster
+        document.getElementById('return-to-feed-container').style.display = 'block';
+    }, 1000);
 });
 
-// Sonraki kişiye geç
-function nextPerson() {
-    if (!currentSession.allScenarios) {
-        // Eğer allScenarios yoksa, tüm session bitti
-        showSummary();
-        return;
+// Enter tuşu ile mesaj gönderme
+document.getElementById('dm-input').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && e.target.value.trim() !== '') {
+        document.getElementById('dm-send').click();
     }
+});
+
+// Ana sayfaya dön
+function returnToFeed() {
+    showScreen('main-app');
+    document.getElementById('return-to-feed-container').style.display = 'none';
     
-    const nextIndex = currentSession.currentScenarioIndex + 1;
+    // Mesaj indeksini artır
+    currentSession.currentMessageIndex++;
     
-    if (nextIndex < currentSession.allScenarios.length) {
-        // Sonraki kişiye geç
-        setTimeout(() => {
-            openMessageInbox(currentSession.allScenarios);
-        }, 2000);
+    // 10 saniye sonra sonraki mesajı gönder
+    if (currentSession.currentMessageIndex < currentSession.messageQueue.length) {
+        currentSession.messageTimeout = setTimeout(() => {
+            sendNextMessageNotification();
+        }, 10000);
     } else {
-        // Bu zorbalık türü bitti, oturum tamamlandı
+        // Tüm mesajlar tamamlandı
         setTimeout(() => {
             showSummary();
         }, 2000);
     }
 }
+
+// "Ana Sayfaya Dön" buton handler'ları
+document.getElementById('return-to-feed-btn').addEventListener('click', returnToFeed);
+document.getElementById('return-to-feed-from-thanks').addEventListener('click', returnToFeed);
 
 // Şikayet et butonu
 document.getElementById('report-btn').addEventListener('click', () => {
@@ -503,27 +519,14 @@ document.getElementById('report-btn').addEventListener('click', () => {
         clearTimeout(currentSession.hintTimeout);
     }
     
-    const hintUsed = document.getElementById('report-btn').classList.contains('blink');
-    
     // Önce engelle butonuna tıkladıysa sadece doğru butonu yanıp sönsün
     if (currentSession.blockClicked && !currentSession.reportClicked) {
         showWrongOrderHint('report');
         return;
     }
     
-    currentSession.reportClicked = true;
-    currentSession.skills.reporting = true;
-    
-    document.getElementById('report-btn').disabled = true;
-    document.getElementById('report-btn').classList.remove('blink');
-    
-    const reactionTime = (Date.now() - currentSession.currentMessageStartTime) / 1000;
-    saveMessageData('cyberbullying', 'report', reactionTime, hintUsed, true);
-    
-    currentSession.stats.correct++;
-    
-    // Şimdi engelle butonunu yanıp söndür
-    showNextStepHint('block');
+    // Şikayet nedeni modalını göster
+    showComplaintReasonDialog();
 });
 
 // Engelle butonu
@@ -545,14 +548,15 @@ document.getElementById('block-btn').addEventListener('click', () => {
     
     document.getElementById('block-btn').disabled = true;
     document.getElementById('block-btn').classList.remove('blink');
+    document.getElementById('action-buttons').style.display = 'none';
     
     const reactionTime = (Date.now() - currentSession.currentMessageStartTime) / 1000;
     saveMessageData('cyberbullying', 'block', reactionTime, hintUsed, true);
     
     currentSession.stats.correct++;
     
-    // Mesaj tamamlandı, sonraki kişiye geç
-    nextPerson();
+    // Teşekkür mesajını göster
+    document.getElementById('thank-you-modal').style.display = 'flex';
 });
 
 // Yanlış sıra ipucu göster (sadece doğru buton yanıp sönecek, metin YOK)
@@ -574,6 +578,122 @@ function showWrongOrderHint(wrongButton) {
         }, 3000);
     }
 }
+
+// Şikayet nedeni seçim modalını göster
+function showComplaintReasonDialog() {
+    const modal = document.getElementById('complaint-modal');
+    const reasonsContainer = document.getElementById('complaint-reasons');
+    const scenario = currentSession.currentScenario;
+    const message = scenario.messages[currentSession.messageIndex];
+    const correctReason = message.complaintReason;
+    
+    // Nedenleri oluştur
+    reasonsContainer.innerHTML = '';
+    COMPLAINT_REASONS.forEach(reason => {
+        const optionDiv = document.createElement('div');
+        optionDiv.className = 'complaint-reason-option';
+        optionDiv.dataset.reason = reason.id;
+        
+        optionDiv.innerHTML = `
+            <input type="radio" name="complaint-reason" id="reason-${reason.id}" value="${reason.id}">
+            <label for="reason-${reason.id}">${reason.label}</label>
+        `;
+        
+        optionDiv.addEventListener('click', function() {
+            // Radio button'ı seç
+            const radio = this.querySelector('input[type="radio"]');
+            radio.checked = true;
+            
+            // Tüm seçeneklerin seçimini kaldır
+            document.querySelectorAll('.complaint-reason-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Bu seçeneği seç
+            this.classList.add('selected');
+            
+            // Gönder butonunu aktif et
+            document.getElementById('submit-complaint').disabled = false;
+            
+            // Seçilen nedeni kaydet
+            currentSession.selectedComplaintReason = reason.id;
+        });
+        
+        reasonsContainer.appendChild(optionDiv);
+    });
+    
+    // Modalı göster
+    modal.style.display = 'flex';
+    
+    // 5 saniye sonra doğru cevabı yanıp söndür
+    setTimeout(() => {
+        if (!currentSession.selectedComplaintReason) {
+            const correctOption = document.querySelector(`[data-reason="${correctReason}"]`);
+            if (correctOption) {
+                correctOption.classList.add('blink-hint');
+                currentSession.stats.hints++;
+            }
+        }
+    }, 5000);
+}
+
+// Şikayet gönder butonu
+document.getElementById('submit-complaint').addEventListener('click', () => {
+    const scenario = currentSession.currentScenario;
+    const message = scenario.messages[currentSession.messageIndex];
+    const correctReason = message.complaintReason;
+    const selectedReason = currentSession.selectedComplaintReason;
+    
+    const hintUsed = document.querySelector('.complaint-reason-option.blink-hint') !== null;
+    
+    if (selectedReason === correctReason) {
+        // Doğru seçim
+        const correctOption = document.querySelector(`[data-reason="${correctReason}"]`);
+        correctOption.classList.remove('blink-hint');
+        correctOption.classList.add('correct');
+        
+        // Tik animasyonu göster
+        setTimeout(() => {
+            document.getElementById('complaint-modal').style.display = 'none';
+            
+            // Şikayet tamamlandı
+            currentSession.reportClicked = true;
+            currentSession.skills.reporting = true;
+            
+            document.getElementById('report-btn').disabled = true;
+            document.getElementById('report-btn').classList.remove('blink');
+            
+            const reactionTime = (Date.now() - currentSession.currentMessageStartTime) / 1000;
+            saveMessageData('cyberbullying', 'report', reactionTime, hintUsed, true);
+            
+            currentSession.stats.correct++;
+            
+            // Engelle butonunu yanıp söndür
+            showNextStepHint('block');
+        }, 500);
+    } else {
+        // Yanlış seçim - doğru cevabı göster
+        const correctOption = document.querySelector(`[data-reason="${correctReason}"]`);
+        const selectedOption = document.querySelector(`[data-reason="${selectedReason}"]`);
+        
+        // Seçilen seçeneğin seçimini kaldır
+        if (selectedOption) {
+            selectedOption.classList.remove('selected');
+            selectedOption.querySelector('input[type="radio"]').checked = false;
+        }
+        
+        // Doğru cevabı yanıp söndür
+        if (correctOption) {
+            correctOption.classList.add('blink-hint');
+        }
+        
+        // Seçimi sıfırla
+        currentSession.selectedComplaintReason = null;
+        document.getElementById('submit-complaint').disabled = true;
+        
+        currentSession.stats.hints++;
+    }
+});
 
 // İpucu göster (sadece butonlar yanıp sönsün, metin YOK)
 function showHint() {
@@ -670,6 +790,14 @@ function showSummary() {
 
 // Bitir butonu
 document.getElementById('finish-session').addEventListener('click', () => {
+    // Zamanlayıcıları temizle
+    if (currentSession.messageTimeout) {
+        clearTimeout(currentSession.messageTimeout);
+    }
+    if (currentSession.hintTimeout) {
+        clearTimeout(currentSession.hintTimeout);
+    }
+    
     // Tüm verileri sıfırla
     currentSession = {
         sessionType: "",
@@ -698,7 +826,10 @@ document.getElementById('finish-session').addEventListener('click', () => {
         messageTimeout: null,
         reportClicked: false,
         blockClicked: false,
-        pendingMessages: 0
+        pendingMessages: 0,
+        messageQueue: [],
+        currentMessageIndex: 0,
+        selectedComplaintReason: null
     };
     
     showScreen('welcome-screen');

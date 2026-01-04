@@ -226,6 +226,32 @@
                 <p id="hint-text"></p>
             </div>
         </div>
+
+        <!-- Şikayet Nedeni Seçim Modalı -->
+        <div class="complaint-modal" id="complaint-modal" style="display: none;">
+            <div class="complaint-modal-content">
+                <h3>Şikayet Nedeni Seçin:</h3>
+                <div class="complaint-reasons" id="complaint-reasons">
+                    <!-- Reasons will be populated by JavaScript -->
+                </div>
+                <button class="btn-primary" id="submit-complaint" disabled>Şikayeti Gönder</button>
+            </div>
+        </div>
+
+        <!-- Teşekkür Mesajı Modalı -->
+        <div class="thank-you-modal" id="thank-you-modal" style="display: none;">
+            <div class="thank-you-content">
+                <div class="checkmark-animation">✓</div>
+                <h3>Şikayetin için teşekkürler!</h3>
+                <p>Gerekli incelemeleri yapacağız.</p>
+                <button class="btn-primary" id="return-to-feed-from-thanks">Ana Sayfaya Dön</button>
+            </div>
+        </div>
+
+        <!-- Ana Sayfaya Dön Butonu -->
+        <div class="return-to-feed-container" id="return-to-feed-container" style="display: none;">
+            <button class="btn-primary" id="return-to-feed-btn">Ana Sayfaya Dön</button>
+        </div>
     </div>
 
     <!-- Özet Ekranı -->
