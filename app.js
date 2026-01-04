@@ -448,7 +448,6 @@ function openSpecificDM(scenario) {
     document.getElementById('dm-messages').innerHTML = '';
     document.getElementById('dm-input-container').style.display = 'none';
     document.getElementById('action-buttons').style.display = 'none';
-    document.getElementById('return-to-feed-container').style.display = 'none';
     
     // Send the message after a delay
     setTimeout(() => {
