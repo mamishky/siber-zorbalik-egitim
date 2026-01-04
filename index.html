@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram - Siber Zorbalık Farkındalık Eğitimi</title>
+    <title>SafeStagram - Güvenli Sosyal Medya Eğitimi</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Satisfy&display=swap">
     <link rel="stylesheet" href="styles.css">
@@ -13,10 +13,13 @@
     <div id="welcome-screen" class="screen active">
         <div class="welcome-container">
             <div class="logo">
-                <i class="fas fa-shield-alt"></i>
+                <div class="safestagram-logo-container">
+                    <i class="fab fa-instagram"></i>
+                    <i class="fas fa-shield-alt shield-icon"></i>
+                </div>
             </div>
-            <h1>SiberGüven</h1>
-            <p class="subtitle">Siber Zorbalık Farkındalık Eğitimi</p>
+            <h1 class="safestagram-title">SafeStagram</h1>
+            <p class="subtitle">Güvenli Sosyal Medya Eğitimi</p>
             
             <div class="welcome-form">
                 <input type="text" id="participant-name" placeholder="Adınız" required>
@@ -100,7 +103,8 @@
         <header class="top-bar">
             <div class="logo-container">
                 <i class="fab fa-instagram"></i>
-                <div class="logo-text">Instagram</div>
+                <i class="fas fa-shield-alt shield-overlay"></i>
+                <div class="logo-text">SafeStagram</div>
             </div>
             <div class="top-icons">
                 <i class="far fa-heart"></i>
@@ -188,6 +192,18 @@
             <i class="far fa-heart" data-nav="likes"></i>
             <i class="far fa-user" data-nav="profile"></i>
         </nav>
+        
+        <!-- Logout Overlay (shown when profile is clicked) -->
+        <div class="logout-overlay" id="logout-overlay" style="display: none;">
+            <div class="logout-modal">
+                <h3>Profil Ayarları</h3>
+                <button class="logout-btn" id="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Çıkış Yap
+                </button>
+                <button class="btn-secondary" id="close-logout-modal">İptal</button>
+            </div>
+        </div>
     </div>
 
     <!-- Reels Screen -->

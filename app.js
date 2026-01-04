@@ -35,34 +35,48 @@ let currentSession = {
 
 // Persistent message history functions
 function getParticipantStorageKey(participantName) {
-    return `siberg uven_messages_${participantName.toLowerCase().trim()}`;
+    return `safestagram_users`;
 }
 
 function loadMessageHistory(participantName) {
-    const storageKey = getParticipantStorageKey(participantName);
-    const stored = localStorage.getItem(storageKey);
-    if (stored) {
-        return JSON.parse(stored);
+    const allUsers = localStorage.getItem('safestagram_users');
+    if (allUsers) {
+        const usersData = JSON.parse(allUsers);
+        const normalizedName = participantName.toLowerCase().trim();
+        if (usersData[normalizedName]) {
+            return usersData[normalizedName].conversations || {};
+        }
     }
     return {};
 }
 
-function saveMessageHistory(participantName, history) {
-    const storageKey = getParticipantStorageKey(participantName);
-    localStorage.setItem(storageKey, JSON.stringify(history));
+function saveMessageHistory(participantName, conversations) {
+    const allUsers = localStorage.getItem('safestagram_users');
+    let usersData = allUsers ? JSON.parse(allUsers) : {};
+    const normalizedName = participantName.toLowerCase().trim();
+    
+    if (!usersData[normalizedName]) {
+        usersData[normalizedName] = {
+            conversations: {},
+            watchedStories: []
+        };
+    }
+    
+    usersData[normalizedName].conversations = conversations;
+    localStorage.setItem('safestagram_users', JSON.stringify(usersData));
 }
 
 function saveConversationState(sender, conversation, status, blockedAt = null) {
     if (!currentSession.participantName) return;
     
-    const history = loadMessageHistory(currentSession.participantName);
-    history[sender] = {
-        conversation: conversation,
+    const conversations = loadMessageHistory(currentSession.participantName);
+    conversations[sender] = {
+        messages: conversation,
         status: status, // 'completed' or 'blocked'
         blockedAt: blockedAt,
         timestamp: new Date().toISOString()
     };
-    saveMessageHistory(currentSession.participantName, history);
+    saveMessageHistory(currentSession.participantName, conversations);
 }
 
 // Real Instagram DM notification sound (base64 encoded)
@@ -1209,6 +1223,68 @@ document.getElementById('clear-data').addEventListener('click', () => {
 
 // Alt navigasyon butonları
 document.addEventListener('DOMContentLoaded', () => {
+    // Logout functionality
+    const logoutOverlay = document.getElementById('logout-overlay');
+    const logoutBtn = document.getElementById('logout-btn');
+    const closeLogoutModal = document.getElementById('close-logout-modal');
+    
+    if (closeLogoutModal) {
+        closeLogoutModal.addEventListener('click', () => {
+            logoutOverlay.style.display = 'none';
+        });
+    }
+    
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            // Clear current session timeouts
+            if (currentSession.messageTimeout) {
+                clearTimeout(currentSession.messageTimeout);
+            }
+            if (currentSession.hintTimeout) {
+                clearTimeout(currentSession.hintTimeout);
+            }
+            
+            // Reset session
+            currentSession = {
+                sessionType: "",
+                participantId: "",
+                participantName: "",
+                participantAge: 0,
+                startTime: null,
+                currentBullyingType: null,
+                currentScenario: null,
+                messageIndex: 0,
+                sessionData: [],
+                skills: {
+                    navigation: false,
+                    reading: false,
+                    replying: false,
+                    reporting: false,
+                    blocking: false
+                },
+                stats: {
+                    correct: 0,
+                    wrong: 0,
+                    hints: 0
+                },
+                currentMessageStartTime: null,
+                hintTimeout: null,
+                messageTimeout: null,
+                reportClicked: false,
+                blockClicked: false,
+                pendingMessages: 0,
+                messageQueue: [],
+                currentMessageIndex: 0,
+                selectedComplaintReason: null,
+                conversationHistory: {}
+            };
+            
+            // Hide overlay and return to welcome screen
+            logoutOverlay.style.display = 'none';
+            showScreen('welcome-screen');
+        });
+    }
+    
     // Reels close button
     const reelsCloseBtn = document.getElementById('reels-close-btn');
     if (reelsCloseBtn) {
@@ -1222,6 +1298,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const icons = bottomNav.querySelectorAll('i[data-nav]');
         icons.forEach((icon) => {
             icon.addEventListener('click', () => {
+                const navType = icon.dataset.nav;
+                
+                // Handle profile separately (show logout modal)
+                if (navType === 'profile') {
+                    if (logoutOverlay) {
+                        logoutOverlay.style.display = 'flex';
+                    }
+                    return;
+                }
+                
                 // Aktif durumu güncelle
                 document.querySelectorAll('.bottom-nav i').forEach(i => i.classList.remove('active'));
                 icon.classList.add('active');
@@ -1243,7 +1329,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         break;
                     case 'search':
                     case 'likes':
-                    case 'profile':
                         // Bu özellikler demo için devre dışı
                         break;
                 }

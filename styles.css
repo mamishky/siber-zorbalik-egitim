@@ -34,7 +34,39 @@ body {
 .logo {
     font-size: 80px;
     margin-bottom: 20px;
+    position: relative;
+}
+
+.safestagram-logo-container {
+    position: relative;
+    display: inline-block;
+}
+
+.safestagram-logo-container .fa-instagram {
+    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     animation: pulse 2s infinite;
+}
+
+.safestagram-logo-container .shield-icon {
+    position: absolute;
+    top: -10px;
+    right: -15px;
+    font-size: 32px;
+    color: #4CAF50;
+    animation: pulse 2s infinite;
+}
+
+.safestagram-title {
+    background: linear-gradient(45deg, #405DE6, #5851DB, #833AB4, #C13584, #E1306C, #FD1D1D);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-family: 'Satisfy', cursive;
+    font-size: 48px;
+    margin-bottom: 10px;
 }
 
 @keyframes pulse {
@@ -46,6 +78,8 @@ body {
     font-size: 48px;
     margin-bottom: 10px;
 }
+
+/* Remove since .safestagram-title is used */
 
 .subtitle {
     font-size: 18px;
@@ -228,14 +262,24 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
+    position: relative;
 }
 
-.logo-container i {
+.logo-container i.fa-instagram {
     font-size: 28px;
     background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+}
+
+.logo-container .shield-overlay {
+    position: absolute;
+    left: 18px;
+    top: -2px;
+    font-size: 14px;
+    color: #4CAF50;
+    filter: drop-shadow(0 0 2px white);
 }
 
 .logo-text {
@@ -1388,4 +1432,61 @@ body {
     color: #8e8e8e;
     margin-bottom: 25px;
     line-height: 1.5;
+}
+
+/* Logout Overlay */
+.logout-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1004;
+    animation: fadeIn 0.3s;
+}
+
+.logout-modal {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 400px;
+    width: 90%;
+    margin: 20px;
+    text-align: center;
+}
+
+.logout-modal h3 {
+    color: #262626;
+    margin-bottom: 20px;
+    font-size: 20px;
+}
+
+.logout-btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: 10px;
+    background: #ed4956;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.logout-btn:hover {
+    background: #d63447;
+}
+
+.logout-btn i {
+    font-size: 18px;
 }
