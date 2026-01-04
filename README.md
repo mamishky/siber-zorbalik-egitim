@@ -7,26 +7,26 @@ SiberGüven, tez çalışması için geliştirilmiş Instagram benzeri bir siber
 ## 🎯 Temel Özellikler
 
 ### 1. Instagram Benzeri Arayüz
-- **Ana Sayfa (Feed)**: Postlar ve beğeniler
+- **Ana Sayfa (Feed)**: Çocuk dostu 35+ post (kediler, köpekler, tavşanlar, kelebekler, gökkuşağı, balonlar, pastalar, dondurma, oyunlar, sporlar, sanat, müzik, plaj, lunapark, sirk, hayvanat bahçesi hayvanları ve daha fazlası)
 - **Hikayeler (Stories)**: Kullanıcı hikayeleri
+- **Mesaj Kutusu/Inbox**: Mesaj listesi görünümü, okunmamış mesaj göstergeleri
 - **Direkt Mesajlar (DM)**: Asıl eğitim senaryolarının gerçekleştiği alan
-- **Profil Sayfası**: Kullanıcı profili
-- **Bildirimler**: Sosyal medya bildirimleri
-- **Keşfet Sayfası**: İçerik keşfi
+- **Modern Tasarım**: Instagram web arayüzüne benzer, ortalanmış feed (max 470px), temiz ve kompakt görünüm
 - **Alt Navigasyon Barı**: Kolay gezinme
 
-### 2. Oturum Türleri (4 Aşama)
+### 2. Oturum Türleri (5 Farklı Oturum)
 
-Her oturum 25 mesaj içerir (5 zorbalık türü × 5 mesaj):
+Her oturum seçilen zorbalık türü için 5 mesaj içerir (3 siber zorbalık + 2 güvenli mesaj):
 
-1. **Başlama Düzeyi (Ön-Test)**: Katılımcının başlangıç seviyesini ölçer
-2. **Uygulama**: Öğrenme ve pratik yapma aşaması
-3. **Son-Test**: Öğrenilenlerin değerlendirilmesi
-4. **Genelleme**: Becerilerin farklı bağlamlarda uygulanması
-
-**TOPLAM**: 4 oturum × 25 mesaj = **100 benzersiz Türkçe senaryo**
+1. **Başlama Düzeyi**: Katılımcının başlangıç seviyesini ölçer (ön-test verisi otomatik alınır)
+2. **Uygulama**: Öğrenme ve pratik yapma aşaması (son-test verisi otomatik alınır)
+3. **İzleme (2. Hafta)**: 2 hafta sonra veri toplama
+4. **İzleme (4. Hafta)**: 4 hafta sonra veri toplama
+5. **İzleme (8. Hafta)**: 8 hafta sonra veri toplama
 
 ### 3. Siber Zorbalık Türleri
+
+Her oturum başlangıcında tek bir zorbalık türü seçilir:
 
 1. **Sözel/Psikolojik Saldırı**: Hakaret, aşağılama
 2. **Sosyal Dışlanma**: Gruplara alınmama, dışlanma
@@ -36,33 +36,45 @@ Her oturum 25 mesaj içerir (5 zorbalık türü × 5 mesaj):
 
 ### 4. Mesaj Sistemi
 
-- Her oturumda **5 mesaj** (3 güvenli, 2 siber zorbalık)
-- Uygulama başladıktan **10 saniye sonra** ilk mesaj gelir
-- Her mesaja cevap verildikten **10 saniye sonra** yeni mesaj gelir
+**Mesaj Dağılımı (Her Zorbalık Türü İçin):**
+- **5 farklı kişiden mesaj** gelir
+- **3 mesaj siber zorbalık** içerir
+- **2 mesaj güvenli/normal** mesajdır
+
+**Mesaj Kutusu Akışı:**
+1. Kullanıcı 10 saniye sonra mesaj bildirimi alır
+2. Mesaj ikonuna tıklandığında **mesaj listesi/inbox** açılır
+3. Okunmamış mesajlar **mavi nokta** ile işaretli görünür
+4. Kullanıcı hangi mesaja tıklarsa **o sohbet açılır**
+5. Sohbette cevap yazar VEYA şikayet et/engelle butonlarını kullanır
+
+**Mesaj Özellikleri:**
 - **Güvenli mesajlar**: Serbest metin cevabı (max 180 karakter)
-- **Siber zorbalık mesajları**: Sırayla → ŞİKAYET ET → ENGELLE → YETİŞKİNE BİLDİR
+- **Siber zorbalık mesajları**: Sırayla → ŞİKAYET ET → ENGELLE
 
-### 5. Sabit Bekleme Süreli Öğretim
+### 5. Sabit Bekleme Süreli Öğretim - Yeni İpucu Sistemi
 
-- **5 saniye** içinde doğru cevap verilmezse ipucu gösterilir
-- İpucu: Hem yazılı metin hem buton yanıp söner
+**İpucu Sistemi Özellikleri:**
+- **Yazılı ipucu metni KALDIRILDI** (overlay metin yok)
+- **5 saniye** içinde doğru cevap verilmezse **sadece butonlar yanıp söner**
+- Yanlış butona tıklandığında **doğru buton yanıp söner** (metin yok, sadece animasyon)
+- Yanıp sönme animasyonu dikkat çekici (pulse/blink efekti)
 - Şikayet etmeden engellemeye izin verilmez (sıralı adımlar)
 
 ### 6. Beceri Analizi
 
-Sistem aşağıdaki 6 beceriyi değerlendirir:
+Sistem aşağıdaki 5 beceriyi değerlendirir:
 
 1. ✓/✗ Sosyal medya uygulamasında gezinme
 2. ✓/✗ Gelen mesajı okuma
 3. ✓/✗ Siber zorbalık içermeyen mesajı cevaplama
 4. ✓/✗ Siber zorbalık içeren mesajı şikâyet etme
 5. ✓/✗ Siber zorbalık yapan kişiyi engelleme
-6. ✓/✗ Yaşadığı olumsuz olayı bir yetişkine bildirme
 
 ### 7. Veri Kayıt (LocalStorage + Excel Export)
 
 Her etkileşim için kaydedilen bilgiler:
-- Katılımcı ID, adı, yaşı
+- Katılımcı ID (otomatik oluşturulur), adı, yaşı
 - Oturum türü ve zorbalık türü
 - Her beceri için +/- durumu
 - Tepki süresi (saniye)
@@ -71,11 +83,13 @@ Her etkileşim için kaydedilen bilgiler:
 
 ### 8. Akademisyen Kontrol Paneli
 
-- **Şifre**: `akademisyen2024` (Not: Bu demo/tez amaçlı basit bir şifredir. Gerçek kullanımda güvenli kimlik doğrulama kullanılmalıdır.)
+- **Şifre**: `06112002`
 - Tüm verileri görüntüleme
 - Oturum ve zorbalık türüne göre filtreleme
 - Excel (CSV) formatında veri aktarma
 - Tüm verileri temizleme
+
+**Not**: Bu demo/tez amaçlı basit bir şifredir. Gerçek kullanımda güvenli kimlik doğrulama kullanılmalıdır.
 
 ### 9. Özet Ekranı
 
@@ -83,7 +97,7 @@ Her oturum sonunda gösterilen bilgiler:
 - Doğru cevap sayısı
 - Yanlış cevap sayısı
 - İpucu kullanım sayısı
-- 6 beceri için detaylı tablo
+- 5 beceri için detaylı tablo
 
 ## 🚀 Kurulum ve Kullanım
 
@@ -133,7 +147,7 @@ siber-zorbalik-egitim/
 │
 ├── index.html          # Ana HTML dosyası (tüm ekranlar)
 ├── styles.css          # CSS stilleri (Instagram benzeri tasarım)
-├── scenarios.js        # 100 Türkçe senaryo verisi
+├── scenarios.js        # Yeni senaryo yapısı (5 oturum × 5 zorbalık türü × 5 kişi)
 ├── app.js              # Ana JavaScript uygulama mantığı
 └── README.md           # Proje dokümantasyonu
 ```
@@ -143,21 +157,26 @@ siber-zorbalik-egitim/
 ### Katılımcı İçin
 
 1. **Giriş Yapma**:
-   - Katılımcı ID, ad ve yaş bilgilerini girin
-   - Oturum türünü seçin
+   - Adınızı ve yaşınızı girin
+   - Oturum türünü seçin (Başlama Düzeyi, Uygulama, İzleme 2/4/8. Hafta)
+   - Zorbalık türünü seçin (Sözel, Dışlanma, Tehdit, İftira, Kimlik)
    - "Başla" butonuna tıklayın
 
 2. **Ana Ekran**:
    - Instagram benzeri arayüzü keşfedin
-   - 10 saniye sonra ilk mesaj gelecektir
+   - Çocuk dostu postları görün
+   - 10 saniye sonra mesaj bildirimi gelecektir
 
 3. **Mesajlaşma**:
+   - Mesaj ikonuna tıklayın
+   - Mesaj listesinde (inbox) okunmamış mesajları görün
+   - Mesaja tıklayarak sohbeti açın
    - Güvenli mesajlara metin ile cevap verin
    - Siber zorbalık mesajlarında sırasıyla:
      1. ŞİKAYET ET butonuna basın
      2. ENGELLE butonuna basın
-     3. YETİŞKİNE BİLDİR butonuna basın
-   - İpuçlarını takip edin
+   - 5 saniye beklerseniz butonlar yanıp sönecek (ipucu)
+   - Yanlış butona basarsanız doğru buton yanıp sönecek
 
 4. **Oturum Sonu**:
    - Özet ekranında performansınızı görün
@@ -167,7 +186,7 @@ siber-zorbalik-egitim/
 
 1. **Giriş**:
    - "Akademisyen Girişi" butonuna tıklayın
-   - Şifre: `akademisyen2024`
+   - Şifre: `06112002`
 
 2. **Veri Görüntüleme**:
    - Tüm katılımcı verilerini tabloda görün
@@ -205,11 +224,11 @@ Veriler tarayıcının LocalStorage'ında `siberguven_data` anahtarı altında J
 ```javascript
 [
   {
-    "participantId": "001",
+    "participantId": "P1704388245123",
     "participantName": "Ahmet",
     "participantAge": 14,
     "sessionType": "baslama",
-    "sessionLabel": "Başlama Düzeyi (Ön-Test)",
+    "sessionLabel": "Başlama Düzeyi",
     "bullyingType": "sozel",
     "bullyingLabel": "Sözel/Psikolojik Saldırı",
     "messageType": "cyberbullying",
@@ -226,13 +245,13 @@ Veriler tarayıcının LocalStorage'ında `siberguven_data` anahtarı altında J
 
 CSV dosyasında yer alan sütunlar:
 
-1. **Katılımcı ID**: Benzersiz kimlik
+1. **Katılımcı ID**: Otomatik oluşturulan benzersiz kimlik
 2. **Ad**: Katılımcı adı
 3. **Yaş**: Katılımcı yaşı
 4. **Oturum**: Oturum türü
 5. **Zorbalık Türü**: Mesajın zorbalık kategorisi
 6. **Mesaj Türü**: safe / cyberbullying
-7. **Aksiyon**: reply / report / block / notify
+7. **Aksiyon**: reply / report / block
 8. **Tepki Süresi (sn)**: Saniye cinsinden
 9. **İpucu**: Evet / Hayır
 10. **Doğru**: Evet / Hayır
@@ -242,10 +261,11 @@ CSV dosyasında yer alan sütunlar:
 
 ### Öğretim Stratejisi
 
-1. **Sabit Bekleme Süreli Öğretim**: 5 saniye içinde tepki yoksa ipucu
-2. **Kademeli Destek**: Görsel ve yazılı ipuçları
-3. **Pozitif Pekiştirme**: Doğru davranışların ödüllendirilmesi
-4. **Tekrarlı Pratik**: 4 farklı oturum ile beceri pekiştirme
+1. **Sabit Bekleme Süreli Öğretim**: 5 saniye içinde tepki yoksa ipucu (sadece buton animasyonu)
+2. **Görsel İpuçları**: Yanıp sönen butonlar (metin ipucu kaldırıldı)
+3. **Kademeli Destek**: İlk yanlış adımda ipucu
+4. **Pozitif Pekiştirme**: Doğru davranışların ödüllendirilmesi
+5. **Tekrarlı Pratik**: 5 farklı oturum ile beceri pekiştirme
 
 ### Değerlendirme Kriterleri
 
@@ -258,7 +278,7 @@ CSV dosyasında yer alan sütunlar:
 
 - Veriler sadece tarayıcının LocalStorage'ında saklanır
 - Sunucuya veri gönderilmez
-- Katılımcı bilgileri şifrelenmemiştir (demo amaçlı)
+- Katılımcı ID otomatik oluşturulur (timestamp bazlı)
 - Akademisyen şifresi basit bir demo şifresidir (tez/eğitim amaçlı)
 - **Önemli**: Gerçek kullanımda:
   - Sunucu taraflı kimlik doğrulama kullanılmalıdır
@@ -281,16 +301,27 @@ Proje Sahibi: [mamishky](https://github.com/mamishky)
 ## 📝 Notlar
 
 - Uygulama tamamen Türkçe dilindedir
-- 100 benzersiz senaryo içerir
+- 5 oturum × 5 zorbalık türü × 5 mesaj = 125 benzersiz senaryo
 - Mobil uyumlu responsive tasarım
 - Offline çalışabilir (avatarlar hariç)
 - Tarayıcı kapatılsa bile veriler korunur
+- Çocuk dostu içerik ve renkli tasarım
 
 ## 🔄 Güncellemeler
 
+### v2.0.0 (2024)
+- ✨ Yeni mesaj inbox/liste sistemi
+- 🎨 35+ çocuk dostu post eklendi
+- 🔔 Okunmamış mesaj göstergeleri
+- 💡 İpucu sistemi güncellendi (sadece buton animasyonu, metin kaldırıldı)
+- 📊 5 oturum türü (Başlama, Uygulama, İzleme 2/4/8. Hafta)
+- 🎯 Her zorbalık türü için 5 farklı kişiden mesaj
+- 🔒 Akademisyen şifresi güncellendi (06112002)
+- 📱 Modern Instagram web tasarımı (ortalanmış, max 470px feed)
+- 🎨 Daha kompakt ve temiz post görünümleri
+
 ### v1.0.0 (2024)
 - İlk sürüm
-- 100 Türkçe senaryo
-- 6 beceri analizi
+- Temel özellikler
 - Akademisyen paneli
 - Excel export özelliği
