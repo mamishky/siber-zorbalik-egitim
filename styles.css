@@ -299,8 +299,17 @@ body {
     width: 70px;
     height: 70px;
     border-radius: 50%;
-    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
     padding: 3px;
+}
+
+/* İzlenmemiş hikaye - renkli gradient */
+.story-avatar.unwatched {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+
+/* İzlenmiş hikaye - gri kenarlık */
+.story-avatar.watched {
+    background: #dbdbdb;
 }
 
 .story-avatar img {
@@ -608,6 +617,28 @@ body {
     background: #0095f6;
     border-radius: 50%;
     flex-shrink: 0;
+}
+
+/* Blocked User Styles */
+.inbox-item.blocked {
+    border-left: 3px solid #ed4956;
+}
+
+.blocked-label {
+    color: #ed4956;
+    font-size: 12px;
+    font-weight: 700;
+    margin-left: 8px;
+}
+
+.blocked-preview {
+    color: #ed4956 !important;
+    font-weight: 600;
+}
+
+.inbox-item.blocked:hover {
+    background: #fff5f5;
+    cursor: not-allowed;
 }
 
 /* Reels Styles */
@@ -1115,13 +1146,24 @@ body {
     z-index: 1;
 }
 
-.story-progress {
+/* Story Progress Segments */
+.story-progress-container {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 10px;
+    left: 10px;
+    right: 10px;
     height: 2px;
+    display: flex;
+    gap: 4px;
+    z-index: 2;
+}
+
+.story-progress-segment {
+    flex: 1;
+    height: 100%;
     background: rgba(255,255,255,0.3);
+    border-radius: 2px;
+    overflow: hidden;
 }
 
 .story-progress-bar {
@@ -1129,6 +1171,11 @@ body {
     background: white;
     width: 0%;
     animation: storyProgress 5s linear forwards;
+}
+
+.story-progress-segment.completed .story-progress-bar {
+    width: 100%;
+    animation: none;
 }
 
 @keyframes storyProgress {
@@ -1167,12 +1214,32 @@ body {
     align-items: center;
     justify-content: center;
     background: #000;
+    position: relative;
 }
 
 .story-content img {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+}
+
+/* Story Navigation Areas */
+.story-nav-left,
+.story-nav-right {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 30%;
+    cursor: pointer;
+    z-index: 1;
+}
+
+.story-nav-left {
+    left: 0;
+}
+
+.story-nav-right {
+    right: 0;
 }
 
 /* Şikayet Nedeni Modal */

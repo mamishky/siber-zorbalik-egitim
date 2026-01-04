@@ -7,13 +7,19 @@ const SCENARIOS = {
     baslama: {
         sozel: [
             { sender: "ali.yilmaz", avatar: "aliyilmaz", messages: [
-                { type: "safe", text: "Merhaba! Nasılsın bugün?", response: "text" }
+                { type: "safe", text: "Selam! Bu hafta sonu yeni Marvel filmi çıkıyor biliyorsun dimi? 🎬" },
+                { type: "safe", text: "Aynen çok iyi olacak! Cumartesi saat 3'te AVM'de buluşalım mı?" },
+                { type: "safe", text: "Diğerlerine de haber veriyorum, hep beraber gidelim 🍿" },
+                { type: "safe", text: "Tamamdır o zaman, cumartesi görüşürüz! 👋" }
             ]},
             { sender: "ayse.kara", avatar: "aysekara", messages: [
                 { type: "cyberbullying", text: "Sen gerçekten çok aptalsın, hiçbir şey bilmiyorsun!", actions: ["report", "block"], complaintReason: "sozel" }
             ]},
             { sender: "mehmet.demir", avatar: "mehmetdemir", messages: [
-                { type: "safe", text: "Yarın sinemaya gidelim mi?", response: "text" }
+                { type: "safe", text: "Knk matematik ödevini yaptın mı? Şu 3. soruyu bi türlü çözemedim 📚" },
+                { type: "safe", text: "Eyvallah! Çok sağol, sen adamsın 💪" },
+                { type: "safe", text: "Yarın teneffüste bi anlatsana, hala tam anlamadım" },
+                { type: "safe", text: "Hadi görüşürüz, iyi geceler! ✌️" }
             ]},
             { sender: "zeynep.tas", avatar: "zeyneptas", messages: [
                 { type: "cyberbullying", text: "Seninle kimse arkadaş olmak istemez, çok salaksın!", actions: ["report", "block"], complaintReason: "sozel" }
@@ -24,13 +30,19 @@ const SCENARIOS = {
         ],
         dislanma: [
             { sender: "selin.yilmaz", avatar: "selinyilmaz", messages: [
-                { type: "safe", text: "Bugün ders çalışacak mısın?", response: "text" }
+                { type: "safe", text: "Yarın sahada maç var, gelcen mi? ⚽" },
+                { type: "safe", text: "Süper! 5'e 5 oynayacağız, takımlar hazır" },
+                { type: "safe", text: "Saat 4'te orada ol, geç kalma sakın!" },
+                { type: "safe", text: "Görüşürüz, hazır ol! 🏃" }
             ]},
             { sender: "cem.aydın", avatar: "cemaydin", messages: [
                 { type: "cyberbullying", text: "Seni partiye davet etmedik, kimse seni istemiyor.", actions: ["report", "block"], complaintReason: "dislanma" }
             ]},
             { sender: "gizem.kaya", avatar: "gizemkaya", messages: [
-                { type: "safe", text: "Matematik ödevini yaptın mı?", response: "text" }
+                { type: "safe", text: "Cuma günü bende parti var, geliyorsun dimi? 🎂" },
+                { type: "safe", text: "Harika! Saat 7'de başlıyoruz" },
+                { type: "safe", text: "Pizza ve oyun olacak, çok eğleneceğiz 🎮" },
+                { type: "safe", text: "Görüşürüz, heyecanla bekliyorum! 🎈" }
             ]},
             { sender: "burak.celik", avatar: "burakcelik", messages: [
                 { type: "cyberbullying", text: "Bizim gruba katılamazsın, sen uygun değilsin.", actions: ["report", "block"], complaintReason: "dislanma" }
@@ -41,10 +53,16 @@ const SCENARIOS = {
         ],
         tehdit: [
             { sender: "ahmet.polat", avatar: "ahmetpolat", messages: [
-                { type: "safe", text: "Yeni oyunu denedin mi?", response: "text" }
+                { type: "safe", text: "Bu akşam PS5'te FIFA oynayak mı? 🎮" },
+                { type: "safe", text: "Olur be! Saat 8'de hazır ol" },
+                { type: "safe", text: "Sesli konuşalım, daha eğlenceli olur 🎧" },
+                { type: "safe", text: "Tamam o zaman, akşam görüşürüz! 👊" }
             ]},
             { sender: "fatma.arslan", avatar: "fatmaarslan", messages: [
-                { type: "safe", text: "O oyun çok eğlenceli!", response: "text" }
+                { type: "safe", text: "Bugün yeni albüm çıktı duydun mu? 🎵" },
+                { type: "safe", text: "Evet çok iyi şarkılar var!" },
+                { type: "safe", text: "En sevdiğim 3. şarkı oldu sanırım 🎶" },
+                { type: "safe", text: "Sonra beraber dinleriz, hadi görüşürüz! ✌️" }
             ]},
             { sender: "mustafa.guven", avatar: "mustafaguven", messages: [
                 { type: "cyberbullying", text: "Eğer bunu birine söylersen seni döverim!", actions: ["report", "block"], complaintReason: "tehdit" }
@@ -58,13 +76,19 @@ const SCENARIOS = {
         ],
         iftira: [
             { sender: "hatice.yavuz", avatar: "haticeyavuz", messages: [
-                { type: "safe", text: "Bugün hava çok güzel değil mi?", response: "text" }
+                { type: "safe", text: "Hoca bugün çok güzel anlattı dimi? 📖" },
+                { type: "safe", text: "Evet artık daha iyi anladım konuyu" },
+                { type: "safe", text: "Yarın beraber tekrar yapalım mı?" },
+                { type: "safe", text: "Tamam görüşürüz, haydi iyi dersler! 📚" }
             ]},
             { sender: "ibrahim.ozkan", avatar: "ibrahimozkan", messages: [
                 { type: "cyberbullying", text: "Herkes senin hırsızlık yaptığını söylüyor, doğru mu?", actions: ["report", "block"], complaintReason: "iftira" }
             ]},
             { sender: "hacer.dogan", avatar: "hacerdogan", messages: [
-                { type: "safe", text: "Yeni dizi tavsiyesi var mı?", response: "text" }
+                { type: "safe", text: "Hafta sonu pikniğe gelsene 🌳" },
+                { type: "safe", text: "Harika! Pazar günü sabah 10'da" },
+                { type: "safe", text: "Top ve frisbee getir, çok eğlenirüz 🏐" },
+                { type: "safe", text: "Süper, pazar görüşürüz o zaman! 🙌" }
             ]},
             { sender: "huseyin.sahin", avatar: "huseyinsahin", messages: [
                 { type: "cyberbullying", text: "Sınıfta senin kopya çektiğini söylüyorlar, çok ayıp!", actions: ["report", "block"], complaintReason: "iftira" }
@@ -75,13 +99,19 @@ const SCENARIOS = {
         ],
         kimlik: [
             { sender: "sahte_hesap1", avatar: "sahtehesap1", messages: [
-                { type: "safe", text: "Merhaba, tanışalım mı?", response: "text" }
+                { type: "safe", text: "Selam! Yeni kursa başladım, sen de gelir misin? 📝" },
+                { type: "safe", text: "Güzel! Her salı ve perşembe saat 4'te" },
+                { type: "safe", text: "Hem öğreniriz hem eğleniriz 😊" },
+                { type: "safe", text: "Harika, salı görüşürüz o zaman! 👋" }
             ]},
             { sender: "fake_profile1", avatar: "fakeprofile1", messages: [
                 { type: "cyberbullying", text: "Ben aslında senin arkadaşının hesabını çaldım!", actions: ["report", "block"], complaintReason: "kimlik" }
             ]},
             { sender: "clone_user1", avatar: "cloneuser1", messages: [
-                { type: "safe", text: "Ne tür müzikler dinliyorsun?", response: "text" }
+                { type: "safe", text: "Bu hafta sonu bisiklet turuna çıkalım mı? 🚴" },
+                { type: "safe", text: "Evet park etrafında güzel yol var" },
+                { type: "safe", text: "Cumartesi sabah 9'da hazır ol 🌞" },
+                { type: "safe", text: "Tamam, görüşürüz haftasonu! 🚴‍♂️" }
             ]},
             { sender: "imposter1", avatar: "imposter1", messages: [
                 { type: "cyberbullying", text: "Senin şifreni biliyorum, hesabını ele geçireceğim!", actions: ["report", "block"], complaintReason: "kimlik" }
@@ -96,13 +126,19 @@ const SCENARIOS = {
     uygulama: {
         sozel: [
             { sender: "cem.yildiz", avatar: "cemyildiz", messages: [
-                { type: "safe", text: "Bugünkü maçı izledin mi?", response: "text" }
+                { type: "safe", text: "Bugünkü maçı izledin mi? Çok heyecanlıydı! ⚽" },
+                { type: "safe", text: "Evet son dakika golü muhteşemdi!" },
+                { type: "safe", text: "Hangi takımı tutuyorsun sen?" },
+                { type: "safe", text: "Güzel! Sonraki maçı beraber izleriz, görüşürüz! 👋" }
             ]},
             { sender: "selin.erdem", avatar: "selinerdem", messages: [
                 { type: "cyberbullying", text: "Sen gerçekten çok çirkinsin, aynaya bakma!", actions: ["report", "block"], complaintReason: "sozel" }
             ]},
             { sender: "can.turan", avatar: "canturan", messages: [
-                { type: "safe", text: "Hangi takımı tutuyorsun?", response: "text" }
+                { type: "safe", text: "Yarın kütüphaneye geliyor musun? 📚" },
+                { type: "safe", text: "Harika! Saat 2'de buluşalım" },
+                { type: "safe", text: "Fen ödevini bitir beraber yaparız 📝" },
+                { type: "safe", text: "Tamam görüşürüz, iyi akşamlar! ✨" }
             ]},
             { sender: "deniz.koç", avatar: "denizkoc", messages: [
                 { type: "cyberbullying", text: "Kimse senin gibi birini sevemez, berbatsın!", actions: ["report", "block"], complaintReason: "sozel" }
@@ -113,10 +149,16 @@ const SCENARIOS = {
         ],
         dislanma: [
             { sender: "aleyna.yurt", avatar: "aleynayurt", messages: [
-                { type: "safe", text: "Yarın pikniğe geliyor musun?", response: "text" }
+                { type: "safe", text: "Yarın pikniğe geliyor musun? 🌳" },
+                { type: "safe", text: "Harika! Çok eğlenceli olacak" },
+                { type: "safe", text: "Top ve frisbee getir yanına 🥏" },
+                { type: "safe", text: "Süper, yarın görüşürüz! 🌞" }
             ]},
             { sender: "kaan.ozer", avatar: "kaanozer", messages: [
-                { type: "safe", text: "Harika! Çok eğlenceli olacak.", response: "text" }
+                { type: "safe", text: "Yeni çıkan oyunu aldın mı? 🎮" },
+                { type: "safe", text: "Çok iyi oyunmuş duydum!" },
+                { type: "safe", text: "Bu hafta sonu online oynayalım mı?" },
+                { type: "safe", text: "Tamam Discord'dan yazsana, görüşürüz! 🎧" }
             ]},
             { sender: "esra.kara", avatar: "esrakara", messages: [
                 { type: "cyberbullying", text: "Aslında seni istemiyoruz, gelme daha iyi.", actions: ["report", "block"], complaintReason: "dislanma" }
@@ -130,13 +172,19 @@ const SCENARIOS = {
         ],
         tehdit: [
             { sender: "onur.aksoy", avatar: "onuraksoy", messages: [
-                { type: "safe", text: "Ödevini bitirdin mi?", response: "text" }
+                { type: "safe", text: "Ödevini bitirdin mi? Ben de bitmek üzere 📝" },
+                { type: "safe", text: "Güzel! Hangi bölüm en zor geldi sana?" },
+                { type: "safe", text: "Evet o kısım gerçekten zordu" },
+                { type: "safe", text: "Yarın teneffüste konuşuruz, görüşürüz! 👋" }
             ]},
             { sender: "ceren.cetin", avatar: "cerencetin", messages: [
                 { type: "cyberbullying", text: "Eğer ödevini vermezsen fotoğraflarını yayarım!", actions: ["report", "block"], complaintReason: "tehdit" }
             ]},
             { sender: "serkan.tas", avatar: "serkantas", messages: [
-                { type: "safe", text: "Matematik zordu değil mi?", response: "text" }
+                { type: "safe", text: "Bugün hoca çok iyi anlattı dimi? 👨‍🏫" },
+                { type: "safe", text: "Evet artık daha iyi anladım konuyu" },
+                { type: "safe", text: "Yarın beraber tekrar yapalım istersen" },
+                { type: "safe", text: "Tamam görüşürüz, iyi dersler! 📚" }
             ]},
             { sender: "gamze.ozturk", avatar: "gamzeozturk", messages: [
                 { type: "cyberbullying", text: "Bana para ver yoksa sırlarını ifşa ederim!", actions: ["report", "block"], complaintReason: "tehdit" }
@@ -147,10 +195,16 @@ const SCENARIOS = {
         ],
         iftira: [
             { sender: "irem.guven", avatar: "iremguven", messages: [
-                { type: "safe", text: "Bugün çok yorgunum.", response: "text" }
+                { type: "safe", text: "Bugün çok yorgunum, sen nasılsın? 😴" },
+                { type: "safe", text: "Ben de öyle! Çok ders çalıştım dün" },
+                { type: "safe", text: "Hafta sonu dinlenelim artık 🛌" },
+                { type: "safe", text: "Evet kesinlikle! Görüşürüz, iyi dinlenmeler! 💤" }
             ]},
             { sender: "baris.kaya", avatar: "bariskaya", messages: [
-                { type: "safe", text: "Ben de aynı şekilde.", response: "text" }
+                { type: "safe", text: "Yeni albümü dinledin mi? Çok güzel! 🎵" },
+                { type: "safe", text: "Evet ben de çok beğendim!" },
+                { type: "safe", text: "Özellikle 5. şarkı favorim oldu 🎶" },
+                { type: "safe", text: "Benimki de! Sonra tekrar dinleriz, görüşürüz! 🎧" }
             ]},
             { sender: "aslı.celik", avatar: "aslicelik", messages: [
                 { type: "cyberbullying", text: "Herkes senin yalan söylediğini biliyor, utanmıyor musun?", actions: ["report", "block"], complaintReason: "iftira" }
@@ -164,13 +218,19 @@ const SCENARIOS = {
         ],
         kimlik: [
             { sender: "sahte_hesap2", avatar: "sahtehesap2", messages: [
-                { type: "safe", text: "Selam, yeni mi katıldın?", response: "text" }
+                { type: "safe", text: "Selam, yeni mi katıldın okula? 🏫" },
+                { type: "safe", text: "Güzel! Hoş geldin o zaman" },
+                { type: "safe", text: "İhtiyacın olursa sor bana 😊" },
+                { type: "safe", text: "Tamamdır, görüşürüz! 👋" }
             ]},
             { sender: "fake_profile2", avatar: "fakeprofile2", messages: [
                 { type: "cyberbullying", text: "Senin adınla sahte hesap açtım, herkese mesaj attım!", actions: ["report", "block"], complaintReason: "kimlik" }
             ]},
             { sender: "clone_user2", avatar: "cloneuser2", messages: [
-                { type: "safe", text: "Okulda neyi seversin?", response: "text" }
+                { type: "safe", text: "Okulda hangi kulübe katıldın? 🎨" },
+                { type: "safe", text: "Vay be! Çok güzel" },
+                { type: "safe", text: "Ben de müzik kulübündeyim 🎸" },
+                { type: "safe", text: "Harika! Görüşürüz, iyi eğlenceler! 🎭" }
             ]},
             { sender: "imposter2", avatar: "imposter2", messages: [
                 { type: "cyberbullying", text: "Senin hesabını ele geçirdim, şifreni değiştirdim!", actions: ["report", "block"], complaintReason: "kimlik" }
@@ -185,10 +245,16 @@ const SCENARIOS = {
     "izleme-2": {
         sozel: [
             { sender: "tarik.barkan", avatar: "tarikbarkan", messages: [
-                { type: "safe", text: "Yeni filmler var mı izledin?", response: "text" }
+                { type: "safe", text: "Yeni filmler var mı izledin? 🎬" },
+                { type: "safe", text: "Ben de izlemek istiyorum!" },
+                { type: "safe", text: "Hangi tür filmler seversin?" },
+                { type: "safe", text: "Harika! Sonra beraber izleriz, görüşürüz! 🍿" }
             ]},
             { sender: "seda.kale", avatar: "sedakale", messages: [
-                { type: "safe", text: "Ben de izlemek istiyorum!", response: "text" }
+                { type: "safe", text: "Hafta sonu ne planlıyorsun? 🌞" },
+                { type: "safe", text: "Vay be! Çok güzel" },
+                { type: "safe", text: "Ben de ailemle gezmeye gideceğim 🚗" },
+                { type: "safe", text: "Süper! İyi eğlenceler, görüşürüz! 👋" }
             ]},
             { sender: "umut.tuncer", avatar: "umuttuncer", messages: [
                 { type: "cyberbullying", text: "Sen gerçekten hiçbir şey başaramazsın, yeteneksizsin!", actions: ["report", "block"], complaintReason: "sozel" }
@@ -202,13 +268,19 @@ const SCENARIOS = {
         ],
         dislanma: [
             { sender: "dilek.polat", avatar: "dilekpolat", messages: [
-                { type: "safe", text: "Bugün ne yapıyorsun?", response: "text" }
+                { type: "safe", text: "Bugün ne yapıyorsun? 😊" },
+                { type: "safe", text: "Güzel! Bende evde dinlenirim" },
+                { type: "safe", text: "Haftaya görüşürüz" },
+                { type: "safe", text: "Tamam görüşürüz, iyi hafta sonları! ✨" }
             ]},
             { sender: "volkan.sahin", avatar: "volkansahin", messages: [
                 { type: "cyberbullying", text: "Seni doğum günü partisine çağırmadık, istemiyoruz.", actions: ["report", "block"], complaintReason: "dislanma" }
             ]},
             { sender: "sebnem.yavuz", avatar: "sebnemyavuz", messages: [
-                { type: "safe", text: "Yeni kitap aldın mı?", response: "text" }
+                { type: "safe", text: "Yeni kitap aldın mı? 📖" },
+                { type: "safe", text: "Çok güzel! Hangi kitap?" },
+                { type: "safe", text: "Vay be! O kitabı ben de okumak istiyorum" },
+                { type: "safe", text: "Bitince bana ver okuyayım, görüşürüz! 📚" }
             ]},
             { sender: "engin.koç", avatar: "enginkoc", messages: [
                 { type: "cyberbullying", text: "Bizim takımda yer yok sana, başka yer bul.", actions: ["report", "block"], complaintReason: "dislanma" }
@@ -219,13 +291,19 @@ const SCENARIOS = {
         ],
         tehdit: [
             { sender: "orhan.celik", avatar: "orhancelik", messages: [
-                { type: "safe", text: "Bugün hava nasıl?", response: "text" }
+                { type: "safe", text: "Bugün hava nasıl? Çok güzel görünüyor ☀️" },
+                { type: "safe", text: "Evet ben de öyle düşünüyorum!" },
+                { type: "safe", text: "Dışarı çıkalım mı biraz?" },
+                { type: "safe", text: "Tamam görüşürüz o zaman! 🌳" }
             ]},
             { sender: "nihal.demir", avatar: "nihaldemir", messages: [
                 { type: "cyberbullying", text: "Kimseye söyleme yoksa çok kötü olur!", actions: ["report", "block"], complaintReason: "tehdit" }
             ]},
             { sender: "erdem.yilmaz", avatar: "erdemyilmaz", messages: [
-                { type: "safe", text: "Spor yapmayı sever misin?", response: "text" }
+                { type: "safe", text: "Spor yapmayı sever misin? 🏃" },
+                { type: "safe", text: "Ben de çok severim!" },
+                { type: "safe", text: "Yarın jogging yapalım mı?" },
+                { type: "safe", text: "Harika! Yarın görüşürüz, hazır ol! 👟" }
             ]},
             { sender: "ozlem.kaya", avatar: "ozlemkaya", messages: [
                 { type: "cyberbullying", text: "Yarın bana 50 lira getir, getirmezsen pişman olursun!", actions: ["report", "block"], complaintReason: "tehdit" }
@@ -236,13 +314,19 @@ const SCENARIOS = {
         ],
         iftira: [
             { sender: "filiz.tas", avatar: "filiztas", messages: [
-                { type: "safe", text: "Yeni oyunu aldın mı?", response: "text" }
+                { type: "safe", text: "Yeni oyunu aldın mı? 🎮" },
+                { type: "safe", text: "Çok iyi oyunmuş!" },
+                { type: "safe", text: "Beraber online oynayalım mı?" },
+                { type: "safe", text: "Tamam akşam Discord'tan yaz! 🎧" }
             ]},
             { sender: "sinan.guven", avatar: "sinanguven", messages: [
                 { type: "cyberbullying", text: "Duydum ki sen başkalarının eşyalarını çalıyormuşsun!", actions: ["report", "block"], complaintReason: "iftira" }
             ]},
             { sender: "songul.arslan", avatar: "songularslan", messages: [
-                { type: "safe", text: "Hangi dersi seversin?", response: "text" }
+                { type: "safe", text: "Hangi dersi seversin en çok? 📝" },
+                { type: "safe", text: "Ben de o dersi severim!" },
+                { type: "safe", text: "Yarın beraber ders çalışalım mı?" },
+                { type: "safe", text: "Tamam görüşürüz, iyi dersler! 📚" }
             ]},
             { sender: "levent.dogan", avatar: "leventdogan", messages: [
                 { type: "cyberbullying", text: "Herkes senin not çalıp sattığını söylüyor!", actions: ["report", "block"], complaintReason: "iftira" }
@@ -253,10 +337,16 @@ const SCENARIOS = {
         ],
         kimlik: [
             { sender: "sahte_hesap3", avatar: "sahtehesap3", messages: [
-                { type: "safe", text: "Selam, nasılsın?", response: "text" }
+                { type: "safe", text: "Selam, nasılsın bugün? 😊" },
+                { type: "safe", text: "İyiyim teşekkürler!" },
+                { type: "safe", text: "Sen ne yapıyorsun?" },
+                { type: "safe", text: "Güzel! Görüşürüz, iyi günler! 👋" }
             ]},
             { sender: "fake_profile3", avatar: "fakeprofile3", messages: [
-                { type: "safe", text: "Ben iyiyim teşekkürler!", response: "text" }
+                { type: "safe", text: "Yeni dizi önerin var mı? 📺" },
+                { type: "safe", text: "Evet var çok güzel!" },
+                { type: "safe", text: "Hangi tür diziler seversin?" },
+                { type: "safe", text: "Anladım, sonra konuşuruz görüşürüz! 🎬" }
             ]},
             { sender: "clone_user3", avatar: "cloneuser3", messages: [
                 { type: "cyberbullying", text: "Senin fotoğraflarını kopyaladım, sahte hesap açtım!", actions: ["report", "block"], complaintReason: "kimlik" }
