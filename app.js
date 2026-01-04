@@ -95,44 +95,8 @@ function playNotificationSound() {
     }
 }
 
-// Feed için gönderi verileri - Çocuk dostu içerikler (fotoğraf + video karışık)
-const POSTS = [
-    // Hayvanlar
-    { username: "sevimli.kedicik", avatar: "sevimlikedicik", image: "https://picsum.photos/seed/cat1/600/600", caption: "Minnoş kedim uyuyor 🐱💤", likes: 342, type: "image" },
-    { username: "kopek.dostu", avatar: "kopekdostu", image: "https://picsum.photos/seed/dog1/600/600", caption: "Yavru köpeğim çok oyuncu! 🐕🎾", likes: 521, type: "image" },
-    { username: "hayvan.videolari", avatar: "hayvanvideolari", image: "https://picsum.photos/seed/animals1/600/600", video: "https://videos.pexels.com/video-files/856973/856973-sd_640_360_30fps.mp4", caption: "Sevimli hayvan videosu 🐾", likes: 876, type: "video" },
-    { username: "tavsan.cicek", avatar: "tavsancicek", image: "https://picsum.photos/seed/rabbit1/600/600", caption: "Tavşanım havuç yiyor 🐰🥕", likes: 398, type: "image" },
-    
-    // Renkler ve Eğlence
-    { username: "gokkusagi.dunyasi", avatar: "gokkusagidunyasi", image: "https://picsum.photos/seed/rainbow1/600/600", caption: "Gökkuşağı çok renkli 🌈☀️", likes: 612, type: "image" },
-    { username: "parti.videolari", avatar: "partivideolari", image: "https://picsum.photos/seed/party1/600/600", video: "https://videos.pexels.com/video-files/857251/857251-sd_640_360_30fps.mp4", caption: "Doğum günü partisi! 🎉🎈", likes: 945, type: "video" },
-    { username: "balon.partisi", avatar: "balonpartisi", image: "https://picsum.photos/seed/balloons1/600/600", caption: "Renkli balonlarla parti! 🎈🎉", likes: 489, type: "image" },
-    { username: "pasta.dunyasi", avatar: "pastadunyasi", image: "https://picsum.photos/seed/cake1/600/600", caption: "Doğum günü pastası hazır 🎂🎊", likes: 576, type: "image" },
-    
-    // Oyunlar ve Sporlar
-    { username: "oyun.zamani", avatar: "oyunzamani", image: "https://picsum.photos/seed/game1/600/600", caption: "Yeni oyunum çok eğlenceli 🎮🕹️", likes: 445, type: "image" },
-    { username: "futbol.goller", avatar: "futbolgoller", image: "https://picsum.photos/seed/soccer1/600/600", video: "https://videos.pexels.com/video-files/856641/856641-sd_640_360_30fps.mp4", caption: "Harika gol anı! ⚽🔥", likes: 1234, type: "video" },
-    { username: "futbol.yildizi", avatar: "futbolyildizi", image: "https://picsum.photos/seed/soccer2/600/600", caption: "Futbol oynamak çok keyifli! ⚽🏆", likes: 523, type: "image" },
-    { username: "basketbol.asa", avatar: "basketbolasa", image: "https://picsum.photos/seed/basketball1/600/600", caption: "Basket atışı yaptım! 🏀🎯", likes: 412, type: "image" },
-    
-    // Müzik ve Dans
-    { username: "dans.show", avatar: "dansshow", image: "https://picsum.photos/seed/dance1/600/600", video: "https://videos.pexels.com/video-files/3571264/3571264-sd_640_360_30fps.mp4", caption: "Yeni dans hareketim 💃✨", likes: 2156, type: "video" },
-    { username: "renk.paleti", avatar: "renkpaleti", image: "https://picsum.photos/seed/paint1/600/600", caption: "Resim yapmayı seviyorum 🎨🖌️", likes: 387, type: "image" },
-    { username: "muzik.dunyasi", avatar: "muzikdunyasi", image: "https://picsum.photos/seed/music1/600/600", caption: "Gitar çalmayı öğreniyorum 🎵🎸", likes: 498, type: "image" },
-    
-    // Doğa ve Dışarı
-    { username: "plaj.keyfi", avatar: "plajkeyfi", image: "https://picsum.photos/seed/beach1/600/600", caption: "Deniz ve kumda oynamak 🏖️🌊", likes: 589, type: "image" },
-    { username: "lunapark.eglence", avatar: "lunaparkeglence", image: "https://picsum.photos/seed/amusement1/600/600", video: "https://videos.pexels.com/video-files/2093313/2093313-sd_640_360_30fps.mp4", caption: "Lunapark anıları! 🎡", likes: 1567, type: "video" },
-    { username: "lunapark.macerasi", avatar: "lunaparkmacerasi", image: "https://picsum.photos/seed/amusement2/600/600", caption: "Lunapark çok eğlenceli! 🎡🎢", likes: 671, type: "image" },
-    { username: "sirk.gozu", avatar: "sirkgozu", image: "https://picsum.photos/seed/circus1/600/600", caption: "Sirkte palyaçolar gördüm 🎪🤡", likes: 534, type: "image" },
-    
-    // Daha fazla içerik
-    { username: "komik.anlar", avatar: "komikanlar", image: "https://picsum.photos/seed/funny1/600/600", video: "https://videos.pexels.com/video-files/3571225/3571225-sd_640_360_30fps.mp4", caption: "Çok komik an! 😂", likes: 2341, type: "video" },
-    { username: "hayvanat.bahcesi", avatar: "hayvanatbahcesi", image: "https://picsum.photos/seed/zoo1/600/600", caption: "Aslan görmeye gittik 🦁👀", likes: 612, type: "image" },
-    { username: "akvaryum.balik", avatar: "akvaryumbalik", image: "https://picsum.photos/seed/fish1/600/600", caption: "Renkli balıklar yüzüyor 🐠🐟", likes: 456, type: "image" },
-    { username: "cicek.bahcesi", avatar: "cicekbahcesi", image: "https://picsum.photos/seed/flowers1/600/600", caption: "Renkli çiçekler açmış 🌺🌸", likes: 423, type: "image" },
-    { username: "skate.videolari", avatar: "skatevideolari", image: "https://picsum.photos/seed/skate1/600/600", video: "https://videos.pexels.com/video-files/3015491/3015491-sd_640_360_30fps.mp4", caption: "Yeni trick! 🛹", likes: 1876, type: "video" }
-];
+// Feed için gönderi verileri - scenarios.js'den POSTS_100 kullan
+const POSTS = POSTS_100;
 
 // Ekran geçişleri
 function showScreen(screenId) {
@@ -268,24 +232,81 @@ function generateFeed() {
     });
 }
 
-// Story state management
+// Turkish names for stories
+const TURKISH_USERNAMES = [
+    'ali.yilmaz', 'ayse.demir', 'mehmet.kaya', 'zeynep.ozturk', 'cem.yildiz',
+    'selin.yildirim', 'can.yilmaz', 'gizem.sen', 'tarik.barkan', 'ebru.celik',
+    'kerem.akar', 'deniz.koc', 'berk.aydin', 'aleyna.yurt', 'kaan.ozer',
+    'esra.kara', 'mert.yilmaz', 'pinar.demir', 'onur.aksoy', 'ceren.cetin',
+    'serkan.tas', 'gamze.ozturk', 'alper.yildirim', 'irem.guven', 'baris.kaya',
+    'asli.celik', 'gorkem.arslan', 'ebru.dogan', 'umut.tuncer', 'neslihan.oz',
+    'dilek.polat', 'volkan.sahin', 'sebnem.yavuz', 'engin.koc', 'sevgi.aydin',
+    'orhan.celik', 'nihal.demir', 'erdem.yilmaz', 'ozlem.kaya', 'yusuf.ozturk',
+    'filiz.tas', 'sinan.guven', 'songul.arslan', 'levent.dogan', 'nurcan.yildirim',
+    'kadir.cetin', 'canan.kara', 'serdar.polat', 'belgin.sahin', 'selim.yavuz',
+    'gulsum.koc', 'ercan.aydin', 'nurten.celik', 'ismet.demir', 'munevver.yilmaz',
+    'nejat.kaya', 'perihan.ozturk', 'nuri.tas', 'saime.guven', 'haluk.arslan',
+    'nermin.dogan', 'cemil.yildirim', 'zehra.cetin', 'riza.kara', 'fadime.polat',
+    'resat.sahin', 'fadime.yavuz', 'recep.koc', 'sabiha.aydin', 'halil.celik',
+    'sevim.demir', 'ramazan.yilmaz', 'aysegul.kaya', 'osman.ozturk', 'hanife.tas',
+    'suleyman.guven', 'zeliha.arslan', 'yasar.dogan', 'meryem.yildirim', 'ismail.cetin',
+    'serife.kara', 'ahmet.polat', 'fatma.sahin', 'mustafa.yavuz', 'emine.koc',
+    'burak.yilmaz', 'elif.demir', 'emre.kaya', 'seda.ozturk', 'hakan.celik',
+    'burcu.yildirim', 'tolga.yilmaz', 'tugce.sen', 'batuhan.barkan', 'derya.celik',
+    'ege.akar', 'duygu.koc', 'burak.aydin', 'simge.yurt', 'doruk.ozer'
+];
+
+// Story state management - 100 stories
 let storyState = {
     currentStoryIndex: 0,
-    stories: [
-        { username: 'senin', avatar: 'user1', watched: false },
-        { username: 'ali.yilmaz', avatar: 'aliyilmaz', watched: false },
-        { username: 'ayse.demir', avatar: 'aysedemir', watched: false },
-        { username: 'mehmet.kaya', avatar: 'mehmetkaya', watched: false },
-        { username: 'zeynep.ozturk', avatar: 'zeynepozturk', watched: false },
-        { username: 'cem.yildiz', avatar: 'cemyildiz', watched: false },
-        { username: 'selin.yildirim', avatar: 'selinyildirim', watched: false },
-        { username: 'can.yilmaz', avatar: 'canyilmaz', watched: false },
-        { username: 'gizem.sen', avatar: 'gizemsen', watched: false },
-        { username: 'tarik.barkan', avatar: 'tarikbarkan', watched: false }
-    ],
+    stories: [],
     autoplayTimeout: null,
     progressTimeout: null
 };
+
+// Generate 100 stories
+function generateStories() {
+    storyState.stories = [];
+    for (let i = 0; i < 100; i++) {
+        const username = TURKISH_USERNAMES[i % TURKISH_USERNAMES.length];
+        const seed = `${username}${i}`;
+        storyState.stories.push({
+            username: username + (i > TURKISH_USERNAMES.length - 1 ? Math.floor(i / TURKISH_USERNAMES.length) : ''),
+            avatar: seed,
+            watched: false
+        });
+    }
+}
+
+// Initialize stories on load
+generateStories();
+
+// Render stories into the container
+function renderStories() {
+    const storiesContainer = document.getElementById('stories-container');
+    if (!storiesContainer) return;
+    
+    storiesContainer.innerHTML = '';
+    
+    storyState.stories.forEach((story, index) => {
+        const storyDiv = document.createElement('div');
+        storyDiv.className = 'story';
+        storyDiv.dataset.story = story.avatar;
+        
+        storyDiv.innerHTML = `
+            <div class="story-avatar ${story.watched ? 'watched' : 'unwatched'}">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${story.avatar}" alt="Story">
+            </div>
+            <span>${story.username}</span>
+        `;
+        
+        storyDiv.addEventListener('click', function() {
+            openStory(story.username, story.avatar, index);
+        });
+        
+        storiesContainer.appendChild(storyDiv);
+    });
+}
 
 // Load story watched states from localStorage
 function loadStoryStates() {
@@ -307,14 +328,17 @@ function saveStoryStates() {
 
 // Update story avatar classes based on watched state
 function updateStoryAvatars() {
-    document.querySelectorAll('.story').forEach((storyEl, index) => {
-        const avatar = storyEl.querySelector('.story-avatar');
-        if (storyState.stories[index] && storyState.stories[index].watched) {
-            avatar.classList.remove('unwatched');
-            avatar.classList.add('watched');
-        } else {
-            avatar.classList.remove('watched');
-            avatar.classList.add('unwatched');
+    storyState.stories.forEach((story, index) => {
+        const storyEl = document.querySelector(`.story[data-story="${story.avatar}"]`);
+        if (storyEl) {
+            const avatar = storyEl.querySelector('.story-avatar');
+            if (story.watched) {
+                avatar.classList.remove('unwatched');
+                avatar.classList.add('watched');
+            } else {
+                avatar.classList.remove('watched');
+                avatar.classList.add('unwatched');
+            }
         }
     });
 }
@@ -386,16 +410,9 @@ function closeStory() {
 
 // Hikaye tıklama event'leri
 document.addEventListener('DOMContentLoaded', () => {
-    // Load story states on page load
+    // Load story states on page load and render stories
     loadStoryStates();
-    
-    document.querySelectorAll('.story').forEach((story, index) => {
-        story.addEventListener('click', function() {
-            const storyData = this.dataset.story;
-            const username = this.querySelector('span').textContent;
-            openStory(username, storyData, index);
-        });
-    });
+    renderStories();
     
     // Story navigation
     document.getElementById('story-nav-left').addEventListener('click', () => {
@@ -473,11 +490,12 @@ document.getElementById('start-session').addEventListener('click', () => {
     
     showScreen('main-app');
     generateFeed(); // Feed'i oluştur
+    renderStories(); // Hikayeleri oluştur
     
-    // 10 saniye sonra ilk mesajı göster (bildirim olarak)
+    // İlk mesaj için 10 saniye bekle
     currentSession.messageTimeout = setTimeout(() => {
         sendNextMessageNotification();
-    }, 10000);
+    }, 10000); // 10 saniye
 });
 
 // Mesaj bildirimi göster
@@ -608,6 +626,13 @@ function openConversationFromInbox(index) {
 // Inbox'tan ana sayfaya dön
 document.getElementById('inbox-back-to-feed').addEventListener('click', () => {
     showScreen('main-app');
+    
+    // Eğer zamanlayıcı yoksa ve hala mesaj gönderilmemişse, zamanlayıcıyı başlat
+    if (!currentSession.messageTimeout && currentSession.currentMessageIndex < currentSession.messageQueue.length && currentSession.pendingMessages === 0) {
+        currentSession.messageTimeout = setTimeout(() => {
+            sendNextMessageNotification();
+        }, 10000); // 10 saniye bekle
+    }
 });
 
 // Akademisyen Girişi
@@ -669,9 +694,44 @@ function openSpecificDM(scenario) {
 
 // Geri butonları
 document.getElementById('back-to-inbox').addEventListener('click', () => {
-    // Inbox'a dön
+    // Inbox'a dön - mesaj tamamlandığında çağrılır
+    const messagesContainer = document.getElementById('dm-messages');
+    const scenario = currentSession.currentScenario;
+    
+    // Save conversation state if not already saved
+    if (scenario && messagesContainer) {
+        const allMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
+            text: msg.querySelector('.message-content').textContent,
+            sender: msg.classList.contains('sent') ? 'user' : scenario.sender,
+            time: msg.querySelector('.message-time').textContent
+        }));
+        
+        // Save as completed if not blocked
+        const messageHistory = loadMessageHistory(currentSession.participantName);
+        const senderHistory = messageHistory[scenario.sender];
+        if (!senderHistory || senderHistory.status !== 'blocked') {
+            saveConversationState(scenario.sender, allMessages, 'completed');
+        }
+    }
+    
+    // İndeksi artır ve inbox'a dön
+    currentSession.currentMessageIndex++;
     showScreen('inbox-screen');
     renderInboxList();
+    
+    // Check if we've completed all 5 messages
+    if (currentSession.currentMessageIndex >= 5 || currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
+        // Tüm mesajlar tamamlandı - 2 saniye sonra özet ekranı
+        setTimeout(() => {
+            showSummary();
+        }, 2000);
+    } else {
+        // 10 saniye sonra sonraki mesajı gönder
+        clearTimeout(currentSession.messageTimeout); // Önceki zamanlayıcıyı temizle
+        currentSession.messageTimeout = setTimeout(() => {
+            sendNextMessageNotification();
+        }, 10000); // 10 saniye bekle
+    }
 });
 
 // Mesaj gönder
@@ -836,16 +896,22 @@ document.getElementById('dm-send').addEventListener('click', () => {
                 sendConversationMessage();
             }, 1500);
         } else {
-            // Conversation ended - save state
+            // Conversation ended - save state and show back button hint
             const allMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
                 text: msg.querySelector('.message-content').textContent,
                 sender: msg.classList.contains('sent') ? 'user' : scenario.sender,
                 time: msg.querySelector('.message-time').textContent
             }));
             saveConversationState(scenario.sender, allMessages, 'completed');
+            
+            // Sohbet bitti - kullanıcı geri tuşuna basmalı
+            // Otomatik olarak 3 saniye sonra feed'e dön
+            setTimeout(() => {
+                returnToFeed();
+            }, 3000);
         }
     } else {
-        // Old format - save and end
+        // Old format - save and return to feed automatically
         const allMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
             text: msg.querySelector('.message-content').textContent,
             sender: msg.classList.contains('sent') ? 'user' : scenario.sender,
@@ -853,9 +919,12 @@ document.getElementById('dm-send').addEventListener('click', () => {
         }));
         
         saveConversationState(scenario.sender, allMessages, 'completed');
+        
+        // Otomatik olarak 3 saniye sonra feed'e dön
+        setTimeout(() => {
+            returnToFeed();
+        }, 3000);
     }
-    
-    // Sohbet tamamlandı - kullanıcı doğal olarak geri veya home tuşuyla dönecek
 });
 
 // Enter tuşu ile mesaj gönderme
@@ -877,15 +946,16 @@ function returnToFeed() {
         
         // Check if we've completed all 5 messages
         if (currentSession.currentMessageIndex >= 5 || currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
-            // Tüm mesajlar tamamlandı
+            // Tüm mesajlar tamamlandı - 2 saniye sonra özet ekranı
             setTimeout(() => {
                 showSummary();
             }, 2000);
         } else {
             // 10 saniye sonra sonraki mesajı gönder
+            clearTimeout(currentSession.messageTimeout); // Önceki zamanlayıcıyı temizle
             currentSession.messageTimeout = setTimeout(() => {
                 sendNextMessageNotification();
-            }, 10000);
+            }, 10000); // 10 saniye bekle
         }
     }
 }
@@ -893,7 +963,24 @@ function returnToFeed() {
 // Thank you modal'ı kapat ve akışa devam et
 document.getElementById('close-thank-you-modal').addEventListener('click', () => {
     document.getElementById('thank-you-modal').style.display = 'none';
-    // Kullanıcı doğal olarak geri veya home tuşuyla dönecek
+    
+    // Return to feed after closing thank you modal
+    currentSession.currentMessageIndex++;
+    showScreen('main-app');
+    
+    // Check if we've completed all 5 messages
+    if (currentSession.currentMessageIndex >= 5 || currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
+        // Tüm mesajlar tamamlandı - 2 saniye sonra özet ekranı
+        setTimeout(() => {
+            showSummary();
+        }, 2000);
+    } else {
+        // 10 saniye sonra sonraki mesajı gönder
+        clearTimeout(currentSession.messageTimeout); // Önceki zamanlayıcıyı temizle
+        currentSession.messageTimeout = setTimeout(() => {
+            sendNextMessageNotification();
+        }, 10000); // 10 saniye bekle
+    }
 });
 
 // Şikayet et butonu
@@ -951,6 +1038,8 @@ document.getElementById('block-btn').addEventListener('click', () => {
     
     // Teşekkür mesajını göster
     document.getElementById('thank-you-modal').style.display = 'flex';
+    
+    // Not: thank you modal'ın close butonu otomatik olarak timer'ı başlatacak
 });
 
 // Yanlış sıra ipucu göster (sadece doğru buton yanıp sönecek, metin YOK)
