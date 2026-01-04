@@ -440,9 +440,35 @@ document.getElementById('start-session').addEventListener('click', () => {
     // Navigasyon becerisini başlangıçta true yap
     currentSession.skills.navigation = true;
     
-    // Mesaj kuyruğunu hazırla
-    const scenarios = SCENARIOS[sessionType][bullyingType];
-    currentSession.messageQueue = scenarios;
+    // CRITICAL: Clear previous session data from localStorage
+    localStorage.removeItem('safestagram_current_session');
+    localStorage.removeItem('safestagram_users');
+    
+    // Mesaj kuyruğunu hazırla - EXACTLY 5 messages
+    const allScenarios = SCENARIOS[sessionType][bullyingType];
+    
+    // Separate cyberbullying and safe messages
+    const cyberbullyingMessages = allScenarios.filter(s => 
+        s.messages && s.messages.some(m => m.type === 'cyberbullying')
+    );
+    const safeMessages = allScenarios.filter(s => s.conversation);
+    
+    // Create queue: 3 cyberbullying + 2 safe = 5 total
+    currentSession.messageQueue = [];
+    
+    // Add 3 cyberbullying messages
+    for (let i = 0; i < Math.min(3, cyberbullyingMessages.length); i++) {
+        currentSession.messageQueue.push(cyberbullyingMessages[i]);
+    }
+    
+    // Add 2 safe messages
+    for (let i = 0; i < Math.min(2, safeMessages.length); i++) {
+        currentSession.messageQueue.push(safeMessages[i]);
+    }
+    
+    // Shuffle the queue to mix cyberbullying and safe messages
+    currentSession.messageQueue.sort(() => Math.random() - 0.5);
+    
     currentSession.currentMessageIndex = 0;
     
     showScreen('main-app');
@@ -456,8 +482,9 @@ document.getElementById('start-session').addEventListener('click', () => {
 
 // Mesaj bildirimi göster
 function sendNextMessageNotification() {
-    if (currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
-        // Tüm mesajlar tamamlandı
+    // Check if we've completed all 5 messages
+    if (currentSession.currentMessageIndex >= 5 || currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
+        // Tüm mesajlar tamamlandı - show summary
         setTimeout(() => {
             showSummary();
         }, 2000);
@@ -494,66 +521,68 @@ function renderInboxList() {
     // Load message history for this participant
     const messageHistory = loadMessageHistory(currentSession.participantName);
     
-    // Her mesaj için bir inbox item oluştur
+    // Her mesaj için bir inbox item oluştur - but only show up to current index
     currentSession.messageQueue.forEach((scenario, index) => {
-        const isUnread = index >= currentSession.currentMessageIndex && currentSession.pendingMessages > 0;
+        // Only show messages up to current index (messages that have been sent)
+        if (index > currentSession.currentMessageIndex) {
+            return; // Skip future messages
+        }
+        
+        const isUnread = index === currentSession.currentMessageIndex && currentSession.pendingMessages > 0;
         const isPast = index < currentSession.currentMessageIndex;
         
         // Check if this sender is blocked
         const senderHistory = messageHistory[scenario.sender];
         const isBlocked = senderHistory && senderHistory.status === 'blocked';
         
-        // Sadece mevcut veya geçmiş mesajları göster
-        if (index <= currentSession.currentMessageIndex || isPast) {
-            const item = document.createElement('div');
-            item.className = `inbox-item ${isUnread ? 'unread' : ''} ${isBlocked ? 'blocked' : ''}`;
-            item.dataset.index = index;
-            
-            // Mesaj önizlemesi için ilk mesajı al
-            let previewText = '';
-            if (isBlocked) {
-                previewText = '🔴 ENGELLENDİ';
-            } else if (scenario.conversation && scenario.conversation.length > 0) {
-                // New conversation format
-                previewText = scenario.conversation[0].incoming || '';
-                // Uzun mesajları kısalt
-                if (previewText.length > 40) {
-                    previewText = previewText.substring(0, 40) + '...';
-                }
-            } else if (scenario.messages && scenario.messages.length > 0) {
-                // Old messages format
-                previewText = scenario.messages[0].text || '';
-                // Uzun mesajları kısalt
-                if (previewText.length > 40) {
-                    previewText = previewText.substring(0, 40) + '...';
-                }
+        const item = document.createElement('div');
+        item.className = `inbox-item ${isUnread ? 'unread' : ''} ${isBlocked ? 'blocked' : ''}`;
+        item.dataset.index = index;
+        
+        // Mesaj önizlemesi için ilk mesajı al
+        let previewText = '';
+        if (isBlocked) {
+            previewText = '🔴 ENGELLENDİ';
+        } else if (scenario.conversation && scenario.conversation.length > 0) {
+            // New conversation format
+            previewText = scenario.conversation[0].incoming || '';
+            // Uzun mesajları kısalt
+            if (previewText.length > 40) {
+                previewText = previewText.substring(0, 40) + '...';
             }
-            
-            item.innerHTML = `
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}" alt="${scenario.sender}">
-                <div class="inbox-item-content">
-                    <div class="inbox-item-header">
-                        <span class="inbox-sender">${scenario.sender}${isBlocked ? ' <span class="blocked-label">🔴 ENGELLENDİ</span>' : ''}</span>
-                        <span class="inbox-time">Şimdi</span>
-                    </div>
-                    <div class="inbox-message-preview ${isBlocked ? 'blocked-preview' : ''}">
-                        ${isUnread && !isBlocked ? '<span class="unread-dot"></span>' : ''}
-                        ${previewText}
-                    </div>
-                </div>
-            `;
-            
-            // Tıklama eventi
-            item.addEventListener('click', () => {
-                if (isBlocked) {
-                    alert('Bu kullanıcı engellenmiştir.');
-                } else {
-                    openConversationFromInbox(index);
-                }
-            });
-            
-            inboxList.appendChild(item);
+        } else if (scenario.messages && scenario.messages.length > 0) {
+            // Old messages format
+            previewText = scenario.messages[0].text || '';
+            // Uzun mesajları kısalt
+            if (previewText.length > 40) {
+                previewText = previewText.substring(0, 40) + '...';
+            }
         }
+        
+        item.innerHTML = `
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}" alt="${scenario.sender}">
+            <div class="inbox-item-content">
+                <div class="inbox-item-header">
+                    <span class="inbox-sender">${scenario.sender}${isBlocked ? ' <span class="blocked-label">🔴 ENGELLENDİ</span>' : ''}</span>
+                    <span class="inbox-time">Şimdi</span>
+                </div>
+                <div class="inbox-message-preview ${isBlocked ? 'blocked-preview' : ''}">
+                    ${isUnread && !isBlocked ? '<span class="unread-dot"></span>' : ''}
+                    ${previewText}
+                </div>
+            </div>
+        `;
+        
+        // Tıklama eventi
+        item.addEventListener('click', () => {
+            if (isBlocked) {
+                alert('Bu kullanıcı engellenmiştir.');
+            } else {
+                openConversationFromInbox(index);
+            }
+        });
+        
+        inboxList.appendChild(item);
     });
 }
 
@@ -846,16 +875,17 @@ function returnToFeed() {
         // Mesaj indeksini artır
         currentSession.currentMessageIndex++;
         
-        // 10 saniye sonra sonraki mesajı gönder
-        if (currentSession.currentMessageIndex < currentSession.messageQueue.length) {
-            currentSession.messageTimeout = setTimeout(() => {
-                sendNextMessageNotification();
-            }, 10000);
-        } else {
+        // Check if we've completed all 5 messages
+        if (currentSession.currentMessageIndex >= 5 || currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
             // Tüm mesajlar tamamlandı
             setTimeout(() => {
                 showSummary();
             }, 2000);
+        } else {
+            // 10 saniye sonra sonraki mesajı gönder
+            currentSession.messageTimeout = setTimeout(() => {
+                sendNextMessageNotification();
+            }, 10000);
         }
     }
 }
