@@ -39,24 +39,58 @@ body {
 
 .safestagram-logo-container {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.safestagram-logo-container .fa-instagram {
-    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+.safestagram-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(45deg, #405DE6, #5851DB, #833AB4, #C13584, #E1306C, #FD1D1D, #F77737, #FCAF45);
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     animation: pulse 2s infinite;
 }
 
-.safestagram-logo-container .shield-icon {
+.camera-outline {
+    width: 60px;
+    height: 60px;
+    border: 4px solid white;
+    border-radius: 16px;
+    position: relative;
+}
+
+.camera-outline::before {
+    content: "";
     position: absolute;
-    top: -10px;
-    right: -15px;
+    width: 30px;
+    height: 30px;
+    border: 4px solid white;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.camera-outline::after {
+    content: "🛡️";
+    position: absolute;
+    bottom: -20px;
+    right: -20px;
     font-size: 32px;
-    color: #4CAF50;
-    animation: pulse 2s infinite;
+    background: white;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .safestagram-title {
@@ -271,15 +305,6 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-}
-
-.logo-container .shield-overlay {
-    position: absolute;
-    left: 18px;
-    top: -2px;
-    font-size: 14px;
-    color: #4CAF50;
-    filter: drop-shadow(0 0 2px white);
 }
 
 .logo-text {
