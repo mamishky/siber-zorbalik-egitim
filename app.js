@@ -29,30 +29,54 @@ let currentSession = {
     pendingMessages: 0
 };
 
-// Feed için gönderi verileri
+// Feed için gönderi verileri - Çocuk dostu içerikler
 const POSTS = [
-    { username: "ali.yilmaz", avatar: "aliyilmaz", image: "https://picsum.photos/600/600?random=1", caption: "Bugün harika bir gün! 🌟", likes: 245 },
-    { username: "ayse.demir", avatar: "aysedemir", image: "https://picsum.photos/600/600?random=2", caption: "Doğa yürüyüşü çok keyifliydi 🌲", likes: 189 },
-    { username: "mehmet.kaya", avatar: "mehmetkaya", image: "https://picsum.photos/600/600?random=3", caption: "Yeni hobim fotoğrafçılık 📸", likes: 332 },
-    { username: "zeynep.ozturk", avatar: "zeynepozturk", image: "https://picsum.photos/600/600?random=4", caption: "Güneşli bir gün ☀️", likes: 421 },
-    { username: "cem.yildiz", avatar: "cemyildiz", image: "https://picsum.photos/600/600?random=5", caption: "Spor sonrası kendimi harika hissediyorum 💪", likes: 276 },
-    { username: "selin.yildirim", avatar: "selinyildirim", image: "https://picsum.photos/600/600?random=6", caption: "Kahve molası ☕️", likes: 198 },
-    { username: "can.yilmaz", avatar: "canyilmaz", image: "https://picsum.photos/600/600?random=7", caption: "Yeni kitabımı okuyorum 📚", likes: 145 },
-    { username: "gizem.sen", avatar: "gizemsen", image: "https://picsum.photos/600/600?random=8", caption: "Güzel bir akşam yemeği 🍝", likes: 389 },
-    { username: "tarik.barkan", avatar: "tarikbarkan", image: "https://picsum.photos/600/600?random=9", caption: "Konserde muhteşem bir gece 🎵", likes: 512 },
-    { username: "aleyna.tilkici", avatar: "aleynatilkici", image: "https://picsum.photos/600/600?random=10", caption: "Sanat galerisinde 🎨", likes: 298 },
-    { username: "berk.ozturk", avatar: "berkozturk", image: "https://picsum.photos/600/600?random=11", caption: "Bisiklet turu harika geçti 🚴", likes: 223 },
-    { username: "nadise.guzel", avatar: "nadiseguzel", image: "https://picsum.photos/600/600?random=12", caption: "Günbatımı manzarası 🌅", likes: 467 },
-    { username: "barkan.tas", avatar: "barkantas", image: "https://picsum.photos/600/600?random=13", caption: "Yeni projem heyecan verici! 💻", likes: 178 },
-    { username: "hadide.kaya", avatar: "hadidekaya", image: "https://picsum.photos/600/600?random=14", caption: "Müzik yapmak ruhu dinlendiriyor 🎸", likes: 345 },
-    { username: "murat.demirtas", avatar: "muratdemirtas", image: "https://picsum.photos/600/600?random=15", caption: "Parkta güzel bir gün 🌳", likes: 201 },
-    { username: "aleyda.tilki", avatar: "aleydatilki", image: "https://picsum.photos/600/600?random=16", caption: "Yeni elbisem çok güzel 👗", likes: 534 },
-    { username: "arda.turan", avatar: "ardaturan", image: "https://picsum.photos/600/600?random=17", caption: "Futbol oynamayı çok seviyorum ⚽️", likes: 412 },
-    { username: "ece.demir", avatar: "ecedemir", image: "https://picsum.photos/600/600?random=18", caption: "Çiçekler açmış 🌸", likes: 267 },
-    { username: "deniz.akar", avatar: "denizakar", image: "https://picsum.photos/600/600?random=19", caption: "Deniz kenarında huzur 🌊", likes: 398 },
-    { username: "burak.ozkan", avatar: "burakozkan", image: "https://picsum.photos/600/600?random=20", caption: "Arkadaşlarla harika bir gün 🎉", likes: 289 },
-    { username: "merve.karatas", avatar: "mervekaratas", image: "https://picsum.photos/600/600?random=21", caption: "Yeni pastam çok lezzetli 🍰", likes: 356 },
-    { username: "tolga.aydin", avatar: "tolgaaydin", image: "https://picsum.photos/600/600?random=22", caption: "Dağ yürüyüşü manzarası 🏔️", likes: 423 }
+    // Hayvanlar
+    { username: "sevimli.kedicik", avatar: "sevimlikedicik", image: "https://picsum.photos/seed/cat1/600/600", caption: "Minnoş kedim uyuyor 🐱💤", likes: 342 },
+    { username: "kopek.dostu", avatar: "kopekdostu", image: "https://picsum.photos/seed/dog1/600/600", caption: "Yavru köpeğim çok oyuncu! 🐕🎾", likes: 521 },
+    { username: "tavsan.cicek", avatar: "tavsancicek", image: "https://picsum.photos/seed/rabbit1/600/600", caption: "Tavşanım havuç yiyor 🐰🥕", likes: 398 },
+    { username: "kelebek.bahcesi", avatar: "kelebekbahcesi", image: "https://picsum.photos/seed/butterfly1/600/600", caption: "Renkli kelebekler çok güzel! 🦋✨", likes: 467 },
+    
+    // Renkler ve Eğlence
+    { username: "gokkusagi.dunyasi", avatar: "gokkusagidunyasi", image: "https://picsum.photos/seed/rainbow1/600/600", caption: "Gökkuşağı çok renkli 🌈☀️", likes: 612 },
+    { username: "balon.partisi", avatar: "balonpartisi", image: "https://picsum.photos/seed/balloons1/600/600", caption: "Renkli balonlarla parti! 🎈🎉", likes: 489 },
+    { username: "pasta.dunyasi", avatar: "pastadunyasi", image: "https://picsum.photos/seed/cake1/600/600", caption: "Doğum günü pastası hazır 🎂🎊", likes: 576 },
+    { username: "dondurma.keyfi", avatar: "dondurmakeyfi", image: "https://picsum.photos/seed/icecream1/600/600", caption: "Çikolatalı dondurma en sevdiğim! 🍦😋", likes: 634 },
+    
+    // Oyunlar ve Sporlar
+    { username: "oyun.zamani", avatar: "oyunzamani", image: "https://picsum.photos/seed/game1/600/600", caption: "Yeni oyunum çok eğlenceli 🎮🕹️", likes: 445 },
+    { username: "futbol.yildizi", avatar: "futbolyildizi", image: "https://picsum.photos/seed/soccer1/600/600", caption: "Futbol oynamak çok keyifli! ⚽🏆", likes: 523 },
+    { username: "basketbol.asa", avatar: "basketbolasa", image: "https://picsum.photos/seed/basketball1/600/600", caption: "Basket atışı yaptım! 🏀🎯", likes: 412 },
+    
+    // Sanat ve Müzik
+    { username: "renk.paleti", avatar: "renkpaleti", image: "https://picsum.photos/seed/paint1/600/600", caption: "Resim yapmayı seviyorum 🎨🖌️", likes: 387 },
+    { username: "muzik.dunyasi", avatar: "muzikdunyasi", image: "https://picsum.photos/seed/music1/600/600", caption: "Gitar çalmayı öğreniyorum 🎵🎸", likes: 498 },
+    
+    // Doğa ve Dışarı
+    { username: "plaj.keyfi", avatar: "plajkeyfi", image: "https://picsum.photos/seed/beach1/600/600", caption: "Deniz ve kumda oynamak 🏖️🌊", likes: 589 },
+    { username: "lunapark.macerasi", avatar: "lunaparkmacerasi", image: "https://picsum.photos/seed/amusement1/600/600", caption: "Lunapark çok eğlenceli! 🎡🎢", likes: 671 },
+    { username: "sirk.gozu", avatar: "sirkgozu", image: "https://picsum.photos/seed/circus1/600/600", caption: "Sirkte palyaçolar gördüm 🎪🤡", likes: 534 },
+    { username: "hayvanat.bahcesi", avatar: "hayvanatbahcesi", image: "https://picsum.photos/seed/zoo1/600/600", caption: "Aslan görmeye gittik 🦁👀", likes: 612 },
+    { username: "akvaryum.balik", avatar: "akvaryumbalik", image: "https://picsum.photos/seed/fish1/600/600", caption: "Renkli balıklar yüzüyor 🐠🐟", likes: 456 },
+    { username: "cicek.bahcesi", avatar: "cicekbahcesi", image: "https://picsum.photos/seed/flowers1/600/600", caption: "Renkli çiçekler açmış 🌺🌸", likes: 423 },
+    { username: "orman.yuruyusu", avatar: "ormanyuruyusu", image: "https://picsum.photos/seed/forest1/600/600", caption: "Ormanda yürüyüş yaptık 🌳🌲", likes: 389 },
+    
+    // Daha fazla çeşitlilik
+    { username: "kedi.dostum", avatar: "kedidostum", image: "https://picsum.photos/seed/cat2/600/600", caption: "Kedim çok sevimli 🐱❤️", likes: 445 },
+    { username: "kopek.sevgisi", avatar: "kopeksevgisi", image: "https://picsum.photos/seed/dog2/600/600", caption: "Köpeklerle oynamak harika 🐕💕", likes: 512 },
+    { username: "pamuk.tavsan", avatar: "pamuktavsan", image: "https://picsum.photos/seed/rabbit2/600/600", caption: "Pamuk gibi beyaz tavşan 🐰☁️", likes: 367 },
+    { username: "cicek.kelebek", avatar: "cicekkelebek", image: "https://picsum.photos/seed/butterfly2/600/600", caption: "Kelebekler çiçeklerde 🦋🌼", likes: 421 },
+    { username: "rengarenk.dunya", avatar: "rengarenkdunya", image: "https://picsum.photos/seed/rainbow2/600/600", caption: "Her yer renkli ve güzel 🌈🎨", likes: 498 },
+    { username: "parti.zamani", avatar: "partizamani", image: "https://picsum.photos/seed/party1/600/600", caption: "Doğum günü partisindeyiz 🎈🎁", likes: 567 },
+    { username: "tatli.pasta", avatar: "tatlipasta", image: "https://picsum.photos/seed/cake2/600/600", caption: "Çilekli pasta çok lezzetli 🍰🍓", likes: 489 },
+    { username: "meyveli.dondurma", avatar: "meyvelidondurma", image: "https://picsum.photos/seed/icecream2/600/600", caption: "Çilek ve vanilyalı dondurma 🍦🍨", likes: 523 },
+    { username: "video.oyunlari", avatar: "videooyunlari", image: "https://picsum.photos/seed/game2/600/600", caption: "Arkadaşlarla oyun oynuyoruz 🎮👾", likes: 478 },
+    { username: "gol.krali", avatar: "golkrali", image: "https://picsum.photos/seed/soccer2/600/600", caption: "Bugün gol attım! ⚽🎉", likes: 534 },
+    { username: "potayi.buldum", avatar: "potayibuldum", image: "https://picsum.photos/seed/basketball2/600/600", caption: "Üç sayı attım 🏀🔥", likes: 456 },
+    { username: "kucuk.ressam", avatar: "kucukressam", image: "https://picsum.photos/seed/paint2/600/600", caption: "Renkli resim yaptım 🎨🖼️", likes: 398 },
+    { username: "piyano.dersi", avatar: "pianodersi", image: "https://picsum.photos/seed/music2/600/600", caption: "Piyano çalmayı öğreniyorum 🎹🎶", likes: 467 },
+    { username: "kumda.oyun", avatar: "kumdaoyun", image: "https://picsum.photos/seed/beach2/600/600", caption: "Kumdan kale yaptık 🏖️🏰", likes: 512 },
+    { username: "eglence.park", avatar: "eglencepark", image: "https://picsum.photos/seed/amusement2/600/600", caption: "Dönme dolap çok yüksek! 🎡😄", likes: 589 }
 ];
 
 // Ekran geçişleri
@@ -209,20 +233,22 @@ function showScreen(screenId) {
 
 // Hoşgeldiniz Ekranı
 document.getElementById('start-session').addEventListener('click', () => {
-    const id = document.getElementById('participant-id').value.trim();
     const name = document.getElementById('participant-name').value.trim();
     const age = document.getElementById('participant-age').value;
     const sessionType = document.getElementById('session-type').value;
+    const bullyingType = document.getElementById('bullying-type').value;
     
-    if (!id || !name || !age) {
+    if (!name || !age || !sessionType || !bullyingType) {
         alert('Lütfen tüm alanları doldurun!');
         return;
     }
     
-    currentSession.participantId = id;
+    // Generate a unique participant ID based on timestamp
+    currentSession.participantId = `P${Date.now()}`;
     currentSession.participantName = name;
     currentSession.participantAge = parseInt(age);
     currentSession.sessionType = sessionType;
+    currentSession.currentBullyingType = bullyingType;
     currentSession.startTime = new Date();
     
     // Navigasyon becerisini başlangıçta true yap
@@ -267,7 +293,7 @@ document.getElementById('admin-submit').addEventListener('click', () => {
     const password = document.getElementById('admin-password').value;
     // Not: Bu şifre demo/tez amaçlı basit bir güvenlik katmanıdır
     // Gerçek üretim ortamında sunucu taraflı kimlik doğrulama kullanılmalıdır
-    if (password === 'akademisyen2024') {
+    if (password === '06112002') {
         showScreen('admin-panel');
         loadAdminData();
     } else {
@@ -281,29 +307,70 @@ document.getElementById('logout').addEventListener('click', () => {
 
 // İlk senaryoyu başlat
 function startFirstScenario() {
-    const bullyingTypes = BULLYING_TYPES;
-    currentSession.currentBullyingType = bullyingTypes[0];
-    currentSession.currentScenario = SCENARIOS[currentSession.sessionType][currentSession.currentBullyingType][0];
-    currentSession.messageIndex = 0;
+    // Get all scenarios for the selected bullying type
+    const scenarios = SCENARIOS[currentSession.sessionType][currentSession.currentBullyingType];
     
-    openDMScreen();
+    // Open message inbox
+    openMessageInbox(scenarios);
 }
 
-// DM ekranını aç
-function openDMScreen() {
-    const scenario = currentSession.currentScenario;
+// Mesaj inbox'ı aç
+function openMessageInbox(scenarios) {
+    showScreen('dm-screen');
+    
+    // Clear DM screen
+    document.getElementById('dm-messages').innerHTML = '';
+    document.getElementById('dm-input-container').style.display = 'none';
+    document.getElementById('action-buttons').style.display = 'none';
+    
+    // Show inbox header
+    document.getElementById('dm-username').textContent = 'Mesajlar';
+    document.getElementById('dm-avatar').src = 'https://api.dicebear.com/7.x/avataaars/svg?seed=inbox';
+    
+    // Create message list
+    const messagesContainer = document.getElementById('dm-messages');
+    messagesContainer.innerHTML = '<div class="inbox-list"></div>';
+    const inboxList = messagesContainer.querySelector('.inbox-list');
+    
+    scenarios.forEach((scenario, index) => {
+        const messagePreview = document.createElement('div');
+        messagePreview.className = 'inbox-item unread';
+        messagePreview.innerHTML = `
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}" alt="${scenario.sender}">
+            <div class="inbox-item-content">
+                <div class="inbox-item-header">
+                    <span class="inbox-sender">${scenario.sender}</span>
+                    <span class="unread-indicator">●</span>
+                </div>
+                <div class="inbox-message-preview">${scenario.messages[0].text.substring(0, 50)}...</div>
+            </div>
+        `;
+        
+        messagePreview.addEventListener('click', () => {
+            currentSession.currentScenarioIndex = index;
+            openSpecificDM(scenario, index, scenarios);
+        });
+        
+        inboxList.appendChild(messagePreview);
+    });
+    
+    // Mark reading skill as true
+    currentSession.skills.reading = true;
+}
+
+// Belirli bir DM'i aç
+function openSpecificDM(scenario, scenarioIndex, allScenarios) {
+    currentSession.currentScenario = scenario;
+    currentSession.messageIndex = 0;
+    currentSession.allScenarios = allScenarios;
+    currentSession.currentScenarioIndex = scenarioIndex;
     
     document.getElementById('dm-username').textContent = scenario.sender;
     document.getElementById('dm-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}`;
     
     document.getElementById('dm-messages').innerHTML = '';
     
-    showScreen('dm-screen');
-    
-    // Okuma becerisini true yap
-    currentSession.skills.reading = true;
-    
-    // İlk mesajı gönder
+    // Send the message after a delay
     setTimeout(() => {
         sendMessage();
     }, 1000);
@@ -311,7 +378,12 @@ function openDMScreen() {
 
 // Geri butonları
 document.getElementById('back-to-feed').addEventListener('click', () => {
-    showScreen('main-app');
+    // If we're in a specific DM, go back to inbox
+    if (currentSession.allScenarios) {
+        openMessageInbox(currentSession.allScenarios);
+    } else {
+        showScreen('main-app');
+    }
 });
 
 // Mesaj gönder
@@ -320,8 +392,8 @@ function sendMessage() {
     const message = scenario.messages[currentSession.messageIndex];
     
     if (!message) {
-        // Senaryo bitti, sonrakine geç
-        nextScenario();
+        // Bu kişiden daha fazla mesaj yok, sonraki kişiye geç
+        nextPerson();
         return;
     }
     
@@ -359,7 +431,7 @@ function sendMessage() {
         document.getElementById('report-btn').classList.remove('blink');
         document.getElementById('block-btn').classList.remove('blink');
         
-        // 5 saniye sonra ipucu göster
+        // 5 saniye sonra ipucu göster (sadece buton yanıp sönsün, metin YOK)
         currentSession.hintTimeout = setTimeout(() => {
             showHint();
         }, 5000);
@@ -398,12 +470,32 @@ document.getElementById('dm-send').addEventListener('click', () => {
     
     currentSession.stats.correct++;
     
-    // 10 saniye sonra sonraki mesaj
-    currentSession.messageIndex++;
-    setTimeout(() => {
-        sendMessage();
-    }, 10000);
+    // Sonraki kişiye geç
+    nextPerson();
 });
+
+// Sonraki kişiye geç
+function nextPerson() {
+    if (!currentSession.allScenarios) {
+        // Eğer allScenarios yoksa, tüm session bitti
+        showSummary();
+        return;
+    }
+    
+    const nextIndex = currentSession.currentScenarioIndex + 1;
+    
+    if (nextIndex < currentSession.allScenarios.length) {
+        // Sonraki kişiye geç
+        setTimeout(() => {
+            openMessageInbox(currentSession.allScenarios);
+        }, 2000);
+    } else {
+        // Bu zorbalık türü bitti, oturum tamamlandı
+        setTimeout(() => {
+            showSummary();
+        }, 2000);
+    }
+}
 
 // Şikayet et butonu
 document.getElementById('report-btn').addEventListener('click', () => {
@@ -411,12 +503,10 @@ document.getElementById('report-btn').addEventListener('click', () => {
         clearTimeout(currentSession.hintTimeout);
     }
     
-    const hintUsed = document.getElementById('hint-overlay').style.display === 'flex';
-    document.getElementById('hint-overlay').style.display = 'none';
+    const hintUsed = document.getElementById('report-btn').classList.contains('blink');
     
-    // Önce engelle butonuna tıkladıysa uyarı göster
+    // Önce engelle butonuna tıkladıysa sadece doğru butonu yanıp sönsün
     if (currentSession.blockClicked && !currentSession.reportClicked) {
-        document.getElementById('hint-overlay').style.display = 'none';
         showWrongOrderHint('report');
         return;
     }
@@ -432,7 +522,7 @@ document.getElementById('report-btn').addEventListener('click', () => {
     
     currentSession.stats.correct++;
     
-    // İpucu göster: Şimdi engelle
+    // Şimdi engelle butonunu yanıp söndür
     showNextStepHint('block');
 });
 
@@ -442,11 +532,10 @@ document.getElementById('block-btn').addEventListener('click', () => {
         clearTimeout(currentSession.hintTimeout);
     }
     
-    const hintUsed = document.getElementById('hint-overlay').style.display === 'flex';
-    document.getElementById('hint-overlay').style.display = 'none';
+    const hintUsed = document.getElementById('block-btn').classList.contains('blink');
     
     if (!currentSession.reportClicked) {
-        // Önce şikayet etmeden engelleyemez - yanlış sıra
+        // Önce şikayet etmeden engelleyemez - sadece doğru butonu yanıp sönsün
         showWrongOrderHint('block');
         return;
     }
@@ -462,43 +551,31 @@ document.getElementById('block-btn').addEventListener('click', () => {
     
     currentSession.stats.correct++;
     
-    // Mesaj tamamlandı, sonraki mesaja geç
-    currentSession.messageIndex++;
-    setTimeout(() => {
-        sendMessage();
-    }, 2000);
+    // Mesaj tamamlandı, sonraki kişiye geç
+    nextPerson();
 });
 
-// Yanlış sıra ipucu göster
+// Yanlış sıra ipucu göster (sadece doğru buton yanıp sönecek, metin YOK)
 function showWrongOrderHint(wrongButton) {
-    let hintText = '';
     let blinkButton = null;
     
     if (wrongButton === 'block') {
-        hintText = 'Önce şikayet etmelisin! ŞİKAYET ET butonuna bas.';
         blinkButton = document.getElementById('report-btn');
     } else if (wrongButton === 'report') {
-        hintText = 'Zaten şikayet ettin! Şimdi ENGELLE butonuna bas.';
         blinkButton = document.getElementById('block-btn');
     }
     
-    document.getElementById('hint-text').textContent = hintText;
-    document.getElementById('hint-overlay').style.display = 'flex';
-    
     if (blinkButton) {
         blinkButton.classList.add('blink');
-    }
-    
-    // BUTONLAR TIKLANABİLİR KALIYOR - ipucu 3 saniye sonra kaybolacak
-    currentSession.hintTimeout = setTimeout(() => {
-        document.getElementById('hint-overlay').style.display = 'none';
-        if (blinkButton) {
+        
+        // 3 saniye sonra yanıp sönmeyi durdur
+        setTimeout(() => {
             blinkButton.classList.remove('blink');
-        }
-    }, 3000);
+        }, 3000);
+    }
 }
 
-// İpucu göster
+// İpucu göster (sadece butonlar yanıp sönsün, metin YOK)
 function showHint() {
     const scenario = currentSession.currentScenario;
     const message = scenario.messages[currentSession.messageIndex];
@@ -507,51 +584,36 @@ function showHint() {
     
     currentSession.stats.hints++;
     
-    let hintText = '';
     let blinkButton = null;
     
     if (!currentSession.reportClicked) {
-        hintText = 'Bu mesaj siber zorbalık içeriyor! İlk olarak ŞİKAYET ET butonuna bas.';
         blinkButton = document.getElementById('report-btn');
     } else if (!currentSession.blockClicked) {
-        hintText = 'Şimdi bu kişiyi ENGELLE butonuna basarak engelle.';
         blinkButton = document.getElementById('block-btn');
     }
-    
-    document.getElementById('hint-text').textContent = hintText;
-    document.getElementById('hint-overlay').style.display = 'flex';
     
     if (blinkButton) {
         blinkButton.classList.add('blink');
     }
-    
-    // İpucu gösterildiğinde BUTONLAR TIKLANABİLİR KALIYOR
 }
 
-// Sonraki adım ipucu
+// Sonraki adım ipucu (sadece buton yanıp sönecek, metin YOK)
 function showNextStepHint(step) {
     setTimeout(() => {
-        let hintText = '';
         let blinkButton = null;
         
         if (step === 'block') {
-            hintText = 'Şimdi bu kişiyi ENGELLE butonuna basarak engelle.';
             blinkButton = document.getElementById('block-btn');
         }
         
-        document.getElementById('hint-text').textContent = hintText;
-        document.getElementById('hint-overlay').style.display = 'flex';
-        
         if (blinkButton) {
             blinkButton.classList.add('blink');
-        }
-        
-        currentSession.hintTimeout = setTimeout(() => {
-            document.getElementById('hint-overlay').style.display = 'none';
-            if (blinkButton) {
+            
+            // 5 saniye sonra yanıp sönmeyi durdur
+            setTimeout(() => {
                 blinkButton.classList.remove('blink');
-            }
-        }, 5000);
+            }, 5000);
+        }
     }, 2000);
 }
 
@@ -579,25 +641,6 @@ function saveMessageData(messageType, action, reactionTime, hintUsed, correct) {
     const allData = JSON.parse(localStorage.getItem('siberguven_data') || '[]');
     allData.push(data);
     localStorage.setItem('siberguven_data', JSON.stringify(allData));
-}
-
-// Sonraki senaryoya geç
-function nextScenario() {
-    const bullyingTypes = BULLYING_TYPES;
-    const currentTypeIndex = bullyingTypes.indexOf(currentSession.currentBullyingType);
-    
-    if (currentTypeIndex < bullyingTypes.length - 1) {
-        // Sonraki zorbalık türüne geç
-        currentSession.currentBullyingType = bullyingTypes[currentTypeIndex + 1];
-        currentSession.currentScenario = SCENARIOS[currentSession.sessionType][currentSession.currentBullyingType][0];
-        currentSession.messageIndex = 0;
-        
-        // Yeni DM ekranını başlat
-        openDMScreen();
-    } else {
-        // Tüm senaryolar bitti - özet ekranını göster
-        showSummary();
-    }
 }
 
 // Özet ekranını göster

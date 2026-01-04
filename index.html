@@ -18,17 +18,28 @@
             <p class="subtitle">Siber Zorbalık Farkındalık Eğitimi</p>
             
             <div class="welcome-form">
-                <input type="text" id="participant-id" placeholder="Katılımcı ID" required>
                 <input type="text" id="participant-name" placeholder="Adınız" required>
                 <input type="number" id="participant-age" placeholder="Yaşınız" min="1" max="99" required>
                 
                 <div class="session-select">
                     <label>Oturum Türü:</label>
                     <select id="session-type">
-                        <option value="baslama">Başlama Düzeyi (Ön-Test)</option>
+                        <option value="baslama">Başlama Düzeyi</option>
                         <option value="uygulama">Uygulama</option>
-                        <option value="son-test">Son-Test</option>
-                        <option value="genelleme">Genelleme</option>
+                        <option value="izleme-2">İzleme (2. Hafta)</option>
+                        <option value="izleme-4">İzleme (4. Hafta)</option>
+                        <option value="izleme-8">İzleme (8. Hafta)</option>
+                    </select>
+                </div>
+                
+                <div class="session-select">
+                    <label>Zorbalık Türü:</label>
+                    <select id="bullying-type">
+                        <option value="sozel">Sözel/Psikolojik Saldırı</option>
+                        <option value="dislanma">Sosyal Dışlanma</option>
+                        <option value="tehdit">Tehdit ve Şantaj</option>
+                        <option value="iftira">Yanlış Bilgi/İftira</option>
+                        <option value="kimlik">Kimlik Taklidi</option>
                     </select>
                 </div>
                 
@@ -65,8 +76,9 @@
                 <option value="">Tüm Oturumlar</option>
                 <option value="baslama">Başlama Düzeyi</option>
                 <option value="uygulama">Uygulama</option>
-                <option value="son-test">Son-Test</option>
-                <option value="genelleme">Genelleme</option>
+                <option value="izleme-2">İzleme (2. Hafta)</option>
+                <option value="izleme-4">İzleme (4. Hafta)</option>
+                <option value="izleme-8">İzleme (8. Hafta)</option>
             </select>
             <select id="filter-type">
                 <option value="">Tüm Zorbalık Türleri</option>
