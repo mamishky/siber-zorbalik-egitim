@@ -486,9 +486,20 @@ function sendMessage() {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
     
     if (message.type === 'safe') {
-        // Güvenli mesaj - metin cevabı bekleniyor
-        document.getElementById('dm-input-container').style.display = 'flex';
-        document.getElementById('action-buttons').style.display = 'none';
+        // Güvenli mesaj - eğer birden fazla mesaj varsa otomatik olarak devam et
+        const remainingSafeMessages = scenario.messages.slice(currentSession.messageIndex + 1).filter(m => m.type === 'safe');
+        
+        if (remainingSafeMessages.length > 0) {
+            // Otomatik olarak sonraki mesajı gönder
+            setTimeout(() => {
+                currentSession.messageIndex++;
+                sendMessage();
+            }, 2000);
+        } else {
+            // Son güvenli mesaj - metin cevabı bekleniyor
+            document.getElementById('dm-input-container').style.display = 'flex';
+            document.getElementById('action-buttons').style.display = 'none';
+        }
     } else {
         // Siber zorbalık mesajı - aksiyon butonları
         document.getElementById('dm-input-container').style.display = 'none';
@@ -545,37 +556,7 @@ document.getElementById('dm-send').addEventListener('click', () => {
     // Input alanını gizle
     document.getElementById('dm-input-container').style.display = 'none';
     
-    // Rastgele kapanış mesajı gönder
-    setTimeout(() => {
-        const closingMessages = [
-            "Tamam anlaştık! Görüşürüz 👋",
-            "Harika! Sonra konuşuruz 😊",
-            "Süper! Görüşmek üzere ✌️",
-            "Oldu! Sonra yazışırız 🙌",
-            "Tamamdır! Hoşça kal 👋",
-            "İyi günler! Görüşürüz 😊",
-            "Harika, konuştuğumuz için teşekkürler! 🙏",
-            "Tamam o zaman, hadi görüşürüz! 👋"
-        ];
-        const closingMessage = closingMessages[Math.floor(Math.random() * closingMessages.length)];
-        const scenario = currentSession.currentScenario;
-        
-        const closingDiv = document.createElement('div');
-        closingDiv.className = 'message';
-        closingDiv.innerHTML = `
-            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}" alt="Avatar" class="message-avatar">
-            <div>
-                <div class="message-content">${closingMessage}</div>
-                <div class="message-time">${new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</div>
-            </div>
-        `;
-        
-        messagesContainer.appendChild(closingDiv);
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        
-        // Kullanıcı doğal olarak geri tuşuna veya home'a basacak
-        // "Ana Sayfaya Dön" butonu kaldırıldı
-    }, 1000);
+    // Sohbet tamamlandı - kullanıcı doğal olarak geri veya home tuşuyla dönecek
 });
 
 // Enter tuşu ile mesaj gönderme
