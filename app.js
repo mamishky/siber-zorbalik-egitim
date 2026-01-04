@@ -8,6 +8,7 @@ let currentSession = {
     currentBullyingType: null,
     currentScenario: null,
     messageIndex: 0,
+    conversationIndex: 0,
     sessionData: [],
     skills: {
         navigation: false,
@@ -512,7 +513,15 @@ function renderInboxList() {
             let previewText = '';
             if (isBlocked) {
                 previewText = '🔴 ENGELLENDİ';
+            } else if (scenario.conversation && scenario.conversation.length > 0) {
+                // New conversation format
+                previewText = scenario.conversation[0].incoming || '';
+                // Uzun mesajları kısalt
+                if (previewText.length > 40) {
+                    previewText = previewText.substring(0, 40) + '...';
+                }
             } else if (scenario.messages && scenario.messages.length > 0) {
+                // Old messages format
                 previewText = scenario.messages[0].text || '';
                 // Uzun mesajları kısalt
                 if (previewText.length > 40) {
@@ -601,6 +610,7 @@ document.getElementById('logout').addEventListener('click', () => {
 function openSpecificDM(scenario) {
     currentSession.currentScenario = scenario;
     currentSession.messageIndex = 0;
+    currentSession.conversationIndex = 0;
     
     // Mark reading skill as true
     currentSession.skills.reading = true;
@@ -614,10 +624,18 @@ function openSpecificDM(scenario) {
     document.getElementById('dm-input-container').style.display = 'none';
     document.getElementById('action-buttons').style.display = 'none';
     
-    // Send the message after a delay
-    setTimeout(() => {
-        sendMessage();
-    }, 1000);
+    // Check if it's a conversation or messages format
+    if (scenario.conversation) {
+        // New conversation format - turn-based
+        setTimeout(() => {
+            sendConversationMessage();
+        }, 1000);
+    } else {
+        // Old messages format - cyberbullying
+        setTimeout(() => {
+            sendMessage();
+        }, 1000);
+    }
 }
 
 // Geri butonları
@@ -689,6 +707,58 @@ function sendMessage() {
     }
 }
 
+// Turn-based conversation message handler
+function sendConversationMessage() {
+    const scenario = currentSession.currentScenario;
+    const conversation = scenario.conversation;
+    
+    if (!conversation || currentSession.conversationIndex >= conversation.length) {
+        return;
+    }
+    
+    const turnData = conversation[currentSession.conversationIndex];
+    currentSession.currentMessageStartTime = Date.now();
+    
+    const messagesContainer = document.getElementById('dm-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message';
+    
+    messageDiv.innerHTML = `
+        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}" alt="Avatar" class="message-avatar">
+        <div>
+            <div class="message-content">${turnData.incoming}</div>
+            <div class="message-time">${new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</div>
+        </div>
+    `;
+    
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    // Check if we need to wait for user reply
+    if (turnData.waitForReply) {
+        // Show input for user to reply
+        document.getElementById('dm-input-container').style.display = 'flex';
+        document.getElementById('dm-input').focus();
+    } else {
+        // If it's the last message and doesn't wait for reply, end conversation
+        if (turnData.endsConversation) {
+            // Save conversation state
+            const allMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
+                text: msg.querySelector('.message-content').textContent,
+                sender: msg.classList.contains('sent') ? 'user' : scenario.sender,
+                time: msg.querySelector('.message-time').textContent
+            }));
+            saveConversationState(scenario.sender, allMessages, 'completed');
+        } else {
+            // Continue with next message after 1-2 seconds
+            currentSession.conversationIndex++;
+            setTimeout(() => {
+                sendConversationMessage();
+            }, 1500);
+        }
+    }
+}
+
 // Güvenli mesaja cevap gönder
 document.getElementById('dm-send').addEventListener('click', () => {
     const input = document.getElementById('dm-input');
@@ -724,15 +794,37 @@ document.getElementById('dm-send').addEventListener('click', () => {
     // Input alanını gizle
     document.getElementById('dm-input-container').style.display = 'none';
     
-    // Save completed conversation to message history
+    // Check if conversation continues
     const scenario = currentSession.currentScenario;
-    const allMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
-        text: msg.querySelector('.message-content').textContent,
-        sender: msg.classList.contains('sent') ? 'user' : scenario.sender,
-        time: msg.querySelector('.message-time').textContent
-    }));
     
-    saveConversationState(scenario.sender, allMessages, 'completed');
+    if (scenario.conversation) {
+        // Turn-based conversation - advance to next turn
+        currentSession.conversationIndex++;
+        
+        if (currentSession.conversationIndex < scenario.conversation.length) {
+            // Continue conversation after 1-2 seconds
+            setTimeout(() => {
+                sendConversationMessage();
+            }, 1500);
+        } else {
+            // Conversation ended - save state
+            const allMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
+                text: msg.querySelector('.message-content').textContent,
+                sender: msg.classList.contains('sent') ? 'user' : scenario.sender,
+                time: msg.querySelector('.message-time').textContent
+            }));
+            saveConversationState(scenario.sender, allMessages, 'completed');
+        }
+    } else {
+        // Old format - save and end
+        const allMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
+            text: msg.querySelector('.message-content').textContent,
+            sender: msg.classList.contains('sent') ? 'user' : scenario.sender,
+            time: msg.querySelector('.message-time').textContent
+        }));
+        
+        saveConversationState(scenario.sender, allMessages, 'completed');
+    }
     
     // Sohbet tamamlandı - kullanıcı doğal olarak geri veya home tuşuyla dönecek
 });
