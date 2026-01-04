@@ -71,7 +71,7 @@ Her etkileşim için kaydedilen bilgiler:
 
 ### 8. Akademisyen Kontrol Paneli
 
-- **Şifre**: `akademisyen2024`
+- **Şifre**: `akademisyen2024` (Not: Bu demo/tez amaçlı basit bir şifredir. Gerçek kullanımda güvenli kimlik doğrulama kullanılmalıdır.)
 - Tüm verileri görüntüleme
 - Oturum ve zorbalık türüne göre filtreleme
 - Excel (CSV) formatında veri aktarma
@@ -259,7 +259,12 @@ CSV dosyasında yer alan sütunlar:
 - Veriler sadece tarayıcının LocalStorage'ında saklanır
 - Sunucuya veri gönderilmez
 - Katılımcı bilgileri şifrelenmemiştir (demo amaçlı)
-- Gerçek kullanımda veri güvenliği önlemleri alınmalıdır
+- Akademisyen şifresi basit bir demo şifresidir (tez/eğitim amaçlı)
+- **Önemli**: Gerçek kullanımda:
+  - Sunucu taraflı kimlik doğrulama kullanılmalıdır
+  - Veriler güvenli bir veritabanında saklanmalıdır
+  - HTTPS protokolü kullanılmalıdır
+  - Katılımcı verileri şifrelenmelidir
 
 ## 🤝 Katkıda Bulunma
 

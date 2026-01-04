@@ -77,6 +77,8 @@ document.getElementById('admin-back').addEventListener('click', () => {
 
 document.getElementById('admin-submit').addEventListener('click', () => {
     const password = document.getElementById('admin-password').value;
+    // Not: Bu şifre demo/tez amaçlı basit bir güvenlik katmanıdır
+    // Gerçek üretim ortamında sunucu taraflı kimlik doğrulama kullanılmalıdır
     if (password === 'akademisyen2024') {
         showScreen('admin-panel');
         loadAdminData();
@@ -559,7 +561,7 @@ document.getElementById('export-excel').addEventListener('click', () => {
         csv += `${item.participantId},${item.participantName},${item.participantAge},${item.sessionLabel},${item.bullyingLabel},${item.messageType},${item.action},${item.reactionTime},${item.hintUsed ? 'Evet' : 'Hayır'},${item.correct ? 'Evet' : 'Hayır'},${new Date(item.timestamp).toLocaleString('tr-TR')}\n`;
     });
     
-    // Dosyayı indir
+    // Dosyayı indir - BOM (Byte Order Mark) karakteri Türkçe karakterlerin Excel'de doğru görünmesi için eklenir
     const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
