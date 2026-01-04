@@ -309,7 +309,7 @@ Proje Sahibi: [mamishky](https://github.com/mamishky)
 
 ## 🔄 Güncellemeler
 
-### v2.0.0 (2024)
+### v2.0.0 (2026)
 - ✨ Yeni mesaj inbox/liste sistemi
 - 🎨 35+ çocuk dostu post eklendi
 - 🔔 Okunmamış mesaj göstergeleri
@@ -320,7 +320,7 @@ Proje Sahibi: [mamishky](https://github.com/mamishky)
 - 📱 Modern Instagram web tasarımı (ortalanmış, max 470px feed)
 - 🎨 Daha kompakt ve temiz post görünümleri
 
-### v1.0.0 (2024)
+### v1.0.0 (2026)
 - İlk sürüm
 - Temel özellikler
 - Akademisyen paneli
