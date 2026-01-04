@@ -32,9 +32,9 @@ let currentSession = {
     selectedComplaintReason: null
 };
 
-// Real Instagram DM notification sound (base64 encoded)
-// This is a realistic notification beep that sounds like Instagram
-const notificationSound = new Audio('data:audio/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAADhgCqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr/////////////////////////////////////////8AAABhTEFNRTMuMTAwA6oAAAAAAAAAABQ4JALYQgAAOAAABBoF8kCYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/+xDEAAPAAAGkAAAAIAAANIAAAARMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=');
+// Notification sound (simple beep using base64 encoded MP3)
+// This is a short notification beep sound
+const notificationSound = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBzKM0fPTgjMGHG7A7+OZUQ0PVKzn77BYGAk+k9jzzn0pBSl+zPLaizsIGGS56+ihUQ0OT6Xj8LljHQU2jdXzzn8rBSh8yvLaizwIGWO56+mjUw0OTaLh8LpmHgU1i9Pz0IEtBiV8yfLbjz0IGmS46+mjVQ0OTJ/g8LxrIQU4jtXz0oMvBiR6x/LcjjwIHGa36+ijWA0NS5zh8L1sIgU6kdXz04QwBSN5xvLdjT0IHWa26+mkWQ0NS5zh8L5uIwU8ktXz1IYxBiJ4xfLejT4IHmW16+mlWw0NSprf8MBvJAU+ldXz1oU');
 
 function playNotificationSound() {
     try {
@@ -47,43 +47,54 @@ function playNotificationSound() {
     }
 }
 
-// Feed için gönderi verileri - Çocuk dostu içerikler (fotoğraf + video karışık)
+// Feed için gönderi verileri - Çocuk dostu içerikler
 const POSTS = [
     // Hayvanlar
-    { username: "sevimli.kedicik", avatar: "sevimlikedicik", image: "https://picsum.photos/seed/cat1/600/600", caption: "Minnoş kedim uyuyor 🐱💤", likes: 342, type: "image" },
-    { username: "kopek.dostu", avatar: "kopekdostu", image: "https://picsum.photos/seed/dog1/600/600", caption: "Yavru köpeğim çok oyuncu! 🐕🎾", likes: 521, type: "image" },
-    { username: "hayvan.videolari", avatar: "hayvanvideolari", image: "https://picsum.photos/seed/animals1/600/600", caption: "Sevimli hayvan videosu 🐾", likes: 876, type: "video" },
-    { username: "tavsan.cicek", avatar: "tavsancicek", image: "https://picsum.photos/seed/rabbit1/600/600", caption: "Tavşanım havuç yiyor 🐰🥕", likes: 398, type: "image" },
+    { username: "sevimli.kedicik", avatar: "sevimlikedicik", image: "https://picsum.photos/seed/cat1/600/600", caption: "Minnoş kedim uyuyor 🐱💤", likes: 342 },
+    { username: "kopek.dostu", avatar: "kopekdostu", image: "https://picsum.photos/seed/dog1/600/600", caption: "Yavru köpeğim çok oyuncu! 🐕🎾", likes: 521 },
+    { username: "tavsan.cicek", avatar: "tavsancicek", image: "https://picsum.photos/seed/rabbit1/600/600", caption: "Tavşanım havuç yiyor 🐰🥕", likes: 398 },
+    { username: "kelebek.bahcesi", avatar: "kelebekbahcesi", image: "https://picsum.photos/seed/butterfly1/600/600", caption: "Renkli kelebekler çok güzel! 🦋✨", likes: 467 },
     
     // Renkler ve Eğlence
-    { username: "gokkusagi.dunyasi", avatar: "gokkusagidunyasi", image: "https://picsum.photos/seed/rainbow1/600/600", caption: "Gökkuşağı çok renkli 🌈☀️", likes: 612, type: "image" },
-    { username: "parti.videolari", avatar: "partivideolari", image: "https://picsum.photos/seed/party1/600/600", caption: "Doğum günü partisi! 🎉🎈", likes: 945, type: "video" },
-    { username: "balon.partisi", avatar: "balonpartisi", image: "https://picsum.photos/seed/balloons1/600/600", caption: "Renkli balonlarla parti! 🎈🎉", likes: 489, type: "image" },
-    { username: "pasta.dunyasi", avatar: "pastadunyasi", image: "https://picsum.photos/seed/cake1/600/600", caption: "Doğum günü pastası hazır 🎂🎊", likes: 576, type: "image" },
+    { username: "gokkusagi.dunyasi", avatar: "gokkusagidunyasi", image: "https://picsum.photos/seed/rainbow1/600/600", caption: "Gökkuşağı çok renkli 🌈☀️", likes: 612 },
+    { username: "balon.partisi", avatar: "balonpartisi", image: "https://picsum.photos/seed/balloons1/600/600", caption: "Renkli balonlarla parti! 🎈🎉", likes: 489 },
+    { username: "pasta.dunyasi", avatar: "pastadunyasi", image: "https://picsum.photos/seed/cake1/600/600", caption: "Doğum günü pastası hazır 🎂🎊", likes: 576 },
+    { username: "dondurma.keyfi", avatar: "dondurmakeyfi", image: "https://picsum.photos/seed/icecream1/600/600", caption: "Çikolatalı dondurma en sevdiğim! 🍦😋", likes: 634 },
     
     // Oyunlar ve Sporlar
-    { username: "oyun.zamani", avatar: "oyunzamani", image: "https://picsum.photos/seed/game1/600/600", caption: "Yeni oyunum çok eğlenceli 🎮🕹️", likes: 445, type: "image" },
-    { username: "futbol.goller", avatar: "futbolgoller", image: "https://picsum.photos/seed/soccer1/600/600", caption: "Harika gol anı! ⚽🔥", likes: 1234, type: "video" },
-    { username: "futbol.yildizi", avatar: "futbolyildizi", image: "https://picsum.photos/seed/soccer2/600/600", caption: "Futbol oynamak çok keyifli! ⚽🏆", likes: 523, type: "image" },
-    { username: "basketbol.asa", avatar: "basketbolasa", image: "https://picsum.photos/seed/basketball1/600/600", caption: "Basket atışı yaptım! 🏀🎯", likes: 412, type: "image" },
+    { username: "oyun.zamani", avatar: "oyunzamani", image: "https://picsum.photos/seed/game1/600/600", caption: "Yeni oyunum çok eğlenceli 🎮🕹️", likes: 445 },
+    { username: "futbol.yildizi", avatar: "futbolyildizi", image: "https://picsum.photos/seed/soccer1/600/600", caption: "Futbol oynamak çok keyifli! ⚽🏆", likes: 523 },
+    { username: "basketbol.asa", avatar: "basketbolasa", image: "https://picsum.photos/seed/basketball1/600/600", caption: "Basket atışı yaptım! 🏀🎯", likes: 412 },
     
-    // Müzik ve Dans
-    { username: "dans.show", avatar: "dansshow", image: "https://picsum.photos/seed/dance1/600/600", caption: "Yeni dans hareketim 💃✨", likes: 2156, type: "video" },
-    { username: "renk.paleti", avatar: "renkpaleti", image: "https://picsum.photos/seed/paint1/600/600", caption: "Resim yapmayı seviyorum 🎨🖌️", likes: 387, type: "image" },
-    { username: "muzik.dunyasi", avatar: "muzikdunyasi", image: "https://picsum.photos/seed/music1/600/600", caption: "Gitar çalmayı öğreniyorum 🎵🎸", likes: 498, type: "image" },
+    // Sanat ve Müzik
+    { username: "renk.paleti", avatar: "renkpaleti", image: "https://picsum.photos/seed/paint1/600/600", caption: "Resim yapmayı seviyorum 🎨🖌️", likes: 387 },
+    { username: "muzik.dunyasi", avatar: "muzikdunyasi", image: "https://picsum.photos/seed/music1/600/600", caption: "Gitar çalmayı öğreniyorum 🎵🎸", likes: 498 },
     
     // Doğa ve Dışarı
-    { username: "plaj.keyfi", avatar: "plajkeyfi", image: "https://picsum.photos/seed/beach1/600/600", caption: "Deniz ve kumda oynamak 🏖️🌊", likes: 589, type: "image" },
-    { username: "lunapark.eglence", avatar: "lunaparkeglence", image: "https://picsum.photos/seed/amusement1/600/600", caption: "Lunapark anıları! 🎡", likes: 1567, type: "video" },
-    { username: "lunapark.macerasi", avatar: "lunaparkmacerasi", image: "https://picsum.photos/seed/amusement2/600/600", caption: "Lunapark çok eğlenceli! 🎡🎢", likes: 671, type: "image" },
-    { username: "sirk.gozu", avatar: "sirkgozu", image: "https://picsum.photos/seed/circus1/600/600", caption: "Sirkte palyaçolar gördüm 🎪🤡", likes: 534, type: "image" },
+    { username: "plaj.keyfi", avatar: "plajkeyfi", image: "https://picsum.photos/seed/beach1/600/600", caption: "Deniz ve kumda oynamak 🏖️🌊", likes: 589 },
+    { username: "lunapark.macerasi", avatar: "lunaparkmacerasi", image: "https://picsum.photos/seed/amusement1/600/600", caption: "Lunapark çok eğlenceli! 🎡🎢", likes: 671 },
+    { username: "sirk.gozu", avatar: "sirkgozu", image: "https://picsum.photos/seed/circus1/600/600", caption: "Sirkte palyaçolar gördüm 🎪🤡", likes: 534 },
+    { username: "hayvanat.bahcesi", avatar: "hayvanatbahcesi", image: "https://picsum.photos/seed/zoo1/600/600", caption: "Aslan görmeye gittik 🦁👀", likes: 612 },
+    { username: "akvaryum.balik", avatar: "akvaryumbalik", image: "https://picsum.photos/seed/fish1/600/600", caption: "Renkli balıklar yüzüyor 🐠🐟", likes: 456 },
+    { username: "cicek.bahcesi", avatar: "cicekbahcesi", image: "https://picsum.photos/seed/flowers1/600/600", caption: "Renkli çiçekler açmış 🌺🌸", likes: 423 },
+    { username: "orman.yuruyusu", avatar: "ormanyuruyusu", image: "https://picsum.photos/seed/forest1/600/600", caption: "Ormanda yürüyüş yaptık 🌳🌲", likes: 389 },
     
-    // Daha fazla içerik
-    { username: "komik.anlar", avatar: "komikanlar", image: "https://picsum.photos/seed/funny1/600/600", caption: "Çok komik an! 😂", likes: 2341, type: "video" },
-    { username: "hayvanat.bahcesi", avatar: "hayvanatbahcesi", image: "https://picsum.photos/seed/zoo1/600/600", caption: "Aslan görmeye gittik 🦁👀", likes: 612, type: "image" },
-    { username: "akvaryum.balik", avatar: "akvaryumbalik", image: "https://picsum.photos/seed/fish1/600/600", caption: "Renkli balıklar yüzüyor 🐠🐟", likes: 456, type: "image" },
-    { username: "cicek.bahcesi", avatar: "cicekbahcesi", image: "https://picsum.photos/seed/flowers1/600/600", caption: "Renkli çiçekler açmış 🌺🌸", likes: 423, type: "image" },
-    { username: "skate.videolari", avatar: "skatevideolari", image: "https://picsum.photos/seed/skate1/600/600", caption: "Yeni trick! 🛹", likes: 1876, type: "video" }
+    // Daha fazla çeşitlilik
+    { username: "kedi.dostum", avatar: "kedidostum", image: "https://picsum.photos/seed/cat2/600/600", caption: "Kedim çok sevimli 🐱❤️", likes: 445 },
+    { username: "kopek.sevgisi", avatar: "kopeksevgisi", image: "https://picsum.photos/seed/dog2/600/600", caption: "Köpeklerle oynamak harika 🐕💕", likes: 512 },
+    { username: "pamuk.tavsan", avatar: "pamuktavsan", image: "https://picsum.photos/seed/rabbit2/600/600", caption: "Pamuk gibi beyaz tavşan 🐰☁️", likes: 367 },
+    { username: "cicek.kelebek", avatar: "cicekkelebek", image: "https://picsum.photos/seed/butterfly2/600/600", caption: "Kelebekler çiçeklerde 🦋🌼", likes: 421 },
+    { username: "rengarenk.dunya", avatar: "rengarenkdunya", image: "https://picsum.photos/seed/rainbow2/600/600", caption: "Her yer renkli ve güzel 🌈🎨", likes: 498 },
+    { username: "parti.zamani", avatar: "partizamani", image: "https://picsum.photos/seed/party1/600/600", caption: "Doğum günü partisindeyiz 🎈🎁", likes: 567 },
+    { username: "tatli.pasta", avatar: "tatlipasta", image: "https://picsum.photos/seed/cake2/600/600", caption: "Çilekli pasta çok lezzetli 🍰🍓", likes: 489 },
+    { username: "meyveli.dondurma", avatar: "meyvelidondurma", image: "https://picsum.photos/seed/icecream2/600/600", caption: "Çilek ve vanilyalı dondurma 🍦🍨", likes: 523 },
+    { username: "video.oyunlari", avatar: "videooyunlari", image: "https://picsum.photos/seed/game2/600/600", caption: "Arkadaşlarla oyun oynuyoruz 🎮👾", likes: 478 },
+    { username: "gol.krali", avatar: "golkrali", image: "https://picsum.photos/seed/soccer2/600/600", caption: "Bugün gol attım! ⚽🎉", likes: 534 },
+    { username: "potayi.buldum", avatar: "potayibuldum", image: "https://picsum.photos/seed/basketball2/600/600", caption: "Üç sayı attım 🏀🔥", likes: 456 },
+    { username: "kucuk.ressam", avatar: "kucukressam", image: "https://picsum.photos/seed/paint2/600/600", caption: "Renkli resim yaptım 🎨🖼️", likes: 398 },
+    { username: "piyano.dersi", avatar: "pianodersi", image: "https://picsum.photos/seed/music2/600/600", caption: "Piyano çalmayı öğreniyorum 🎹🎶", likes: 467 },
+    { username: "kumda.oyun", avatar: "kumdaoyun", image: "https://picsum.photos/seed/beach2/600/600", caption: "Kumdan kale yaptık 🏖️🏰", likes: 512 },
+    { username: "eglence.park", avatar: "eglencepark", image: "https://picsum.photos/seed/amusement2/600/600", caption: "Dönme dolap çok yüksek! 🎡😄", likes: 589 }
 ];
 
 // Ekran geçişleri
@@ -102,32 +113,14 @@ function generateFeed() {
     POSTS.forEach((post, index) => {
         const postDiv = document.createElement('div');
         postDiv.className = 'post';
-        
-        // Video veya image content
-        let mediaContent = '';
-        if (post.type === 'video') {
-            mediaContent = `
-                <div class="post-video" data-post="${index}">
-                    <img src="${post.image}" alt="Post" style="width: 100%; height: 100%; object-fit: cover;">
-                    <div class="video-overlay" data-post="${index}">
-                        <i class="fas fa-play-circle"></i>
-                    </div>
-                </div>
-            `;
-        } else {
-            mediaContent = `
-                <div class="post-image">
-                    <img src="${post.image}" alt="Post" style="width: 100%; height: 100%; object-fit: cover;">
-                </div>
-            `;
-        }
-        
         postDiv.innerHTML = `
             <div class="post-header">
                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${post.avatar}" alt="${post.username}">
                 <span>${post.username}</span>
             </div>
-            ${mediaContent}
+            <div class="post-image">
+                <img src="${post.image}" alt="Post" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
             <div class="post-actions">
                 <div class="actions-left">
                     <i class="far fa-heart like-btn" data-post="${index}"></i>
@@ -136,7 +129,7 @@ function generateFeed() {
                 </div>
                 <i class="far fa-bookmark save-btn save-icon" data-post="${index}"></i>
             </div>
-            <div class="post-likes" data-post="${index}">${formatNumber(post.likes)} beğeni</div>
+            <div class="post-likes" data-post="${index}">${post.likes} beğeni</div>
             <div class="post-caption">
                 <strong>${post.username}</strong> ${post.caption}
             </div>
@@ -151,14 +144,6 @@ function generateFeed() {
         feedContainer.appendChild(postDiv);
     });
     
-    // Video overlay click handlers
-    document.querySelectorAll('.video-overlay').forEach(overlay => {
-        overlay.addEventListener('click', function() {
-            this.classList.toggle('playing');
-            // Video simülasyonu - gerçek videoda bu video.play() olurdu
-        });
-    });
-    
     // Like butonları
     document.querySelectorAll('.like-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -168,13 +153,13 @@ function generateFeed() {
             this.classList.toggle('far');
             
             const likesElement = document.querySelector(`.post-likes[data-post="${postIndex}"]`);
-            let likes = POSTS[postIndex].likes;
+            let likes = parseInt(likesElement.textContent);
             if (this.classList.contains('liked')) {
                 likes++;
             } else {
                 likes--;
             }
-            likesElement.textContent = `${formatNumber(likes)} beğeni`;
+            likesElement.textContent = `${likes} beğeni`;
         });
     });
     
@@ -320,91 +305,16 @@ function sendNextMessageNotification() {
     playNotificationSound();
 }
 
-// Mesaj ikonuna tıklandığında - Inbox'ı göster
+// Mesaj ikonuna tıklandığında
 document.getElementById('message-icon').addEventListener('click', () => {
-    if (currentSession.pendingMessages > 0 || currentSession.messageQueue.length > 0) {
-        showInbox();
-    }
-});
-
-// Inbox ekranını göster
-function showInbox() {
-    showScreen('inbox-screen');
-    renderInboxList();
-}
-
-// Inbox listesini oluştur
-function renderInboxList() {
-    const inboxList = document.getElementById('inbox-list');
-    inboxList.innerHTML = '';
-    
-    // Her mesaj için bir inbox item oluştur
-    currentSession.messageQueue.forEach((scenario, index) => {
-        const isUnread = index >= currentSession.currentMessageIndex && currentSession.pendingMessages > 0;
-        const isPast = index < currentSession.currentMessageIndex;
-        
-        // Sadece mevcut veya geçmiş mesajları göster
-        if (index <= currentSession.currentMessageIndex || isPast) {
-            const item = document.createElement('div');
-            item.className = `inbox-item ${isUnread ? 'unread' : ''}`;
-            item.dataset.index = index;
-            
-            // Mesaj önizlemesi için ilk mesajı al
-            let previewText = '';
-            if (scenario.messages && scenario.messages.length > 0) {
-                previewText = scenario.messages[0].text || '';
-                // Uzun mesajları kısalt
-                if (previewText.length > 40) {
-                    previewText = previewText.substring(0, 40) + '...';
-                }
-            }
-            
-            item.innerHTML = `
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}" alt="${scenario.sender}">
-                <div class="inbox-item-content">
-                    <div class="inbox-item-header">
-                        <span class="inbox-sender">${scenario.sender}</span>
-                        <span class="inbox-time">Şimdi</span>
-                    </div>
-                    <div class="inbox-message-preview">
-                        ${isUnread ? '<span class="unread-dot"></span>' : ''}
-                        ${previewText}
-                    </div>
-                </div>
-            `;
-            
-            // Tıklama eventi
-            item.addEventListener('click', () => {
-                openConversationFromInbox(index);
-            });
-            
-            inboxList.appendChild(item);
-        }
-    });
-}
-
-// Inbox'tan sohbet aç
-function openConversationFromInbox(index) {
-    currentSession.currentMessageIndex = index;
-    const scenario = currentSession.messageQueue[index];
-    
-    // Badge'i güncelle
     if (currentSession.pendingMessages > 0) {
-        currentSession.pendingMessages = Math.max(0, currentSession.pendingMessages - 1);
-        const badge = document.getElementById('message-badge');
-        if (currentSession.pendingMessages > 0) {
-            badge.textContent = currentSession.pendingMessages;
-        } else {
-            badge.style.display = 'none';
-        }
+        currentSession.pendingMessages = 0;
+        document.getElementById('message-badge').style.display = 'none';
+        
+        // Mevcut mesajı aç
+        const scenario = currentSession.messageQueue[currentSession.currentMessageIndex];
+        openSpecificDM(scenario);
     }
-    
-    openSpecificDM(scenario);
-}
-
-// Inbox'tan ana sayfaya dön
-document.getElementById('inbox-back-to-feed').addEventListener('click', () => {
-    showScreen('main-app');
 });
 
 // Akademisyen Girişi
@@ -457,10 +367,9 @@ function openSpecificDM(scenario) {
 }
 
 // Geri butonları
-document.getElementById('back-to-inbox').addEventListener('click', () => {
-    // Inbox'a dön
-    showScreen('inbox-screen');
-    renderInboxList();
+document.getElementById('back-to-feed').addEventListener('click', () => {
+    // Ana sayfaya dön
+    returnToFeed();
 });
 
 // Mesaj gönder
@@ -551,17 +460,7 @@ document.getElementById('dm-send').addEventListener('click', () => {
     
     // Rastgele kapanış mesajı gönder
     setTimeout(() => {
-        const closingMessages = [
-            "Tamam anlaştık! Görüşürüz 👋",
-            "Harika! Sonra konuşuruz 😊",
-            "Süper! Görüşmek üzere ✌️",
-            "Oldu! Sonra yazışırız 🙌",
-            "Tamamdır! Hoşça kal 👋",
-            "İyi günler! Görüşürüz 😊",
-            "Harika, konuştuğumuz için teşekkürler! 🙏",
-            "Tamam o zaman, hadi görüşürüz! 👋"
-        ];
-        const closingMessage = closingMessages[Math.floor(Math.random() * closingMessages.length)];
+        const closingMessage = CLOSING_MESSAGES[Math.floor(Math.random() * CLOSING_MESSAGES.length)];
         const scenario = currentSession.currentScenario;
         
         const closingDiv = document.createElement('div');
@@ -577,8 +476,8 @@ document.getElementById('dm-send').addEventListener('click', () => {
         messagesContainer.appendChild(closingDiv);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
         
-        // Kullanıcı doğal olarak geri tuşuna veya home'a basacak
-        // "Ana Sayfaya Dön" butonu kaldırıldı
+        // "Ana Sayfaya Dön" butonunu göster
+        document.getElementById('return-to-feed-container').style.display = 'block';
     }, 1000);
 });
 
@@ -589,9 +488,10 @@ document.getElementById('dm-input').addEventListener('keypress', (e) => {
     }
 });
 
-// Ana sayfaya dön (home icon click)
+// Ana sayfaya dön
 function returnToFeed() {
     showScreen('main-app');
+    document.getElementById('return-to-feed-container').style.display = 'none';
     
     // Mesaj indeksini artır
     currentSession.currentMessageIndex++;
@@ -609,11 +509,9 @@ function returnToFeed() {
     }
 }
 
-// Thank you modal'ı kapat ve akışa devam et
-document.getElementById('close-thank-you-modal').addEventListener('click', () => {
-    document.getElementById('thank-you-modal').style.display = 'none';
-    // Kullanıcı doğal olarak geri veya home tuşuyla dönecek
-});
+// "Ana Sayfaya Dön" buton handler'ları
+document.getElementById('return-to-feed-btn').addEventListener('click', returnToFeed);
+document.getElementById('return-to-feed-from-thanks').addEventListener('click', returnToFeed);
 
 // Şikayet et butonu
 document.getElementById('report-btn').addEventListener('click', () => {
@@ -1055,107 +953,18 @@ document.getElementById('clear-data').addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     const bottomNav = document.querySelector('.bottom-nav');
     if (bottomNav) {
-        const icons = bottomNav.querySelectorAll('i[data-nav]');
-        icons.forEach((icon) => {
+        const icons = bottomNav.querySelectorAll('i');
+        icons.forEach((icon, index) => {
             icon.addEventListener('click', () => {
                 // Aktif durumu güncelle
-                document.querySelectorAll('.bottom-nav i').forEach(i => i.classList.remove('active'));
+                icons.forEach(i => i.classList.remove('active'));
                 icon.classList.add('active');
-                
-                const navType = icon.dataset.nav;
                 
                 // Navigasyon becerisini true yap
                 if (currentSession.sessionType) {
                     currentSession.skills.navigation = true;
                 }
-                
-                // Ekran geçişleri
-                switch(navType) {
-                    case 'home':
-                        returnToFeed();
-                        break;
-                    case 'reels':
-                        showReels();
-                        break;
-                    case 'search':
-                    case 'likes':
-                    case 'profile':
-                        // Bu özellikler demo için devre dışı
-                        break;
-                }
             });
         });
     }
 });
-
-// Reels ekranını göster
-function showReels() {
-    showScreen('reels-screen');
-    generateReels();
-}
-
-// Reels içeriğini oluştur
-function generateReels() {
-    const reelsScroll = document.getElementById('reels-scroll');
-    if (reelsScroll.children.length > 0) return; // Zaten oluşturulmuş
-    
-    const reelsData = [
-        { username: "spor.klipler", avatar: "sporklipler", image: "https://picsum.photos/seed/sports1/600/1067", caption: "Harika gol! ⚽🔥", likes: 1234 },
-        { username: "komik.anlar", avatar: "komikanlar", image: "https://picsum.photos/seed/funny1/600/1067", caption: "Çok komik ya 😂😂", likes: 2341 },
-        { username: "dans.videolari", avatar: "dansvideolari", image: "https://picsum.photos/seed/dance1/600/1067", caption: "Bu dans hareketi çok güzel 💃", likes: 3456 },
-        { username: "oyun.dunyasi", avatar: "oyundunyasi", image: "https://picsum.photos/seed/game1/600/1067", caption: "En iyi oyun anları! 🎮", likes: 4567 },
-        { username: "muzik.cover", avatar: "muzikcover", image: "https://picsum.photos/seed/music1/600/1067", caption: "Bu şarkıyı cover yaptım 🎵", likes: 5678 },
-        { username: "skate.tricks", avatar: "skatetricks", image: "https://picsum.photos/seed/skate1/600/1067", caption: "Yeni trick öğrendim! 🛹", likes: 3421 },
-        { username: "sanat.dunyasi", avatar: "sanatdunyasi", image: "https://picsum.photos/seed/art1/600/1067", caption: "Bu resmi çizdim 🎨", likes: 2987 },
-        { username: "yemek.tarifleri", avatar: "yemektarifleri", image: "https://picsum.photos/seed/food1/600/1067", caption: "Kolay pasta tarifi! 🍰", likes: 5432 }
-    ];
-    
-    reelsData.forEach(reel => {
-        const reelDiv = document.createElement('div');
-        reelDiv.className = 'reel';
-        reelDiv.innerHTML = `
-            <img src="${reel.image}" alt="Reel">
-            <div class="reel-overlay">
-                <div class="reel-user">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${reel.avatar}" alt="${reel.username}">
-                    <span class="reel-username">${reel.username}</span>
-                </div>
-                <div class="reel-caption">${reel.caption}</div>
-            </div>
-            <div class="reel-actions">
-                <div class="reel-action like-reel">
-                    <i class="far fa-heart"></i>
-                    <span>${formatNumber(reel.likes)}</span>
-                </div>
-                <div class="reel-action">
-                    <i class="far fa-comment"></i>
-                    <span>89</span>
-                </div>
-                <div class="reel-action">
-                    <i class="far fa-paper-plane"></i>
-                </div>
-                <div class="reel-action">
-                    <i class="fas fa-ellipsis-v"></i>
-                </div>
-            </div>
-        `;
-        reelsScroll.appendChild(reelDiv);
-        
-        // Like functionality
-        const likeBtn = reelDiv.querySelector('.like-reel');
-        likeBtn.addEventListener('click', function() {
-            const icon = this.querySelector('i');
-            icon.classList.toggle('far');
-            icon.classList.toggle('fas');
-            this.classList.toggle('liked');
-        });
-    });
-}
-
-// Format numbers (1234 -> 1.2K)
-function formatNumber(num) {
-    if (num >= 1000) {
-        return (num / 1000).toFixed(1) + 'K';
-    }
-    return num.toString();
-}

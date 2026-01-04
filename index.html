@@ -181,18 +181,49 @@
 
         <!-- Alt Navigasyon -->
         <nav class="bottom-nav">
-            <i class="fas fa-home active"></i>
-            <i class="fas fa-search"></i>
-            <i class="far fa-plus-square"></i>
-            <i class="far fa-heart"></i>
-            <i class="far fa-user"></i>
+            <i class="fas fa-home active" data-nav="home"></i>
+            <i class="fas fa-search" data-nav="search"></i>
+            <i class="fas fa-film" data-nav="reels"></i>
+            <i class="far fa-heart" data-nav="likes"></i>
+            <i class="far fa-user" data-nav="profile"></i>
         </nav>
+    </div>
+
+    <!-- Reels Screen -->
+    <div id="reels-screen" class="screen">
+        <div class="reels-container">
+            <div class="reels-scroll" id="reels-scroll">
+                <!-- Reels will be populated here -->
+            </div>
+        </div>
+        <!-- Reels Navigation Overlay -->
+        <nav class="bottom-nav reels-nav">
+            <i class="fas fa-home" data-nav="home"></i>
+            <i class="fas fa-search" data-nav="search"></i>
+            <i class="fas fa-film active" data-nav="reels"></i>
+            <i class="far fa-heart" data-nav="likes"></i>
+            <i class="far fa-user" data-nav="profile"></i>
+        </nav>
+    </div>
+
+    <!-- Inbox / Message List Screen -->
+    <div id="inbox-screen" class="screen">
+        <div class="dm-header">
+            <i class="fas fa-arrow-left" id="inbox-back-to-feed"></i>
+            <div class="dm-user-info">
+                <span style="font-weight: 600; font-size: 18px;">Direkt</span>
+            </div>
+            <i class="far fa-edit"></i>
+        </div>
+        <div id="inbox-list" class="inbox-list">
+            <!-- Message list will be populated here -->
+        </div>
     </div>
 
     <!-- Direkt Mesaj Ekranı -->
     <div id="dm-screen" class="screen">
         <div class="dm-header">
-            <i class="fas fa-arrow-left" id="back-to-feed"></i>
+            <i class="fas fa-arrow-left" id="back-to-inbox"></i>
             <div class="dm-user-info">
                 <img id="dm-avatar" src="" alt="User">
                 <span id="dm-username"></span>
@@ -244,14 +275,10 @@
                 <div class="checkmark-animation">✓</div>
                 <h3>Şikayetin için teşekkürler!</h3>
                 <p>Gerekli incelemeleri yapacağız.</p>
-                <button class="btn-primary" id="return-to-feed-from-thanks">Ana Sayfaya Dön</button>
+                <button class="btn-primary" id="close-thank-you-modal">Tamam</button>
             </div>
         </div>
 
-        <!-- Ana Sayfaya Dön Butonu -->
-        <div class="return-to-feed-container" id="return-to-feed-container" style="display: none;">
-            <button class="btn-primary" id="return-to-feed-btn">Ana Sayfaya Dön</button>
-        </div>
     </div>
 
     <!-- Özet Ekranı -->
