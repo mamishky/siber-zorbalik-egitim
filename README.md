@@ -1,8 +1,8 @@
-# SiberGüven - Siber Zorbalık Farkındalık Eğitim Uygulaması
+# Safestagram - Siber Zorbalık Farkındalık Eğitim Uygulaması
 
 ## 📌 Proje Açıklaması
 
-SiberGüven, tez çalışması için geliştirilmiş Instagram benzeri bir siber zorbalık farkındalık eğitim web uygulamasıdır. Uygulama, kullanıcılara gerçekçi sosyal medya senaryoları üzerinden siber zorbalıkla başa çıkma becerilerini öğretir.
+Safestagram, tez çalışması için geliştirilmiş Instagram benzeri bir siber zorbalık farkındalık eğitim web uygulamasıdır. Uygulama, kullanıcılara gerçekçi sosyal medya senaryoları üzerinden siber zorbalıkla başa çıkma becerilerini öğretir.
 
 ## 🎯 Temel Özellikler
 
