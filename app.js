@@ -305,10 +305,10 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         document.getElementById('loginForm').reset();
     } catch (error) {
         console.error('Login error:', error);
-        let errorMessage = 'Giriş sırasında bir hata oluştu.';
+        let errorMessage = 'Giriş yapılırken bir hata oluştu.';
         
         if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-            errorMessage = 'E-posta veya şifre hatalı.';
+            errorMessage = 'E-posta veya şifrenizi yanlış girdiniz.';
         } else if (error.code === 'auth/invalid-email') {
             errorMessage = 'Geçersiz e-posta adresi.';
         } else if (error.code === 'auth/user-disabled') {
@@ -341,6 +341,11 @@ document.getElementById('academic-panel-btn').addEventListener('click', () => {
 });
 
 document.getElementById('back-to-panel').addEventListener('click', () => {
+    showScreen('panel-screen');
+});
+
+// Admin Back Button
+document.getElementById('admin-back-btn').addEventListener('click', () => {
     showScreen('panel-screen');
 });
 
@@ -1096,6 +1101,44 @@ function openSpecificDM(scenario) {
     document.getElementById('dm-input-container').style.display = 'none';
     document.getElementById('action-buttons').style.display = 'none';
     
+    // Load conversation history from localStorage
+    const messageHistory = loadMessageHistory(currentSession.participantName);
+    const senderHistory = messageHistory[scenario.sender];
+    
+    if (senderHistory && senderHistory.messages && senderHistory.messages.length > 0) {
+        // Display previous messages
+        const messagesContainer = document.getElementById('dm-messages');
+        senderHistory.messages.forEach(msg => {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${msg.sender === 'user' ? 'sent' : ''}`;
+            
+            const avatarSrc = msg.sender === 'user' 
+                ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=user1'
+                : `https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}`;
+            
+            messageDiv.innerHTML = `
+                <img src="${avatarSrc}" alt="Avatar" class="message-avatar">
+                <div>
+                    <div class="message-content">${msg.text}</div>
+                    <div class="message-time">${msg.time}</div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+        });
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+        // If conversation was blocked, show blocked status
+        if (senderHistory.status === 'blocked') {
+            return; // Don't send new messages if blocked
+        }
+        
+        // If conversation is complete, don't send new messages
+        if (senderHistory.status === 'completed') {
+            return;
+        }
+    }
+    
     // Check if it's a conversation or messages format
     if (scenario.conversation) {
         // New conversation format - turn-based
@@ -1167,16 +1210,26 @@ function sendMessage() {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${message.type === 'cyberbullying' ? 'cyberbullying' : ''}`;
     
+    const time = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    
     messageDiv.innerHTML = `
         <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}" alt="Avatar" class="message-avatar">
         <div>
             <div class="message-content">${message.text}</div>
-            <div class="message-time">${new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</div>
+            <div class="message-time">${time}</div>
         </div>
     `;
     
     messagesContainer.appendChild(messageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    // Save conversation state after each message
+    const allMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
+        text: msg.querySelector('.message-content').textContent,
+        sender: msg.classList.contains('sent') ? 'user' : scenario.sender,
+        time: msg.querySelector('.message-time').textContent
+    }));
+    saveConversationState(scenario.sender, allMessages, 'in-progress');
     
     if (message.type === 'safe') {
         // Güvenli mesaj - eğer birden fazla mesaj varsa otomatik olarak devam et
@@ -1208,9 +1261,12 @@ function sendMessage() {
         document.getElementById('block-btn').classList.remove('blink');
         
         // 5 saniye sonra ipucu göster (sadece buton yanıp sönsün, metin YOK)
-        currentSession.hintTimeout = setTimeout(() => {
-            showHint();
-        }, 5000);
+        // Check if hints are enabled before setting timeout
+        if (currentSession.hintEnabled) {
+            currentSession.hintTimeout = setTimeout(() => {
+                showHint();
+            }, 5000);
+        }
     }
 }
 
@@ -1230,16 +1286,26 @@ function sendConversationMessage() {
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message';
     
+    const time = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    
     messageDiv.innerHTML = `
         <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}" alt="Avatar" class="message-avatar">
         <div>
             <div class="message-content">${turnData.incoming}</div>
-            <div class="message-time">${new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</div>
+            <div class="message-time">${time}</div>
         </div>
     `;
     
     messagesContainer.appendChild(messageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    // Save conversation state after each incoming message
+    const allMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
+        text: msg.querySelector('.message-content').textContent,
+        sender: msg.classList.contains('sent') ? 'user' : scenario.sender,
+        time: msg.querySelector('.message-time').textContent
+    }));
+    saveConversationState(scenario.sender, allMessages, 'in-progress');
     
     // Check if we need to wait for user reply
     if (turnData.waitForReply) {
@@ -1250,11 +1316,6 @@ function sendConversationMessage() {
         // If it's the last message and doesn't wait for reply, end conversation
         if (turnData.endsConversation) {
             // Save conversation state
-            const allMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
-                text: msg.querySelector('.message-content').textContent,
-                sender: msg.classList.contains('sent') ? 'user' : scenario.sender,
-                time: msg.querySelector('.message-time').textContent
-            }));
             saveConversationState(scenario.sender, allMessages, 'completed');
         } else {
             // Continue with next message after 1-2 seconds
@@ -1280,17 +1341,28 @@ document.getElementById('dm-send').addEventListener('click', () => {
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message sent';
     
+    const time = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    
     messageDiv.innerHTML = `
         <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user1" alt="You" class="message-avatar">
         <div>
             <div class="message-content">${text}</div>
-            <div class="message-time">${new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</div>
+            <div class="message-time">${time}</div>
         </div>
     `;
     
     messagesContainer.appendChild(messageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
     input.value = '';
+    
+    // Save conversation state after user reply
+    const scenario = currentSession.currentScenario;
+    const allMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
+        text: msg.querySelector('.message-content').textContent,
+        sender: msg.classList.contains('sent') ? 'user' : scenario.sender,
+        time: msg.querySelector('.message-time').textContent
+    }));
+    saveConversationState(scenario.sender, allMessages, 'in-progress');
     
     // Veri kaydet
     const reactionTime = (Date.now() - currentSession.currentMessageStartTime) / 1000;
@@ -1302,8 +1374,6 @@ document.getElementById('dm-send').addEventListener('click', () => {
     document.getElementById('dm-input-container').style.display = 'none';
     
     // Check if conversation continues
-    const scenario = currentSession.currentScenario;
-    
     if (scenario.conversation) {
         // Turn-based conversation - advance to next turn
         currentSession.conversationIndex++;
@@ -1315,11 +1385,6 @@ document.getElementById('dm-send').addEventListener('click', () => {
             }, 1500);
         } else {
             // Conversation ended - save state and show back button hint
-            const allMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
-                text: msg.querySelector('.message-content').textContent,
-                sender: msg.classList.contains('sent') ? 'user' : scenario.sender,
-                time: msg.querySelector('.message-time').textContent
-            }));
             saveConversationState(scenario.sender, allMessages, 'completed');
             
             // Sohbet bitti - kullanıcı geri tuşuna basmalı
@@ -1330,12 +1395,6 @@ document.getElementById('dm-send').addEventListener('click', () => {
         }
     } else {
         // Old format - save and return to feed automatically
-        const allMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
-            text: msg.querySelector('.message-content').textContent,
-            sender: msg.classList.contains('sent') ? 'user' : scenario.sender,
-            time: msg.querySelector('.message-time').textContent
-        }));
-        
         saveConversationState(scenario.sender, allMessages, 'completed');
         
         // Otomatik olarak 3 saniye sonra feed'e dön
@@ -1462,6 +1521,11 @@ document.getElementById('block-btn').addEventListener('click', () => {
 
 // Yanlış sıra ipucu göster (sadece doğru buton yanıp sönecek, metin YOK)
 function showWrongOrderHint(wrongButton) {
+    // Check if hints are enabled
+    if (!currentSession.hintEnabled) {
+        return; // Don't show hints if disabled
+    }
+    
     let blinkButton = null;
     
     if (wrongButton === 'block') {
@@ -1627,6 +1691,11 @@ function showHint() {
 
 // Sonraki adım ipucu (sadece buton yanıp sönecek, metin YOK)
 function showNextStepHint(step) {
+    // Check if hints are enabled
+    if (!currentSession.hintEnabled) {
+        return; // Don't show hints if disabled
+    }
+    
     setTimeout(() => {
         let blinkButton = null;
         

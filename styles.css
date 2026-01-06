@@ -1852,6 +1852,10 @@ select.form-control {
     gap: 10px;
 }
 
+#admin-back-btn {
+    margin-right: auto;
+}
+
 .admin-user-info {
     display: flex;
     align-items: center;
