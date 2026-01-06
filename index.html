@@ -7,7 +7,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Satisfy&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Poppins:wght@400;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Righteous&display=swap">
     <link rel="stylesheet" href="styles.css">
+    
+    <!-- Firebase SDK (compat version) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <style>
         /* Cyber-Themed Welcome Screen Styles */
         #welcome-screen {
@@ -344,8 +350,8 @@
     </style>
 </head>
 <body>
-    <!-- Giriş Ekranı - Cyber Theme -->
-    <div id="welcome-screen" class="screen active">
+    <!-- Authentication Screen - Login & Signup -->
+    <div id="auth-screen" class="screen active">
         <!-- Cyber background -->
         <div class="cyber-bg">
             <div class="cyber-line h1"></div>
@@ -361,42 +367,240 @@
         <i class="fas fa-shield-alt floating-icon icon-shield-right"></i>
         <i class="fas fa-lock floating-icon icon-lock-left"></i>
         <i class="fas fa-lock floating-icon icon-lock-right"></i>
-        <i class="fas fa-robot floating-icon icon-robot-left"></i>
-        <i class="fas fa-robot floating-icon icon-robot-right"></i>
-        <i class="fas fa-mobile-alt floating-icon icon-phone-left"></i>
-        <i class="fas fa-mobile-alt floating-icon icon-phone-right"></i>
+        <i class="fas fa-user-shield floating-icon icon-robot-left"></i>
+        <i class="fas fa-ban floating-icon icon-robot-right"></i>
+        <i class="fas fa-flag floating-icon icon-phone-left"></i>
+        <i class="fas fa-exclamation-triangle floating-icon icon-phone-right"></i>
         <i class="fas fa-wifi floating-icon icon-wifi-left"></i>
-        <i class="fas fa-exclamation-triangle floating-icon icon-wifi-right"></i>
+        <i class="fas fa-eye floating-icon icon-wifi-right"></i>
         <i class="fas fa-cloud floating-icon icon-cloud"></i>
-        <i class="fas fa-user-shield floating-icon icon-security-top"></i>
+        <i class="fas fa-shield-alt floating-icon icon-security-top"></i>
 
         <!-- Sliding messages -->
         <div class="message-slider msg1">Siber zorbalığa dur de!</div>
-        <div class="message-slider msg2">Şikayet et • Engelle • Ebeveynine Bildir!</div>
+        <div class="message-slider msg2">Şikayet et • Engelle • Bildir!</div>
         <div class="message-slider msg3">Güvenli internet kullan</div>
         <div class="message-slider msg4">Dijital dünyada güvendeyim</div>
 
         <div class="cyber-welcome-container">
             <header class="cyber-brand">
-                <i class="fas fa-shield-alt logo-shield"></i>
-                <h1>
-                    <span class="letter">S</span><span class="letter">a</span><span class="letter">f</span><span class="letter">e</span><span class="letter special">S</span><span class="letter">t</span><span class="letter">a</span><span class="letter">g</span><span class="letter">r</span><span class="letter">a</span><span class="letter">m</span>
-                </h1>
+                <div class="logo-shield-wrapper">
+                    <i class="fas fa-shield-alt logo-shield"></i>
+                    <span class="shield-s">S</span>
+                </div>
+                <div class="logo-text-container">
+                    <h1 class="logo-title">SafeStagram</h1>
+                    <div class="logo-subtitle">
+                        <span class="subtitle-text">Şikayet Et</span>
+                        <span class="subtitle-dot">•</span>
+                        <span class="subtitle-text">Engelle</span>
+                        <span class="subtitle-dot">•</span>
+                        <span class="subtitle-text">Bildir</span>
+                    </div>
+                </div>
             </header>
 
-            <main class="cyber-card">
-                <form class="cyber-form" id="loginForm">
+            <main class="cyber-card" id="auth-card">
+                <!-- Login Form -->
+                <form class="cyber-form auth-form" id="loginForm" style="display: block;">
+                    <h3 class="form-title">Üye Girişi</h3>
                     <div class="cyber-field">
-                        <input type="text" id="participant-name" name="ad" placeholder="Adınız" autocomplete="name" required />
+                        <input type="email" id="login-email" placeholder="E-posta" autocomplete="email" required />
                     </div>
 
                     <div class="cyber-field">
-                        <input type="number" id="participant-age" name="yas" placeholder="Yaşınız" min="1" max="120" required />
+                        <input type="password" id="login-password" placeholder="Şifre" autocomplete="current-password" required />
+                    </div>
+
+                    <button class="cyber-btn primary full-width" type="submit">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Giriş Yap
+                    </button>
+
+                    <div class="form-switch">
+                        <span>Hesabınız yok mu?</span>
+                        <button type="button" class="switch-btn" id="show-signup">Üye Ol</button>
+                    </div>
+                </form>
+
+                <!-- Signup Form -->
+                <form class="cyber-form auth-form" id="signupForm" style="display: none;">
+                    <h3 class="form-title">Üye Ol</h3>
+                    <div class="cyber-field">
+                        <input type="text" id="signup-firstname" placeholder="İsim" autocomplete="given-name" required />
+                    </div>
+
+                    <div class="cyber-field">
+                        <input type="text" id="signup-lastname" placeholder="Soyisim" autocomplete="family-name" required />
+                    </div>
+
+                    <div class="cyber-field">
+                        <input type="email" id="signup-email" placeholder="E-posta" autocomplete="email" required />
+                    </div>
+
+                    <div class="cyber-field">
+                        <input type="password" id="signup-password" placeholder="Şifre (en az 6 karakter)" autocomplete="new-password" minlength="6" required />
+                    </div>
+
+                    <button class="cyber-btn primary full-width" type="submit">
+                        <i class="fas fa-user-plus"></i>
+                        Üye Ol
+                    </button>
+
+                    <div class="form-switch">
+                        <span>Zaten hesabınız var mı?</span>
+                        <button type="button" class="switch-btn" id="show-login">Giriş Yap</button>
+                    </div>
+                </form>
+            </main>
+        </div>
+    </div>
+
+    <!-- Panel Screen - After Login -->
+    <div id="panel-screen" class="screen">
+        <!-- Cyber background -->
+        <div class="cyber-bg">
+            <div class="cyber-line h1"></div>
+            <div class="cyber-line h2"></div>
+            <div class="cyber-line h3"></div>
+            <div class="cyber-line v1"></div>
+            <div class="cyber-line v2"></div>
+            <div class="cyber-line v3"></div>
+        </div>
+
+        <!-- Floating cyber icons -->
+        <i class="fas fa-shield-alt floating-icon icon-shield-left"></i>
+        <i class="fas fa-shield-alt floating-icon icon-shield-right"></i>
+        <i class="fas fa-lock floating-icon icon-lock-left"></i>
+        <i class="fas fa-lock floating-icon icon-lock-right"></i>
+        <i class="fas fa-user-shield floating-icon icon-robot-left"></i>
+        <i class="fas fa-ban floating-icon icon-robot-right"></i>
+        <i class="fas fa-flag floating-icon icon-phone-left"></i>
+        <i class="fas fa-exclamation-triangle floating-icon icon-phone-right"></i>
+        <i class="fas fa-wifi floating-icon icon-wifi-left"></i>
+        <i class="fas fa-eye floating-icon icon-wifi-right"></i>
+        <i class="fas fa-cloud floating-icon icon-cloud"></i>
+        <i class="fas fa-shield-alt floating-icon icon-security-top"></i>
+
+        <!-- Sliding messages -->
+        <div class="message-slider msg1">Siber zorbalığa dur de!</div>
+        <div class="message-slider msg2">Şikayet et • Engelle • Bildir!</div>
+        <div class="message-slider msg3">Güvenli internet kullan</div>
+        <div class="message-slider msg4">Dijital dünyada güvendeyim</div>
+
+        <div class="cyber-welcome-container">
+            <!-- User Info Display -->
+            <div class="user-info-display">
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-name" id="panel-user-name">Kullanıcı Adı</div>
+                <button class="cyber-btn-logout" id="panel-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Çıkış Yap
+                </button>
+            </div>
+
+            <header class="cyber-brand">
+                <div class="logo-shield-wrapper">
+                    <i class="fas fa-shield-alt logo-shield"></i>
+                    <span class="shield-s">S</span>
+                </div>
+                <div class="logo-text-container">
+                    <h1 class="logo-title">SafeStagram</h1>
+                    <div class="logo-subtitle">
+                        <span class="subtitle-text">Şikayet Et</span>
+                        <span class="subtitle-dot">•</span>
+                        <span class="subtitle-text">Engelle</span>
+                        <span class="subtitle-dot">•</span>
+                        <span class="subtitle-text">Bildir</span>
+                    </div>
+                </div>
+            </header>
+
+            <main class="cyber-card">
+                <div class="panel-options">
+                    <button class="cyber-btn primary panel-option" id="app-entry-btn">
+                        <i class="fas fa-play-circle"></i>
+                        <span>Uygulamaya Giriş</span>
+                        <p>Simülasyonu başlatmak için tıklayın</p>
+                    </button>
+
+                    <button class="cyber-btn secondary panel-option" id="academic-panel-btn">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Akademisyen Paneli</span>
+                        <p>Verilerinizi görüntüleyin</p>
+                    </button>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- App Entry Screen -->
+    <div id="app-entry-screen" class="screen">
+        <!-- Cyber background -->
+        <div class="cyber-bg">
+            <div class="cyber-line h1"></div>
+            <div class="cyber-line h2"></div>
+            <div class="cyber-line h3"></div>
+            <div class="cyber-line v1"></div>
+            <div class="cyber-line v2"></div>
+            <div class="cyber-line v3"></div>
+        </div>
+
+        <!-- Floating cyber icons -->
+        <i class="fas fa-shield-alt floating-icon icon-shield-left"></i>
+        <i class="fas fa-shield-alt floating-icon icon-shield-right"></i>
+        <i class="fas fa-lock floating-icon icon-lock-left"></i>
+        <i class="fas fa-lock floating-icon icon-lock-right"></i>
+        <i class="fas fa-user-shield floating-icon icon-robot-left"></i>
+        <i class="fas fa-ban floating-icon icon-robot-right"></i>
+        <i class="fas fa-flag floating-icon icon-phone-left"></i>
+        <i class="fas fa-exclamation-triangle floating-icon icon-phone-right"></i>
+        <i class="fas fa-wifi floating-icon icon-wifi-left"></i>
+        <i class="fas fa-eye floating-icon icon-wifi-right"></i>
+        <i class="fas fa-cloud floating-icon icon-cloud"></i>
+        <i class="fas fa-shield-alt floating-icon icon-security-top"></i>
+
+        <!-- Sliding messages -->
+        <div class="message-slider msg1">Siber zorbalığa dur de!</div>
+        <div class="message-slider msg2">Şikayet et • Engelle • Bildir!</div>
+        <div class="message-slider msg3">Güvenli internet kullan</div>
+        <div class="message-slider msg4">Dijital dünyada güvendeyim</div>
+
+        <div class="cyber-welcome-container">
+            <header class="cyber-brand">
+                <div class="logo-shield-wrapper">
+                    <i class="fas fa-shield-alt logo-shield"></i>
+                    <span class="shield-s">S</span>
+                </div>
+                <div class="logo-text-container">
+                    <h1 class="logo-title">SafeStagram</h1>
+                    <div class="logo-subtitle">
+                        <span class="subtitle-text">Şikayet Et</span>
+                        <span class="subtitle-dot">•</span>
+                        <span class="subtitle-text">Engelle</span>
+                        <span class="subtitle-dot">•</span>
+                        <span class="subtitle-text">Bildir</span>
+                    </div>
+                </div>
+            </header>
+
+            <main class="cyber-card">
+                <form class="cyber-form" id="sessionForm">
+                    <h3 class="form-title">Simülasyon Başlat</h3>
+                    
+                    <div class="cyber-field">
+                        <input type="text" id="participant-name" placeholder="Adınız" autocomplete="name" required />
+                    </div>
+
+                    <div class="cyber-field">
+                        <input type="number" id="participant-age" placeholder="Yaşınız" min="1" max="120" required />
                     </div>
 
                     <div class="cyber-field">
                         <label for="session-type">Oturum Türü:</label>
-                        <select id="session-type" name="oturum" required>
+                        <select id="session-type" required>
                             <option value="baslama" selected>Başlama Düzeyi</option>
                             <option value="uygulama">Uygulama</option>
                             <option value="izleme-2">İzleme (2.Hafta)</option>
@@ -406,16 +610,14 @@
                     </div>
 
                     <div class="cyber-btnRow">
-                        <button class="cyber-btn primary" type="button" id="start-session">
+                        <button class="cyber-btn primary" type="submit">
+                            <i class="fas fa-play"></i>
                             Başla
                         </button>
 
-                        <button class="cyber-btn secondary" type="button" id="admin-login">
-                            <svg class="cyber-icon" viewBox="0 0 24 24" fill="none">
-                                <path d="M5 13.18v3.69c0 .6 0 1.2 7 4 7-2.8 7-3.4 7-4v-3.69l-7 3.82-7-3.82z" fill="white"/>
-                                <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z" fill="white" opacity="0.9"/>
-                            </svg>
-                            Akademisyen Paneli
+                        <button class="cyber-btn secondary" type="button" id="back-to-panel">
+                            <i class="fas fa-arrow-left"></i>
+                            Geri
                         </button>
                     </div>
                 </form>
@@ -423,21 +625,15 @@
         </div>
     </div>
 
-    <!-- Akademisyen Giriş Ekranı -->
-    <div id="admin-login-screen" class="screen">
-        <div class="admin-container">
-            <h2>Akademisyen Girişi</h2>
-            <input type="password" id="admin-password" placeholder="Şifre">
-            <button class="btn-primary" id="admin-submit">Giriş</button>
-            <button class="btn-secondary" id="admin-back">Geri</button>
-        </div>
-    </div>
 
     <!-- Akademisyen Kontrol Paneli -->
     <div id="admin-panel" class="screen">
         <div class="admin-panel-header">
             <h2>Akademisyen Kontrol Paneli</h2>
-            <button class="btn-secondary" id="logout">Çıkış</button>
+            <div class="admin-user-info">
+                <span id="admin-user-name">Kullanıcı</span>
+                <button class="btn-secondary" id="admin-logout">Çıkış</button>
+            </div>
         </div>
         
         <div class="admin-controls">
