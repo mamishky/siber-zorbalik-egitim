@@ -6,39 +6,49 @@
     <title>SafeStagram - Güvenli Sosyal Medya Eğitimi</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Satisfy&display=swap">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Poppins:wght@400;600;700&display=swap">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- Giriş Ekranı -->
     <div id="welcome-screen" class="screen active">
         <div class="welcome-container">
-            <div class="logo">
-                <div class="cyber-shield">
-                    <div class="matrix-effect"></div>
-                    <i class="fas fa-shield-alt"></i>
-                </div>
+            <div class="logo-container">
+                <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    <rect x="10" y="9" width="4" height="6" rx="1"></rect>
+                </svg>
             </div>
-            <h1 class="safestagram-title">SafeStagram</h1>
+
+            <h1 class="site-title">SafeStagram</h1>
             <p class="subtitle">Güvenli Sosyal Medya Eğitimi</p>
-            
-            <div class="welcome-form">
-                <input type="text" id="participant-name" placeholder="Adınız" required>
-                <input type="number" id="participant-age" placeholder="Yaşınız" min="1" max="99" required>
-                
-                <div class="session-select">
-                    <label>Oturum Türü:</label>
-                    <select id="session-type">
-                        <option value="baslama">Başlama Düzeyi</option>
-                        <option value="uygulama">Uygulama</option>
-                        <option value="izleme-2">İzleme (2. Hafta)</option>
-                        <option value="izleme-4">İzleme (4. Hafta)</option>
-                        <option value="izleme-8">İzleme (8. Hafta)</option>
-                    </select>
-                </div>
-                
-                <button class="btn-primary" id="start-session">Başla</button>
-                <button class="btn-secondary" id="admin-login"><i class="fas fa-lock"></i> Akademisyen Paneli</button>
+
+            <div class="login-card">
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="participant-name" placeholder="Adınız" required>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="number" class="form-control" id="participant-age" placeholder="Yaşınız" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Oturum Türü:</label>
+                        <select class="form-control" id="session-type">
+                            <option value="baslama">Başlama Düzeyi</option>
+                            <option value="uygulama">Uygulama</option>
+                            <option value="izleme-2">İzleme (2. Hafta)</option>
+                            <option value="izleme-4">İzleme (4. Hafta)</option>
+                            <option value="izleme-8">İzleme (8. Hafta)</option>
+                        </select>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary" id="start-session">Başla</button>
+                        <button type="button" class="btn btn-secondary" id="admin-login">Akademisyen Girişi</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
