@@ -542,8 +542,10 @@ const SCENARIOS = {
 
 // Oturum ve zorbalık türü etiketleri
 const SESSION_LABELS = {
+    "genelleme-on": "Genelleme Ön-Test",
     baslama: "Başlama Düzeyi",
     uygulama: "Uygulama",
+    "genelleme-son": "Genelleme Son-Test",
     "izleme-2": "İzleme (2. Hafta)",
     "izleme-4": "İzleme (4. Hafta)",
     "izleme-8": "İzleme (8. Hafta)"
