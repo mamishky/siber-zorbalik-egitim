@@ -6,6 +6,20 @@ Safestagram, tez çalışması için geliştirilmiş Instagram benzeri bir siber
 
 ## 🎯 Temel Özellikler
 
+### 0. Firebase Üyelik Sistemi (YENİ!)
+
+- **Üye Ol**: İsim, Soyisim, E-posta, Şifre ile kayıt
+- **Giriş Yap**: E-posta ve şifre ile giriş
+- **Kullanıcı Profili**: Sol üst köşede isim-soyisim gösterimi
+- **Çıkış Yap**: Güvenli çıkış yapma
+- **Panel Ekranı**: İki aşamalı giriş sistemi
+  - Uygulamaya Giriş: Simülasyonu başlat
+  - Akademisyen Paneli: Sadece kendi verilerinizi görüntüleyin
+- **Firestore Veritabanı**: Her kullanıcının verileri kendi hesabına özel saklanır
+- **Yeni Logo Tasarımı**: Righteous font ile özel SafeStagram logosu
+  - Altın/sarı kalkan içinde "S" harfi
+  - Animasyonlu alt yazı: "Şikayet Et • Engelle • Bildir" (renk geçişli)
+
 ### 1. Instagram Benzeri Arayüz
 - **Ana Sayfa (Feed)**: Çocuk dostu 35+ post (kediler, köpekler, tavşanlar, kelebekler, gökkuşağı, balonlar, pastalar, dondurma, oyunlar, sporlar, sanat, müzik, plaj, lunapark, sirk, hayvanat bahçesi hayvanları ve daha fazlası)
 - **Hikayeler (Stories)**: Kullanıcı hikayeleri
@@ -71,7 +85,22 @@ Sistem aşağıdaki 5 beceriyi değerlendirir:
 4. ✓/✗ Siber zorbalık içeren mesajı şikâyet etme
 5. ✓/✗ Siber zorbalık yapan kişiyi engelleme
 
-### 7. Veri Kayıt (LocalStorage + Excel Export)
+### 7. Veri Kayıt (Firebase Firestore + LocalStorage + Excel Export)
+
+**Firestore Veritabanı Yapısı:**
+```
+users/
+  {userId}/
+    firstName, lastName, email, createdAt
+    sessions/
+      {sessionId}/
+        participantName, participantAge, sessionType, startedAt, status
+        data/
+          {dataId}/
+            participantId, participantName, participantAge, sessionType
+            sessionLabel, bullyingType, bullyingLabel
+            messageType, action, reactionTime, hintUsed, correct, timestamp
+```
 
 Her etkileşim için kaydedilen bilgiler:
 - Katılımcı ID (otomatik oluşturulur), adı, yaşı
@@ -83,13 +112,15 @@ Her etkileşim için kaydedilen bilgiler:
 
 ### 8. Akademisyen Kontrol Paneli
 
-- **Şifre**: `06112002`
-- Tüm verileri görüntüleme
+- **Giriş**: Firebase Authentication ile güvenli giriş
+- **Kullanıcıya Özel Veriler**: Sadece giriş yapan kullanıcının verileri görüntülenir
+- Tüm oturumlardan verileri görüntüleme
 - Oturum ve zorbalık türüne göre filtreleme
 - Excel (CSV) formatında veri aktarma
-- Tüm verileri temizleme
+- Kendi verilerini temizleme
+- Sol üstte kullanıcı adı gösterimi
 
-**Not**: Bu demo/tez amaçlı basit bir şifredir. Gerçek kullanımda güvenli kimlik doğrulama kullanılmalıdır.
+**Not**: Artık şifre sistemi kaldırıldı. Her kullanıcı kendi Firebase hesabı ile giriş yapıyor.
 
 ### 9. Özet Ekranı
 
@@ -104,7 +135,23 @@ Her oturum sonunda gösterilen bilgiler:
 ### Gereksinimler
 - Modern web tarayıcı (Chrome, Firefox, Safari, Edge)
 - JavaScript etkin olmalı
-- İnternet bağlantısı (Font Awesome ve DiceBear avatarları için)
+- İnternet bağlantısı (Firebase, Font Awesome ve DiceBear avatarları için)
+
+### Firebase Konfigürasyonu
+
+Uygulama Firebase Authentication ve Firestore kullanmaktadır. Firebase konfigürasyonu `app.js` dosyasında tanımlıdır:
+
+```javascript
+const firebaseConfig = {
+  apiKey: "AIzaSyCvQGYOPCK1Oc94Qlb2omZKe3XAhmL9yjU",
+  authDomain: "safestagram-a458a.firebaseapp.com",
+  projectId: "safestagram-a458a",
+  storageBucket: "safestagram-a458a.firebasestorage.app",
+  messagingSenderId: "1046452988416",
+  appId: "1:1046452988416:web:588633779fff2ad42b86e5",
+  measurementId: "G-VEBYYDND7H"
+};
+```
 
 ### Çalıştırma
 
@@ -145,21 +192,40 @@ Uygulama şu adreste yayınlanacaktır:
 ```
 siber-zorbalik-egitim/
 │
-├── index.html          # Ana HTML dosyası (tüm ekranlar)
-├── styles.css          # CSS stilleri (Instagram benzeri tasarım)
+├── index.html          # Ana HTML dosyası (tüm ekranlar + Firebase SDK)
+├── styles.css          # CSS stilleri (Instagram + Yeni Logo Tasarımı)
 ├── scenarios.js        # Yeni senaryo yapısı (5 oturum × 5 zorbalık türü × 5 kişi)
-├── app.js              # Ana JavaScript uygulama mantığı
+├── app.js              # Ana JavaScript + Firebase entegrasyonu
 └── README.md           # Proje dokümantasyonu
 ```
 
 ## 🎮 Kullanım Kılavuzu
 
+### Yeni Kullanıcı Kayıt ve Giriş
+
+1. **Üye Ol (İlk Kullanım)**:
+   - İsim ve soyisim girin
+   - E-posta adresi girin
+   - Şifre oluşturun (en az 6 karakter)
+   - "Üye Ol" butonuna tıklayın
+   - "Üyeliğiniz onaylandı!" bildirimi görünecek
+
+2. **Giriş Yap**:
+   - E-posta ve şifre ile giriş yapın
+   - Başarılı girişte panel ekranı açılacak
+   - Sol üstte isim-soyisminiz görünecek
+
+3. **Panel Ekranı**:
+   - "Uygulamaya Giriş": Simülasyonu başlatmak için
+   - "Akademisyen Paneli": Verilerinizi görüntülemek için
+   - "Çıkış Yap": Güvenli çıkış yapmak için
+
 ### Katılımcı İçin
 
-1. **Giriş Yapma**:
+1. **Simülasyon Başlatma**:
+   - Panel ekranında "Uygulamaya Giriş" tıklayın
    - Adınızı ve yaşınızı girin
    - Oturum türünü seçin (Başlama Düzeyi, Uygulama, İzleme 2/4/8. Hafta)
-   - Zorbalık türünü seçin (Sözel, Dışlanma, Tehdit, İftira, Kimlik)
    - "Başla" butonuna tıklayın
 
 2. **Ana Ekran**:
@@ -173,23 +239,24 @@ siber-zorbalik-egitim/
    - Mesaja tıklayarak sohbeti açın
    - Güvenli mesajlara metin ile cevap verin
    - Siber zorbalık mesajlarında sırasıyla:
-     1. ŞİKAYET ET butonuna basın
+     1. ŞİKAYET ET butonuna basın (şikayet nedeni seçin)
      2. ENGELLE butonuna basın
    - 5 saniye beklerseniz butonlar yanıp sönecek (ipucu)
    - Yanlış butona basarsanız doğru buton yanıp sönecek
 
 4. **Oturum Sonu**:
    - Özet ekranında performansınızı görün
-   - "Bitir" butonuyla ana ekrana dönün
+   - "Bitir" butonuyla panel ekranına dönün
 
 ### Akademisyen İçin
 
 1. **Giriş**:
-   - "Akademisyen Girişi" butonuna tıklayın
-   - Şifre: `06112002`
+   - Firebase hesabınız ile giriş yapın (E-posta + Şifre)
+   - Panel ekranında "Akademisyen Paneli" tıklayın
 
 2. **Veri Görüntüleme**:
-   - Tüm katılımcı verilerini tabloda görün
+   - Sadece kendi oturumlarınızdan verileri görün
+   - Sol üstte kullanıcı adınız görünür
    - Filtreleme yapın (oturum türü, zorbalık türü)
 
 3. **Veri Aktarma**:
@@ -197,16 +264,19 @@ siber-zorbalik-egitim/
    - Excel veya Google Sheets ile açın
 
 4. **Veri Yönetimi**:
-   - "Tüm Verileri Temizle" ile tüm kayıtları silin
+   - "Tüm Verileri Temizle" ile kendi kayıtlarınızı silin
    - Dikkat: Bu işlem geri alınamaz!
+   - Her kullanıcının verileri birbirinden bağımsızdır
 
 ## 🛠️ Teknik Detaylar
 
 ### Kullanılan Teknolojiler
 
 - **Frontend**: Vanilla HTML5, CSS3, JavaScript (ES6+)
-- **Veri Depolama**: Browser LocalStorage
+- **Backend**: Firebase Authentication & Firestore
+- **Veri Depolama**: Cloud Firestore + Browser LocalStorage (yedek)
 - **İkonlar**: Font Awesome 6.4.0
+- **Fontlar**: Righteous (Logo), Orbitron, Poppins
 - **Avatarlar**: DiceBear Avataaars API
 - **Export**: CSV formatında veri aktarma
 
@@ -217,7 +287,44 @@ siber-zorbalik-egitim/
 - ✅ Safari 14+
 - ✅ Edge 90+
 
-### LocalStorage Kullanımı
+### Firestore Kullanımı
+
+Veriler Firebase Cloud Firestore'da aşağıdaki yapıda saklanır:
+
+```javascript
+// Kullanıcı Koleksiyonu
+users/{userId}
+  - firstName: "Ahmet"
+  - lastName: "Yılmaz"
+  - email: "ahmet@example.com"
+  - createdAt: Timestamp
+
+// Oturum Alt-Koleksiyonu
+users/{userId}/sessions/{sessionId}
+  - participantName: "Ali"
+  - participantAge: 14
+  - sessionType: "baslama"
+  - startedAt: Timestamp
+  - status: "active"
+
+// Veri Alt-Koleksiyonu
+users/{userId}/sessions/{sessionId}/data/{dataId}
+  - participantId: "P1704388245123"
+  - participantName: "Ali"
+  - participantAge: 14
+  - sessionType: "baslama"
+  - sessionLabel: "Başlama Düzeyi"
+  - bullyingType: "sozel"
+  - bullyingLabel: "Sözel/Psikolojik Saldırı"
+  - messageType: "cyberbullying"
+  - action: "report"
+  - reactionTime: "3.45"
+  - hintUsed: false
+  - correct: true
+  - timestamp: "2024-01-15T10:30:45.123Z"
+```
+
+### LocalStorage Kullanımı (Yedek)
 
 Veriler tarayıcının LocalStorage'ında `siberguven_data` anahtarı altında JSON formatında saklanır:
 
@@ -276,15 +383,33 @@ CSV dosyasında yer alan sütunlar:
 
 ## 🔒 Güvenlik ve Gizlilik
 
-- Veriler sadece tarayıcının LocalStorage'ında saklanır
-- Sunucuya veri gönderilmez
-- Katılımcı ID otomatik oluşturulur (timestamp bazlı)
-- Akademisyen şifresi basit bir demo şifresidir (tez/eğitim amaçlı)
-- **Önemli**: Gerçek kullanımda:
-  - Sunucu taraflı kimlik doğrulama kullanılmalıdır
-  - Veriler güvenli bir veritabanında saklanmalıdır
-  - HTTPS protokolü kullanılmalıdır
-  - Katılımcı verileri şifrelenmelidir
+- **Firebase Authentication**: Güvenli kullanıcı kimlik doğrulama
+- **Firestore Security Rules**: Her kullanıcı sadece kendi verilerine erişebilir
+- **Veri İzolasyonu**: Kullanıcı verileri tamamen birbirinden ayrı
+- **HTTPS**: Firebase otomatik olarak HTTPS kullanır
+- **Şifre Güvenliği**: Firebase şifreleri güvenli şekilde hashler
+- **Yerel Yedekleme**: Veriler ayrıca LocalStorage'da da saklanır
+- **Katılımcı Gizliliği**: Katılımcı ID'leri timestamp bazlı oluşturulur
+
+**Firestore Güvenlik Kuralları (Önerilen):**
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      match /sessions/{sessionId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        
+        match /data/{dataId} {
+          allow read, write: if request.auth != null && request.auth.uid == userId;
+        }
+      }
+    }
+  }
+}
+```
 
 ## 🤝 Katkıda Bulunma
 
@@ -308,6 +433,19 @@ Proje Sahibi: [mamishky](https://github.com/mamishky)
 - Çocuk dostu içerik ve renkli tasarım
 
 ## 🔄 Güncellemeler
+
+### v3.0.0 (2026) - Firebase Entegrasyonu
+- 🔥 Firebase Authentication entegrasyonu
+- 🔐 Üyelik sistemi (Üye Ol + Giriş Yap)
+- 👤 Kullanıcı profili gösterimi
+- 🎨 Yeni SafeStagram logo tasarımı (Righteous font)
+- 🛡️ Altın/sarı kalkan içinde "S" harfi
+- 🌈 Animasyonlu alt yazı (renk geçişli)
+- 🔒 Firestore ile kullanıcıya özel veri saklama
+- 📊 Panel ekranı (İki aşamalı giriş sistemi)
+- 🎯 Akademisyen paneli sadece kendi verileri gösterir
+- ⚡ Siber güvenlik temalı arka plan (floating elementler)
+- 🔐 Şifre sistemi kaldırıldı (Firebase Auth kullanımda)
 
 ### v2.0.0 (2026)
 - ✨ Yeni mesaj inbox/liste sistemi
