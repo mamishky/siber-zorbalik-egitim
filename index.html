@@ -384,12 +384,8 @@
 
         <div class="cyber-welcome-container">
             <header class="cyber-brand">
-                <div class="logo-shield-wrapper">
-                    <i class="fas fa-shield-alt logo-shield"></i>
-                    <span class="shield-s">S</span>
-                </div>
                 <div class="logo-text-container">
-                    <h1 class="logo-title">SafeStagram</h1>
+                    <h1 class="logo-title"><span class="letter">S</span><span class="letter">a</span><span class="letter">f</span><span class="letter">e</span><span class="letter yellow-s">s</span><span class="letter">t</span><span class="letter">a</span><span class="letter">g</span><span class="letter">r</span><span class="letter">a</span><span class="letter">m</span></h1>
                     <div class="logo-subtitle">
                         <span class="subtitle-text">Şikayet Et</span>
                         <span class="subtitle-dot">•</span>
@@ -502,12 +498,8 @@
             </div>
 
             <header class="cyber-brand">
-                <div class="logo-shield-wrapper">
-                    <i class="fas fa-shield-alt logo-shield"></i>
-                    <span class="shield-s">S</span>
-                </div>
                 <div class="logo-text-container">
-                    <h1 class="logo-title">SafeStagram</h1>
+                    <h1 class="logo-title"><span class="letter">S</span><span class="letter">a</span><span class="letter">f</span><span class="letter">e</span><span class="letter yellow-s">s</span><span class="letter">t</span><span class="letter">a</span><span class="letter">g</span><span class="letter">r</span><span class="letter">a</span><span class="letter">m</span></h1>
                     <div class="logo-subtitle">
                         <span class="subtitle-text">Şikayet Et</span>
                         <span class="subtitle-dot">•</span>
@@ -528,7 +520,7 @@
 
                     <button class="cyber-btn secondary panel-option" id="academic-panel-btn">
                         <i class="fas fa-chart-bar"></i>
-                        <span>Akademisyen Paneli</span>
+                        <span>Uygulamacı Paneli</span>
                         <p>Verilerinizi görüntüleyin</p>
                     </button>
                 </div>
@@ -570,12 +562,8 @@
 
         <div class="cyber-welcome-container">
             <header class="cyber-brand">
-                <div class="logo-shield-wrapper">
-                    <i class="fas fa-shield-alt logo-shield"></i>
-                    <span class="shield-s">S</span>
-                </div>
                 <div class="logo-text-container">
-                    <h1 class="logo-title">SafeStagram</h1>
+                    <h1 class="logo-title"><span class="letter">S</span><span class="letter">a</span><span class="letter">f</span><span class="letter">e</span><span class="letter yellow-s">s</span><span class="letter">t</span><span class="letter">a</span><span class="letter">g</span><span class="letter">r</span><span class="letter">a</span><span class="letter">m</span></h1>
                     <div class="logo-subtitle">
                         <span class="subtitle-text">Şikayet Et</span>
                         <span class="subtitle-dot">•</span>
@@ -601,12 +589,28 @@
                     <div class="cyber-field">
                         <label for="session-type">Oturum Türü:</label>
                         <select id="session-type" required>
+                            <option value="genelleme-on">Genelleme Ön-Test</option>
                             <option value="baslama" selected>Başlama Düzeyi</option>
                             <option value="uygulama">Uygulama</option>
-                            <option value="izleme-2">İzleme (2.Hafta)</option>
-                            <option value="izleme-4">İzleme (4.Hafta)</option>
-                            <option value="izleme-8">İzleme (8.Hafta)</option>
+                            <option value="genelleme-son">Genelleme Son-Test</option>
+                            <option value="izleme-2">İzleme (2. Hafta)</option>
+                            <option value="izleme-4">İzleme (4. Hafta)</option>
+                            <option value="izleme-8">İzleme (8. Hafta)</option>
                         </select>
+                    </div>
+
+                    <div class="cyber-field">
+                        <label>İpucu Ayarları:</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="radio" name="hint-option" id="hint-use" value="use" checked />
+                                <span>İpucu Kullan</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="radio" name="hint-option" id="hint-no-use" value="no-use" />
+                                <span>İpucu Kullanma</span>
+                            </label>
+                        </div>
                     </div>
 
                     <div class="cyber-btnRow">
@@ -626,10 +630,10 @@
     </div>
 
 
-    <!-- Akademisyen Kontrol Paneli -->
+    <!-- Uygulamacı Kontrol Paneli -->
     <div id="admin-panel" class="screen">
         <div class="admin-panel-header">
-            <h2>Akademisyen Kontrol Paneli</h2>
+            <h2>Uygulamacı Kontrol Paneli</h2>
             <div class="admin-user-info">
                 <span id="admin-user-name">Kullanıcı</span>
                 <button class="btn-secondary" id="admin-logout">Çıkış</button>
@@ -644,8 +648,10 @@
         <div class="data-filters">
             <select id="filter-session">
                 <option value="">Tüm Oturumlar</option>
+                <option value="genelleme-on">Genelleme Ön-Test</option>
                 <option value="baslama">Başlama Düzeyi</option>
                 <option value="uygulama">Uygulama</option>
+                <option value="genelleme-son">Genelleme Son-Test</option>
                 <option value="izleme-2">İzleme (2. Hafta)</option>
                 <option value="izleme-4">İzleme (4. Hafta)</option>
                 <option value="izleme-8">İzleme (8. Hafta)</option>
@@ -665,6 +671,17 @@
 
     <!-- Instagram Benzeri Ana Ekran -->
     <div id="main-app" class="screen">
+        <!-- Instagram DM Notification Toast -->
+        <div class="dm-notification-toast" id="dm-notification-toast" style="display: none;">
+            <div class="dm-notif-avatar">
+                <img id="dm-notif-avatar" src="" alt="Avatar">
+            </div>
+            <div class="dm-notif-content">
+                <div class="dm-notif-sender" id="dm-notif-sender"></div>
+                <div class="dm-notif-preview" id="dm-notif-preview"></div>
+            </div>
+        </div>
+
         <!-- Üst Bar -->
         <header class="top-bar">
             <div class="logo-container">
@@ -769,6 +786,9 @@
 
         <!-- Zorbalık Aksiyonları -->
         <div class="action-buttons" id="action-buttons" style="display: none;">
+            <div class="unfollowed-message">
+                📩 Takip etmediğin birinden gelen mesaj
+            </div>
             <button class="action-btn report-btn" id="report-btn">
                 <i class="fas fa-flag"></i> ŞİKAYET ET
             </button>

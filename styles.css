@@ -1635,11 +1635,26 @@ select.form-control {
     font-weight: 400;
     letter-spacing: 1px;
     margin: 0;
+}
+
+.logo-title .letter {
+    display: inline-block;
     background: linear-gradient(180deg, #fff 0%, #22d3ee 60%, #a78bfa 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     filter: drop-shadow(0 0 20px rgba(34,211,238,.4));
+}
+
+.logo-title .letter.yellow-s {
+    background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 25px rgba(251,191,36,.6));
+    font-weight: 700;
+    transform: scale(1.1);
+    display: inline-block;
 }
 
 .logo-subtitle {
@@ -1911,6 +1926,126 @@ select.form-control {
         transform: translateX(0);
         opacity: 1;
     }
+}
+
+/* Instagram DM Notification Toast */
+.dm-notification-toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 12px 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 400px;
+    width: 90%;
+    animation: slideDownFade 0.3s ease-out;
+    cursor: pointer;
+}
+
+@keyframes slideDownFade {
+    from {
+        transform: translateX(-50%) translateY(-100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+.dm-notif-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.dm-notif-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.dm-notif-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.dm-notif-sender {
+    font-weight: 700;
+    font-size: 14px;
+    color: #262626;
+    margin-bottom: 2px;
+}
+
+.dm-notif-preview {
+    font-size: 13px;
+    color: #8e8e8e;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Checkbox Group Styles */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 12px;
+    border: 2px solid #e2e6ea;
+    border-radius: 8px;
+    transition: all 0.2s;
+    background: white;
+}
+
+.checkbox-label:hover {
+    border-color: #7c3aed;
+    background: #f8f7ff;
+}
+
+.checkbox-label input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #7c3aed;
+}
+
+.checkbox-label span {
+    font-weight: 600;
+    font-size: 15px;
+    color: #0f172a;
+}
+
+.checkbox-label input[type="radio"]:checked + span {
+    color: #7c3aed;
+}
+
+/* Unfollowed Message Header */
+.unfollowed-message {
+    background: #fff3cd;
+    color: #856404;
+    padding: 12px 16px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
+    border: 2px solid #ffc107;
+    margin-bottom: 10px;
 }
 
 /* Responsive Adjustments */

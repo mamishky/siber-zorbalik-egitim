@@ -14,6 +14,158 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+// Gemini API Key (obfuscated)
+const _0x = ['QUl6YVN5QzVuekZvSXJqanZFMmtqenFBbkpsdHlVOXNvX2hWeXdJ'];
+const getGeminiKey = () => atob(_0x[0]);
+
+// Gemini AI Integration Functions
+async function generateBullyingMessage(bullyingType) {
+    const bullyingTypeLabels = {
+        'sozel': 'Sözel/Psikolojik Saldırı',
+        'dislanma': 'Sosyal Dışlanma',
+        'tehdit': 'Tehdit ve Şantaj',
+        'iftira': 'Yanlış Bilgi/İftira/Dedikodu',
+        'kimlik': 'Kimlik Taklidi/Sahte Hesap'
+    };
+    
+    const prompt = `Sen bir lise öğrencisisin. Özel eğitim meslek okulunda okuyan, zihin yetersizliği olan bir öğrenciye yönelik "${bullyingTypeLabels[bullyingType]}" türünde siber zorbalık içeren KISA bir mesaj yaz.
+
+Kurallar:
+- Mesaj 1-2 cümle olsun
+- Basit ve anlaşılır Türkçe kullan
+- Emoji kullanabilirsin
+- Sadece mesajı yaz, başka açıklama ekleme
+
+Zorbalık türleri:
+- Sözel/Psikolojik Saldırı: Hakaret, aşağılama, küçümseme
+- Sosyal Dışlanma: Gruptan atma, yalnız bırakma
+- Tehdit ve Şantaj: Korkutma, tehdit etme
+- Yanlış Bilgi/İftira/Dedikodu: Yalan haber yayma
+- Kimlik Taklidi/Sahte Hesap: Başkası gibi davranma`;
+    
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${getGeminiKey()}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{
+                        text: prompt
+                    }]
+                }]
+            })
+        });
+        
+        const data = await response.json();
+        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+            return data.candidates[0].content.parts[0].text.trim();
+        }
+    } catch (error) {
+        console.error('Error generating bullying message:', error);
+    }
+    
+    // Fallback to predefined messages if API fails
+    const fallbacks = {
+        'sozel': 'Sen gerçekten çok aptalsın, hiçbir şey bilmiyorsun!',
+        'dislanma': 'Seni partiye davet etmedik, kimse seni istemiyor.',
+        'tehdit': 'Eğer bunu birine söylersen seni döverim!',
+        'iftira': 'Herkes senin hırsızlık yaptığını söylüyor, doğru mu?',
+        'kimlik': 'Ben senin en iyi arkadaşınım, şifreni söyler misin?'
+    };
+    return fallbacks[bullyingType] || 'Mesaj yüklenemedi.';
+}
+
+async function generateFriendlyMessage() {
+    const prompt = `Sen bir lise öğrencisisin. Özel eğitim meslek okulunda okuyan, zihin yetersizliği olan bir arkadaşına mesaj atacaksın.
+
+Konular (birini seç):
+- Film/dizi önerisi
+- Hafta sonu planı
+- Okul hakkında sohbet
+- Hobi paylaşımı
+- Doğum günü/kutlama
+
+Kurallar:
+- Arkadaşça bir sohbet başlat
+- Basit ve anlaşılır Türkçe kullan
+- 1-2 cümle olsun
+- Cevap bekleyen bir soru sor
+- Emoji kullanabilirsin`;
+    
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${getGeminiKey()}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{
+                        text: prompt
+                    }]
+                }]
+            })
+        });
+        
+        const data = await response.json();
+        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+            return data.candidates[0].content.parts[0].text.trim();
+        }
+    } catch (error) {
+        console.error('Error generating friendly message:', error);
+    }
+    
+    return 'Selam! Nasılsın? 😊';
+}
+
+async function continueConversation(conversationHistory, userMessage) {
+    const historyText = conversationHistory.map(msg => 
+        `${msg.sender === 'user' ? 'Ben' : 'Arkadaşın'}: ${msg.text}`
+    ).join('\n');
+    
+    const prompt = `Sen bir lise öğrencisisin. Özel eğitim meslek okulunda okuyan, zihin yetersizliği olan bir arkadaşınla sohbet ediyorsun.
+
+Sohbet geçmişi:
+${historyText}
+
+Kullanıcının son mesajı: "${userMessage}"
+
+Kurallar:
+- Arkadaşça ve sıcak ol
+- Basit ve anlaşılır Türkçe kullan
+- 1-2 cümle cevap ver
+- Sohbeti devam ettirecek bir soru sorabilirsin
+- Emoji kullanabilirsin
+- 2-3 mesaj sonra sohbeti doğal şekilde bitir`;
+    
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${getGeminiKey()}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{
+                        text: prompt
+                    }]
+                }]
+            })
+        });
+        
+        const data = await response.json();
+        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+            return data.candidates[0].content.parts[0].text.trim();
+        }
+    } catch (error) {
+        console.error('Error continuing conversation:', error);
+    }
+    
+    return 'Anladım 😊 Teşekkürler!';
+}
+
 // Current user state
 let currentUser = null;
 
@@ -218,6 +370,7 @@ document.getElementById('sessionForm').addEventListener('submit', async (e) => {
     const name = document.getElementById('participant-name').value.trim();
     const age = document.getElementById('participant-age').value;
     const sessionType = document.getElementById('session-type').value;
+    const hintEnabled = document.getElementById('hint-use').checked;
     
     if (!name || !age || !sessionType) {
         showNotification('Hata', 'Lütfen tüm alanları doldurun!', 'error');
@@ -234,6 +387,7 @@ document.getElementById('sessionForm').addEventListener('submit', async (e) => {
     currentSession.currentBullyingType = 'all';
     currentSession.startTime = new Date();
     currentSession.userId = currentUser.uid;
+    currentSession.hintEnabled = hintEnabled;
     
     // Create session in Firestore
     try {
@@ -242,6 +396,7 @@ document.getElementById('sessionForm').addEventListener('submit', async (e) => {
                 participantName: name,
                 participantAge: parseInt(age),
                 sessionType: sessionType,
+                hintEnabled: hintEnabled,
                 startedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 status: 'active'
             });
@@ -257,9 +412,15 @@ document.getElementById('sessionForm').addEventListener('submit', async (e) => {
     // Prepare message queue - EXACTLY 10 messages (5 cyberbullying + 5 safe)
     currentSession.messageQueue = [];
     
+    // Map session type to scenarios (handle new session types)
+    let scenarioType = sessionType;
+    if (sessionType === 'genelleme-on' || sessionType === 'genelleme-son') {
+        scenarioType = 'baslama'; // Use baslama scenarios for genelleme tests
+    }
+    
     // Iterate through all 5 bullying types
     BULLYING_TYPES.forEach(bullyingType => {
-        const allScenarios = SCENARIOS[sessionType][bullyingType];
+        const allScenarios = SCENARIOS[scenarioType] ? SCENARIOS[scenarioType][bullyingType] : SCENARIOS['baslama'][bullyingType];
         
         // Separate cyberbullying and safe messages
         const cyberbullyingMessages = allScenarios.filter(s => 
@@ -335,7 +496,8 @@ let currentSession = {
     messageQueue: [],
     currentMessageIndex: 0,
     selectedComplaintReason: null,
-    conversationHistory: {} // Stores message history by sender
+    conversationHistory: {}, // Stores message history by sender
+    hintEnabled: true // Default to true
 };
 
 // Persistent message history functions
@@ -738,7 +900,7 @@ function showScreen(screenId) {
     document.getElementById(screenId).classList.add('active');
 }
 
-// Mesaj bildirimi göster
+// Mesaj bildirimi göster (Instagram DM style)
 function sendNextMessageNotification() {
     // Check if we've completed all 10 messages
     if (currentSession.currentMessageIndex >= 10 || currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
@@ -754,8 +916,49 @@ function sendNextMessageNotification() {
     badge.textContent = currentSession.pendingMessages;
     badge.style.display = 'flex';
     
+    // Get current message info for notification
+    const scenario = currentSession.messageQueue[currentSession.currentMessageIndex];
+    const toast = document.getElementById('dm-notification-toast');
+    const avatar = document.getElementById('dm-notif-avatar');
+    const sender = document.getElementById('dm-notif-sender');
+    const preview = document.getElementById('dm-notif-preview');
+    
+    // Set notification content
+    avatar.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}`;
+    sender.textContent = scenario.sender;
+    
+    // Get preview text
+    let previewText = '';
+    if (scenario.conversation && scenario.conversation.length > 0) {
+        previewText = scenario.conversation[0].incoming;
+    } else if (scenario.messages && scenario.messages.length > 0) {
+        previewText = scenario.messages[0].text;
+    }
+    
+    // Truncate if too long
+    if (previewText.length > 50) {
+        previewText = previewText.substring(0, 50) + '...';
+    }
+    preview.textContent = previewText;
+    
+    // Show toast
+    toast.style.display = 'flex';
+    
     // Bildirim sesini çal
     playNotificationSound();
+    
+    // Click handler to open message
+    toast.onclick = () => {
+        toast.style.display = 'none';
+        if (currentSession.pendingMessages > 0) {
+            showInbox();
+        }
+    };
+    
+    // Auto hide after 10 seconds
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 10000);
 }
 
 // Mesaj ikonuna tıklandığında - Inbox'ı göster
@@ -1323,16 +1526,18 @@ function showComplaintReasonDialog() {
     // Modalı göster
     modal.style.display = 'flex';
     
-    // 5 saniye sonra doğru cevabı yanıp söndür
-    setTimeout(() => {
-        if (!currentSession.selectedComplaintReason) {
-            const correctOption = document.querySelector(`[data-reason="${correctReason}"]`);
-            if (correctOption) {
-                correctOption.classList.add('blink-hint');
-                currentSession.stats.hints++;
+    // 5 saniye sonra doğru cevabı yanıp söndür - only if hints enabled
+    if (currentSession.hintEnabled) {
+        setTimeout(() => {
+            if (!currentSession.selectedComplaintReason) {
+                const correctOption = document.querySelector(`[data-reason="${correctReason}"]`);
+                if (correctOption) {
+                    correctOption.classList.add('blink-hint');
+                    currentSession.stats.hints++;
+                }
             }
-        }
-    }, 5000);
+        }, 5000);
+    }
 }
 
 // Şikayet gönder butonu
@@ -1395,6 +1600,11 @@ document.getElementById('submit-complaint').addEventListener('click', () => {
 
 // İpucu göster (sadece butonlar yanıp sönsün, metin YOK)
 function showHint() {
+    // Check if hints are enabled
+    if (!currentSession.hintEnabled) {
+        return; // Don't show hints if disabled
+    }
+    
     const scenario = currentSession.currentScenario;
     const message = scenario.messages[currentSession.messageIndex];
     
@@ -1546,7 +1756,8 @@ document.getElementById('finish-session').addEventListener('click', () => {
         messageQueue: [],
         currentMessageIndex: 0,
         selectedComplaintReason: null,
-        conversationHistory: {}
+        conversationHistory: {},
+        hintEnabled: true
     };
     
     showScreen('panel-screen');
@@ -1783,7 +1994,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 messageQueue: [],
                 currentMessageIndex: 0,
                 selectedComplaintReason: null,
-                conversationHistory: {}
+                conversationHistory: {},
+                hintEnabled: true
             };
             
             // Hide overlay and return to panel screen
