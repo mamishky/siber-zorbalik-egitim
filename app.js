@@ -219,6 +219,10 @@ auth.onAuthStateChanged(async (user) => {
 function updatePanelUserInfo() {
     if (currentUser && currentUser.displayName) {
         document.getElementById('panel-user-name').textContent = currentUser.displayName;
+        const appEntryUserName = document.getElementById('app-entry-user-name');
+        if (appEntryUserName) {
+            appEntryUserName.textContent = currentUser.displayName;
+        }
         const adminUserName = document.getElementById('admin-user-name');
         if (adminUserName) {
             adminUserName.textContent = currentUser.displayName;
@@ -333,6 +337,7 @@ document.getElementById('panel-logout').addEventListener('click', async () => {
 // Panel Buttons
 document.getElementById('app-entry-btn').addEventListener('click', () => {
     showScreen('app-entry-screen');
+    updatePanelUserInfo(); // Update user name display
 });
 
 document.getElementById('academic-panel-btn').addEventListener('click', () => {
@@ -1832,7 +1837,7 @@ document.getElementById('finish-session').addEventListener('click', () => {
     showScreen('panel-screen');
 });
 
-// Akademisyen Panel Fonksiyonları
+// Uygulamacı Panel Fonksiyonları
 async function loadAdminData() {
     if (!currentUser) {
         document.getElementById('data-display').innerHTML = '<p style="text-align: center; padding: 20px;">Lütfen giriş yapın.</p>';

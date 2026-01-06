@@ -235,7 +235,7 @@ select.form-control {
     background: #d63447;
 }
 
-/* Akademisyen Ekranları */
+/* Uygulamacı Ekranları */
 .admin-container {
     display: flex;
     flex-direction: column;
@@ -266,7 +266,7 @@ select.form-control {
     max-width: 400px;
 }
 
-/* Akademisyen Panel */
+/* Uygulamacı Panel */
 .admin-panel-header {
     display: flex;
     justify-content: space-between;
