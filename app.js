@@ -439,9 +439,8 @@ document.getElementById('start-session').addEventListener('click', () => {
     const name = document.getElementById('participant-name').value.trim();
     const age = document.getElementById('participant-age').value;
     const sessionType = document.getElementById('session-type').value;
-    const bullyingType = document.getElementById('bullying-type').value;
     
-    if (!name || !age || !sessionType || !bullyingType) {
+    if (!name || !age || !sessionType) {
         alert('Lütfen tüm alanları doldurun!');
         return;
     }
@@ -451,7 +450,7 @@ document.getElementById('start-session').addEventListener('click', () => {
     currentSession.participantName = name;
     currentSession.participantAge = parseInt(age);
     currentSession.sessionType = sessionType;
-    currentSession.currentBullyingType = bullyingType;
+    currentSession.currentBullyingType = 'all'; // All types are now used
     currentSession.startTime = new Date();
     
     // Navigasyon becerisini başlangıçta true yap
@@ -461,27 +460,40 @@ document.getElementById('start-session').addEventListener('click', () => {
     localStorage.removeItem('safestagram_current_session');
     localStorage.removeItem('safestagram_users');
     
-    // Mesaj kuyruğunu hazırla - EXACTLY 5 messages
-    const allScenarios = SCENARIOS[sessionType][bullyingType];
-    
-    // Separate cyberbullying and safe messages
-    const cyberbullyingMessages = allScenarios.filter(s => 
-        s.messages && s.messages.some(m => m.type === 'cyberbullying')
-    );
-    const safeMessages = allScenarios.filter(s => s.conversation);
-    
-    // Create queue: 3 cyberbullying + 2 safe = 5 total
+    // Mesaj kuyruğunu hazırla - EXACTLY 10 messages (5 cyberbullying + 5 safe)
+    // 1 cyberbullying + 1 safe message from each of the 5 bullying types
     currentSession.messageQueue = [];
     
-    // Add 3 cyberbullying messages
-    for (let i = 0; i < Math.min(3, cyberbullyingMessages.length); i++) {
-        currentSession.messageQueue.push(cyberbullyingMessages[i]);
-    }
-    
-    // Add 2 safe messages
-    for (let i = 0; i < Math.min(2, safeMessages.length); i++) {
-        currentSession.messageQueue.push(safeMessages[i]);
-    }
+    // Iterate through all 5 bullying types
+    BULLYING_TYPES.forEach(bullyingType => {
+        const allScenarios = SCENARIOS[sessionType][bullyingType];
+        
+        // Separate cyberbullying and safe messages
+        const cyberbullyingMessages = allScenarios.filter(s => 
+            s.messages && s.messages.some(m => m.type === 'cyberbullying')
+        );
+        const safeMessages = allScenarios.filter(s => s.conversation);
+        
+        // Add 1 cyberbullying message from this type (randomly selected)
+        if (cyberbullyingMessages.length > 0) {
+            const randomCyberbullying = cyberbullyingMessages[Math.floor(Math.random() * cyberbullyingMessages.length)];
+            // Create a wrapper object to avoid mutating the original scenario
+            currentSession.messageQueue.push({
+                ...randomCyberbullying,
+                _bullyingType: bullyingType
+            });
+        }
+        
+        // Add 1 safe message from this type (randomly selected)
+        if (safeMessages.length > 0) {
+            const randomSafe = safeMessages[Math.floor(Math.random() * safeMessages.length)];
+            // Create a wrapper object to avoid mutating the original scenario
+            currentSession.messageQueue.push({
+                ...randomSafe,
+                _bullyingType: bullyingType
+            });
+        }
+    });
     
     // Shuffle the queue to mix cyberbullying and safe messages
     currentSession.messageQueue.sort(() => Math.random() - 0.5);
@@ -500,8 +512,8 @@ document.getElementById('start-session').addEventListener('click', () => {
 
 // Mesaj bildirimi göster
 function sendNextMessageNotification() {
-    // Check if we've completed all 5 messages
-    if (currentSession.currentMessageIndex >= 5 || currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
+    // Check if we've completed all 10 messages
+    if (currentSession.currentMessageIndex >= 10 || currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
         // Tüm mesajlar tamamlandı - show summary
         setTimeout(() => {
             showSummary();
@@ -719,8 +731,8 @@ document.getElementById('back-to-inbox').addEventListener('click', () => {
     showScreen('inbox-screen');
     renderInboxList();
     
-    // Check if we've completed all 5 messages
-    if (currentSession.currentMessageIndex >= 5 || currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
+    // Check if we've completed all 10 messages
+    if (currentSession.currentMessageIndex >= 10 || currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
         // Tüm mesajlar tamamlandı - 2 saniye sonra özet ekranı
         setTimeout(() => {
             showSummary();
@@ -944,8 +956,8 @@ function returnToFeed() {
         // Mesaj indeksini artır
         currentSession.currentMessageIndex++;
         
-        // Check if we've completed all 5 messages
-        if (currentSession.currentMessageIndex >= 5 || currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
+        // Check if we've completed all 10 messages
+        if (currentSession.currentMessageIndex >= 10 || currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
             // Tüm mesajlar tamamlandı - 2 saniye sonra özet ekranı
             setTimeout(() => {
                 showSummary();
@@ -968,8 +980,8 @@ document.getElementById('close-thank-you-modal').addEventListener('click', () =>
     currentSession.currentMessageIndex++;
     showScreen('main-app');
     
-    // Check if we've completed all 5 messages
-    if (currentSession.currentMessageIndex >= 5 || currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
+    // Check if we've completed all 10 messages
+    if (currentSession.currentMessageIndex >= 10 || currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
         // Tüm mesajlar tamamlandı - 2 saniye sonra özet ekranı
         setTimeout(() => {
             showSummary();
@@ -1222,14 +1234,20 @@ function showNextStepHint(step) {
 
 // Veri kaydet
 function saveMessageData(messageType, action, reactionTime, hintUsed, correct) {
+    // Get the bullying type from the current scenario (tagged during queue creation)
+    // Each scenario now has _bullyingType set during queue creation
+    const scenarioBullyingType = currentSession.currentScenario && currentSession.currentScenario._bullyingType 
+        ? currentSession.currentScenario._bullyingType 
+        : 'unknown';
+    
     const data = {
         participantId: currentSession.participantId,
         participantName: currentSession.participantName,
         participantAge: currentSession.participantAge,
         sessionType: currentSession.sessionType,
         sessionLabel: SESSION_LABELS[currentSession.sessionType],
-        bullyingType: currentSession.currentBullyingType,
-        bullyingLabel: BULLYING_TYPE_LABELS[currentSession.currentBullyingType],
+        bullyingType: scenarioBullyingType,
+        bullyingLabel: BULLYING_TYPE_LABELS[scenarioBullyingType] || 'Bilinmiyor',
         messageType: messageType,
         action: action,
         reactionTime: reactionTime.toFixed(2),
