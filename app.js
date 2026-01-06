@@ -1,5 +1,309 @@
+// Firebase Configuration and Initialization
+const firebaseConfig = {
+    apiKey: "AIzaSyCvQGYOPCK1Oc94Qlb2omZKe3XAhmL9yjU",
+    authDomain: "safestagram-a458a.firebaseapp.com",
+    projectId: "safestagram-a458a",
+    storageBucket: "safestagram-a458a.firebasestorage.app",
+    messagingSenderId: "1046452988416",
+    appId: "1:1046452988416:web:588633779fff2ad42b86e5",
+    measurementId: "G-VEBYYDND7H"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// Current user state
+let currentUser = null;
+
+// Show notification
+function showNotification(title, message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+        <div class="notification-content">
+            <div class="notification-title">${title}</div>
+            <div class="notification-message">${message}</div>
+        </div>
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideInRight 0.3s ease-out reverse';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Auth State Observer
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        currentUser = user;
+        // Get user data from Firestore
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            currentUser.displayName = `${userData.firstName} ${userData.lastName}`;
+            currentUser.firstName = userData.firstName;
+            currentUser.lastName = userData.lastName;
+        }
+        
+        // Show panel screen if on auth screen
+        if (document.getElementById('auth-screen').classList.contains('active')) {
+            showScreen('panel-screen');
+            updatePanelUserInfo();
+        }
+    } else {
+        currentUser = null;
+        // Show auth screen if not on it
+        if (!document.getElementById('auth-screen').classList.contains('active')) {
+            showScreen('auth-screen');
+        }
+    }
+});
+
+// Update panel user info
+function updatePanelUserInfo() {
+    if (currentUser && currentUser.displayName) {
+        document.getElementById('panel-user-name').textContent = currentUser.displayName;
+        const adminUserName = document.getElementById('admin-user-name');
+        if (adminUserName) {
+            adminUserName.textContent = currentUser.displayName;
+        }
+    }
+}
+
+// Auth form toggles
+document.addEventListener('DOMContentLoaded', () => {
+    const showSignupBtn = document.getElementById('show-signup');
+    const showLoginBtn = document.getElementById('show-login');
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+    
+    if (showSignupBtn) {
+        showSignupBtn.addEventListener('click', () => {
+            loginForm.style.display = 'none';
+            signupForm.style.display = 'block';
+        });
+    }
+    
+    if (showLoginBtn) {
+        showLoginBtn.addEventListener('click', () => {
+            signupForm.style.display = 'none';
+            loginForm.style.display = 'block';
+        });
+    }
+});
+
+// Signup Form Handler
+document.getElementById('signupForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const firstName = document.getElementById('signup-firstname').value.trim();
+    const lastName = document.getElementById('signup-lastname').value.trim();
+    const email = document.getElementById('signup-email').value.trim();
+    const password = document.getElementById('signup-password').value;
+    
+    try {
+        // Create user with email and password
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+        
+        // Save user data to Firestore
+        await db.collection('users').doc(user.uid).set({
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        // Show success notification
+        showNotification('Başarılı!', 'Üyeliğiniz onaylandı! Hoş geldiniz.', 'success');
+        
+        // Clear form
+        document.getElementById('signupForm').reset();
+        
+    } catch (error) {
+        console.error('Signup error:', error);
+        let errorMessage = 'Kayıt sırasında bir hata oluştu.';
+        
+        if (error.code === 'auth/email-already-in-use') {
+            errorMessage = 'Bu e-posta adresi zaten kullanılıyor.';
+        } else if (error.code === 'auth/invalid-email') {
+            errorMessage = 'Geçersiz e-posta adresi.';
+        } else if (error.code === 'auth/weak-password') {
+            errorMessage = 'Şifre çok zayıf. En az 6 karakter olmalı.';
+        }
+        
+        showNotification('Hata', errorMessage, 'error');
+    }
+});
+
+// Login Form Handler
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    
+    try {
+        await auth.signInWithEmailAndPassword(email, password);
+        showNotification('Başarılı!', 'Giriş yapıldı. Hoş geldiniz!', 'success');
+        document.getElementById('loginForm').reset();
+    } catch (error) {
+        console.error('Login error:', error);
+        let errorMessage = 'Giriş sırasında bir hata oluştu.';
+        
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+            errorMessage = 'E-posta veya şifre hatalı.';
+        } else if (error.code === 'auth/invalid-email') {
+            errorMessage = 'Geçersiz e-posta adresi.';
+        } else if (error.code === 'auth/user-disabled') {
+            errorMessage = 'Bu hesap devre dışı bırakılmış.';
+        }
+        
+        showNotification('Hata', errorMessage, 'error');
+    }
+});
+
+// Panel Logout
+document.getElementById('panel-logout').addEventListener('click', async () => {
+    try {
+        await auth.signOut();
+        showNotification('Başarılı', 'Çıkış yapıldı.', 'success');
+    } catch (error) {
+        console.error('Logout error:', error);
+        showNotification('Hata', 'Çıkış yapılırken bir hata oluştu.', 'error');
+    }
+});
+
+// Panel Buttons
+document.getElementById('app-entry-btn').addEventListener('click', () => {
+    showScreen('app-entry-screen');
+});
+
+document.getElementById('academic-panel-btn').addEventListener('click', () => {
+    showScreen('admin-panel');
+    loadAdminData();
+});
+
+document.getElementById('back-to-panel').addEventListener('click', () => {
+    showScreen('panel-screen');
+});
+
+// Admin Logout
+const adminLogoutBtn = document.getElementById('admin-logout');
+if (adminLogoutBtn) {
+    adminLogoutBtn.addEventListener('click', async () => {
+        try {
+            await auth.signOut();
+            showNotification('Başarılı', 'Çıkış yapıldı.', 'success');
+        } catch (error) {
+            console.error('Logout error:', error);
+            showNotification('Hata', 'Çıkış yapılırken bir hata oluştu.', 'error');
+        }
+    });
+}
+
+// Session Form Handler (App Entry)
+document.getElementById('sessionForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    if (!currentUser) {
+        showNotification('Hata', 'Lütfen önce giriş yapın.', 'error');
+        return;
+    }
+    
+    const name = document.getElementById('participant-name').value.trim();
+    const age = document.getElementById('participant-age').value;
+    const sessionType = document.getElementById('session-type').value;
+    
+    if (!name || !age || !sessionType) {
+        showNotification('Hata', 'Lütfen tüm alanları doldurun!', 'error');
+        return;
+    }
+    
+    // Generate a unique session ID
+    const sessionId = `S${Date.now()}`;
+    currentSession.sessionId = sessionId;
+    currentSession.participantId = `P${Date.now()}`;
+    currentSession.participantName = name;
+    currentSession.participantAge = parseInt(age);
+    currentSession.sessionType = sessionType;
+    currentSession.currentBullyingType = 'all';
+    currentSession.startTime = new Date();
+    currentSession.userId = currentUser.uid;
+    
+    // Create session in Firestore
+    try {
+        await db.collection('users').doc(currentUser.uid)
+            .collection('sessions').doc(sessionId).set({
+                participantName: name,
+                participantAge: parseInt(age),
+                sessionType: sessionType,
+                startedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                status: 'active'
+            });
+    } catch (error) {
+        console.error('Error creating session:', error);
+        showNotification('Hata', 'Oturum oluşturulamadı.', 'error');
+        return;
+    }
+    
+    // Navigasyon becerisini başlangıçta true yap
+    currentSession.skills.navigation = true;
+    
+    // Prepare message queue - EXACTLY 10 messages (5 cyberbullying + 5 safe)
+    currentSession.messageQueue = [];
+    
+    // Iterate through all 5 bullying types
+    BULLYING_TYPES.forEach(bullyingType => {
+        const allScenarios = SCENARIOS[sessionType][bullyingType];
+        
+        // Separate cyberbullying and safe messages
+        const cyberbullyingMessages = allScenarios.filter(s => 
+            s.messages && s.messages.some(m => m.type === 'cyberbullying')
+        );
+        const safeMessages = allScenarios.filter(s => s.conversation);
+        
+        // Add 1 cyberbullying message from this type
+        if (cyberbullyingMessages.length > 0) {
+            const randomCyberbullying = cyberbullyingMessages[Math.floor(Math.random() * cyberbullyingMessages.length)];
+            currentSession.messageQueue.push({
+                ...randomCyberbullying,
+                _bullyingType: bullyingType
+            });
+        }
+        
+        // Add 1 safe message from this type
+        if (safeMessages.length > 0) {
+            const randomSafe = safeMessages[Math.floor(Math.random() * safeMessages.length)];
+            currentSession.messageQueue.push({
+                ...randomSafe,
+                _bullyingType: bullyingType
+            });
+        }
+    });
+    
+    // Shuffle the queue
+    currentSession.messageQueue.sort(() => Math.random() - 0.5);
+    currentSession.currentMessageIndex = 0;
+    
+    showScreen('main-app');
+    generateFeed();
+    renderStories();
+    
+    // İlk mesaj için 10 saniye bekle
+    currentSession.messageTimeout = setTimeout(() => {
+        sendNextMessageNotification();
+    }, 10000);
+});
+
 // Global değişkenler
 let currentSession = {
+    sessionId: "",
+    userId: "",
     sessionType: "",
     participantId: "",
     participantName: "",
@@ -434,82 +738,6 @@ function showScreen(screenId) {
     document.getElementById(screenId).classList.add('active');
 }
 
-// Hoşgeldiniz Ekranı
-document.getElementById('start-session').addEventListener('click', () => {
-    const name = document.getElementById('participant-name').value.trim();
-    const age = document.getElementById('participant-age').value;
-    const sessionType = document.getElementById('session-type').value;
-    
-    if (!name || !age || !sessionType) {
-        alert('Lütfen tüm alanları doldurun!');
-        return;
-    }
-    
-    // Generate a unique participant ID based on timestamp
-    currentSession.participantId = `P${Date.now()}`;
-    currentSession.participantName = name;
-    currentSession.participantAge = parseInt(age);
-    currentSession.sessionType = sessionType;
-    currentSession.currentBullyingType = 'all'; // All types are now used
-    currentSession.startTime = new Date();
-    
-    // Navigasyon becerisini başlangıçta true yap
-    currentSession.skills.navigation = true;
-    
-    // CRITICAL: Clear previous session data from localStorage
-    localStorage.removeItem('safestagram_current_session');
-    localStorage.removeItem('safestagram_users');
-    
-    // Mesaj kuyruğunu hazırla - EXACTLY 10 messages (5 cyberbullying + 5 safe)
-    // 1 cyberbullying + 1 safe message from each of the 5 bullying types
-    currentSession.messageQueue = [];
-    
-    // Iterate through all 5 bullying types
-    BULLYING_TYPES.forEach(bullyingType => {
-        const allScenarios = SCENARIOS[sessionType][bullyingType];
-        
-        // Separate cyberbullying and safe messages
-        const cyberbullyingMessages = allScenarios.filter(s => 
-            s.messages && s.messages.some(m => m.type === 'cyberbullying')
-        );
-        const safeMessages = allScenarios.filter(s => s.conversation);
-        
-        // Add 1 cyberbullying message from this type (randomly selected)
-        if (cyberbullyingMessages.length > 0) {
-            const randomCyberbullying = cyberbullyingMessages[Math.floor(Math.random() * cyberbullyingMessages.length)];
-            // Create a wrapper object to avoid mutating the original scenario
-            currentSession.messageQueue.push({
-                ...randomCyberbullying,
-                _bullyingType: bullyingType
-            });
-        }
-        
-        // Add 1 safe message from this type (randomly selected)
-        if (safeMessages.length > 0) {
-            const randomSafe = safeMessages[Math.floor(Math.random() * safeMessages.length)];
-            // Create a wrapper object to avoid mutating the original scenario
-            currentSession.messageQueue.push({
-                ...randomSafe,
-                _bullyingType: bullyingType
-            });
-        }
-    });
-    
-    // Shuffle the queue to mix cyberbullying and safe messages
-    currentSession.messageQueue.sort(() => Math.random() - 0.5);
-    
-    currentSession.currentMessageIndex = 0;
-    
-    showScreen('main-app');
-    generateFeed(); // Feed'i oluştur
-    renderStories(); // Hikayeleri oluştur
-    
-    // İlk mesaj için 10 saniye bekle
-    currentSession.messageTimeout = setTimeout(() => {
-        sendNextMessageNotification();
-    }, 10000); // 10 saniye
-});
-
 // Mesaj bildirimi göster
 function sendNextMessageNotification() {
     // Check if we've completed all 10 messages
@@ -645,31 +873,6 @@ document.getElementById('inbox-back-to-feed').addEventListener('click', () => {
             sendNextMessageNotification();
         }, 10000); // 10 saniye bekle
     }
-});
-
-// Akademisyen Girişi
-document.getElementById('admin-login').addEventListener('click', () => {
-    showScreen('admin-login-screen');
-});
-
-document.getElementById('admin-back').addEventListener('click', () => {
-    showScreen('welcome-screen');
-});
-
-document.getElementById('admin-submit').addEventListener('click', () => {
-    const password = document.getElementById('admin-password').value;
-    // Not: Bu şifre demo/tez amaçlı basit bir güvenlik katmanıdır
-    // Gerçek üretim ortamında sunucu taraflı kimlik doğrulama kullanılmalıdır
-    if (password === '06112002') {
-        showScreen('admin-panel');
-        loadAdminData();
-    } else {
-        alert('Yanlış şifre!');
-    }
-});
-
-document.getElementById('logout').addEventListener('click', () => {
-    showScreen('welcome-screen');
 });
 
 // Belirli bir DM'i aç
@@ -1235,7 +1438,6 @@ function showNextStepHint(step) {
 // Veri kaydet
 function saveMessageData(messageType, action, reactionTime, hintUsed, correct) {
     // Get the bullying type from the current scenario (tagged during queue creation)
-    // Each scenario now has _bullyingType set during queue creation
     const scenarioBullyingType = currentSession.currentScenario && currentSession.currentScenario._bullyingType 
         ? currentSession.currentScenario._bullyingType 
         : 'unknown';
@@ -1258,7 +1460,17 @@ function saveMessageData(messageType, action, reactionTime, hintUsed, correct) {
     
     currentSession.sessionData.push(data);
     
-    // LocalStorage'a kaydet
+    // Save to Firestore
+    if (currentUser && currentSession.sessionId) {
+        db.collection('users').doc(currentUser.uid)
+            .collection('sessions').doc(currentSession.sessionId)
+            .collection('data').add(data)
+            .catch(error => {
+                console.error('Error saving data to Firestore:', error);
+            });
+    }
+    
+    // Also save to localStorage for backward compatibility
     const allData = JSON.parse(localStorage.getItem('siberguven_data') || '[]');
     allData.push(data);
     localStorage.setItem('siberguven_data', JSON.stringify(allData));
@@ -1301,6 +1513,8 @@ document.getElementById('finish-session').addEventListener('click', () => {
     
     // Tüm verileri sıfırla
     currentSession = {
+        sessionId: "",
+        userId: "",
         sessionType: "",
         participantId: "",
         participantName: "",
@@ -1335,13 +1549,38 @@ document.getElementById('finish-session').addEventListener('click', () => {
         conversationHistory: {}
     };
     
-    showScreen('welcome-screen');
+    showScreen('panel-screen');
 });
 
 // Akademisyen Panel Fonksiyonları
-function loadAdminData() {
-    const allData = JSON.parse(localStorage.getItem('siberguven_data') || '[]');
-    displayAdminData(allData);
+async function loadAdminData() {
+    if (!currentUser) {
+        document.getElementById('data-display').innerHTML = '<p style="text-align: center; padding: 20px;">Lütfen giriş yapın.</p>';
+        return;
+    }
+    
+    try {
+        // Load all data from all sessions for the current user
+        const sessionsSnapshot = await db.collection('users').doc(currentUser.uid)
+            .collection('sessions').get();
+        
+        const allData = [];
+        
+        for (const sessionDoc of sessionsSnapshot.docs) {
+            const dataSnapshot = await db.collection('users').doc(currentUser.uid)
+                .collection('sessions').doc(sessionDoc.id)
+                .collection('data').get();
+            
+            dataSnapshot.forEach(doc => {
+                allData.push(doc.data());
+            });
+        }
+        
+        displayAdminData(allData);
+    } catch (error) {
+        console.error('Error loading admin data:', error);
+        document.getElementById('data-display').innerHTML = '<p style="text-align: center; padding: 20px;">Veriler yüklenirken hata oluştu.</p>';
+    }
 }
 
 function displayAdminData(data) {
@@ -1444,11 +1683,45 @@ document.getElementById('export-excel').addEventListener('click', () => {
 });
 
 // Verileri Temizle
-document.getElementById('clear-data').addEventListener('click', () => {
+document.getElementById('clear-data').addEventListener('click', async () => {
     if (confirm('Tüm verileri silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!')) {
-        localStorage.removeItem('siberguven_data');
-        loadAdminData();
-        alert('Tüm veriler temizlendi!');
+        if (!currentUser) {
+            alert('Lütfen giriş yapın.');
+            return;
+        }
+        
+        try {
+            // Delete all sessions and their data for the current user
+            const sessionsSnapshot = await db.collection('users').doc(currentUser.uid)
+                .collection('sessions').get();
+            
+            const batch = db.batch();
+            
+            for (const sessionDoc of sessionsSnapshot.docs) {
+                // Delete all data documents in this session
+                const dataSnapshot = await db.collection('users').doc(currentUser.uid)
+                    .collection('sessions').doc(sessionDoc.id)
+                    .collection('data').get();
+                
+                dataSnapshot.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                
+                // Delete the session document
+                batch.delete(sessionDoc.ref);
+            }
+            
+            await batch.commit();
+            
+            // Also clear localStorage for backward compatibility
+            localStorage.removeItem('siberguven_data');
+            
+            loadAdminData();
+            showNotification('Başarılı', 'Tüm veriler temizlendi!', 'success');
+        } catch (error) {
+            console.error('Error clearing data:', error);
+            showNotification('Hata', 'Veriler silinirken hata oluştu.', 'error');
+        }
     }
 });
 
@@ -1477,6 +1750,8 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Reset session
             currentSession = {
+                sessionId: "",
+                userId: "",
                 sessionType: "",
                 participantId: "",
                 participantName: "",
@@ -1485,6 +1760,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentBullyingType: null,
                 currentScenario: null,
                 messageIndex: 0,
+                conversationIndex: 0,
                 sessionData: [],
                 skills: {
                     navigation: false,
@@ -1510,9 +1786,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 conversationHistory: {}
             };
             
-            // Hide overlay and return to welcome screen
+            // Hide overlay and return to panel screen
             logoutOverlay.style.display = 'none';
-            showScreen('welcome-screen');
+            showScreen('panel-screen');
         });
     }
     
