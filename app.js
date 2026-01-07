@@ -199,6 +199,7 @@ auth.onAuthStateChanged(async (user) => {
             currentUser.displayName = `${userData.firstName} ${userData.lastName}`;
             currentUser.firstName = userData.firstName;
             currentUser.lastName = userData.lastName;
+            currentUser.email = userData.email;
         }
         
         // Show panel screen if on auth screen
@@ -218,14 +219,15 @@ auth.onAuthStateChanged(async (user) => {
 // Update panel user info
 function updatePanelUserInfo() {
     if (currentUser && currentUser.displayName) {
-        document.getElementById('panel-user-name').textContent = currentUser.displayName;
+        const fullUserInfo = `${currentUser.displayName} - ${currentUser.email}`;
+        document.getElementById('panel-user-name').textContent = fullUserInfo;
         const appEntryUserName = document.getElementById('app-entry-user-name');
         if (appEntryUserName) {
-            appEntryUserName.textContent = currentUser.displayName;
+            appEntryUserName.textContent = fullUserInfo;
         }
         const adminUserName = document.getElementById('admin-user-name');
         if (adminUserName) {
-            adminUserName.textContent = currentUser.displayName;
+            adminUserName.textContent = fullUserInfo;
         }
     }
 }
