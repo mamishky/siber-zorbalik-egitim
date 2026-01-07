@@ -218,8 +218,10 @@ auth.onAuthStateChanged(async (user) => {
 
 // Update panel user info
 function updatePanelUserInfo() {
-    if (currentUser && currentUser.displayName && currentUser.email) {
-        const fullUserInfo = `${currentUser.displayName} - ${currentUser.email}`;
+    if (currentUser && currentUser.displayName) {
+        // Use email from auth (if available) or Firestore, with fallback to just name
+        const email = currentUser.email;
+        const fullUserInfo = email ? `${currentUser.displayName} - ${email}` : currentUser.displayName;
         document.getElementById('panel-user-name').textContent = fullUserInfo;
         const appEntryUserName = document.getElementById('app-entry-user-name');
         if (appEntryUserName) {
