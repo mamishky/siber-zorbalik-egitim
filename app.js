@@ -15,7 +15,7 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // Gemini API Key (obfuscated)
-const _0x = ['QUl6YVN5QzVuekZvSXJqanZFMmtqenFBbkpsdHlVOXNvX2hWeXdJ'];
+const _0x = ['QUl6YVN5Qnh0Zl9kR1ZVUV9OUTZJRk5rZVRjWlMya3pyR09ybHc4'];
 const getGeminiKey = () => atob(_0x[0]);
 
 // Gemini AI Integration Functions
