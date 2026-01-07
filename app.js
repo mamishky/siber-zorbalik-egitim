@@ -199,6 +199,7 @@ auth.onAuthStateChanged(async (user) => {
             currentUser.displayName = `${userData.firstName} ${userData.lastName}`;
             currentUser.firstName = userData.firstName;
             currentUser.lastName = userData.lastName;
+            currentUser.email = userData.email;
         }
         
         // Show panel screen if on auth screen
@@ -247,6 +248,19 @@ async function updatePanelUserInfo() {
             const parts = currentUser.displayName.split(' ');
             firstName = parts[0] || '';
             lastName = parts.slice(1).join(' ') || '';
+function updatePanelUserInfo() {
+    if (currentUser && currentUser.displayName) {
+        // Use email from auth (if available) or Firestore, with fallback to just name
+        const email = currentUser.email;
+        const fullUserInfo = email ? `${currentUser.displayName} - ${email}` : currentUser.displayName;
+        document.getElementById('panel-user-name').textContent = fullUserInfo;
+        const appEntryUserName = document.getElementById('app-entry-user-name');
+        if (appEntryUserName) {
+            appEntryUserName.textContent = fullUserInfo;
+        }
+        const adminUserName = document.getElementById('admin-user-name');
+        if (adminUserName) {
+            adminUserName.textContent = fullUserInfo;
         }
     }
 
