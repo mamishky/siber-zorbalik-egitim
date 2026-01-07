@@ -220,12 +220,12 @@ auth.onAuthStateChanged(async (user) => {
 async function updatePanelUserInfo() {
     if (!currentUser) return;
 
-    // Varsayılan değerler (fallback)
+    // Varsayılan değerler
     let firstName = '';
     let lastName = '';
     let email = currentUser.email || '';
 
-    // Önce Firestore'dan kullanıcının detaylarını almaya çalış
+    // Firestore'dan kullanıcı verilerini al
     try {
         const userDoc = await db.collection('users').doc(currentUser.uid).get();
         if (userDoc.exists) {
@@ -233,68 +233,30 @@ async function updatePanelUserInfo() {
             firstName = userData.firstName || '';
             lastName = userData.lastName || '';
             email = userData.email || email;
-        } else {
-            // Firestore kaydı yoksa, displayName'den ayıklamaya çalış
-            if (currentUser.displayName) {
-                const parts = currentUser.displayName.split(' ');
-                firstName = parts[0] || '';
-                lastName = parts.slice(1).join(' ') || '';
-            }
         }
     } catch (err) {
         console.error('Kullanıcı verisi alınırken hata:', err);
-        // hata olsa da displayName veya email ile devam et
-        if (!firstName && currentUser.displayName) {
-            const parts = currentUser.displayName.split(' ');
-            firstName = parts[0] || '';
-            lastName = parts.slice(1).join(' ') || '';
-function updatePanelUserInfo() {
-    if (currentUser && currentUser.displayName) {
-        // Use email from auth (if available) or Firestore, with fallback to just name
-        const email = currentUser.email;
-        const fullUserInfo = email ? `${currentUser.displayName} - ${email}` : currentUser.displayName;
-        document.getElementById('panel-user-name').textContent = fullUserInfo;
-        const appEntryUserName = document.getElementById('app-entry-user-name');
-        if (appEntryUserName) {
-            appEntryUserName.textContent = fullUserInfo;
-        }
-        const adminUserName = document.getElementById('admin-user-name');
-        if (adminUserName) {
-            adminUserName.textContent = fullUserInfo;
-        }
     }
 
-    const displayName = (firstName || lastName) ? `${firstName} ${lastName}`.trim() : (currentUser.displayName || 'Kullanıcı');
+    const fullName = `${firstName} ${lastName}`.trim() || 'Kullanıcı';
 
-    // Panel (ana panel üstü)
-    const panelNameEl = document.getElementById('panel-user-name');
-    if (panelNameEl) {
-        const fullnameEl = panelNameEl.querySelector('.user-fullname');
-        const emailEl = document.getElementById('panel-user-email');
-        if (fullnameEl) fullnameEl.textContent = displayName;
-        else panelNameEl.textContent = displayName; // eski yapı için fallback
-        if (emailEl) emailEl.textContent = email;
-    }
+    // Panel Screen güncelle
+    const panelFullname = document.querySelector('#panel-user-name .user-fullname');
+    const panelEmail = document.getElementById('panel-user-email');
+    if (panelFullname) panelFullname.textContent = fullName;
+    if (panelEmail) panelEmail.textContent = email;
 
-    // App-entry (uygulama giriş ekranı)
-    const appEntryEl = document.getElementById('app-entry-user-name');
-    if (appEntryEl) {
-        const fullnameEl = appEntryEl.querySelector('.user-fullname');
-        const emailEl = document.getElementById('app-entry-user-email');
-        if (fullnameEl) fullnameEl.textContent = displayName;
-        else appEntryEl.textContent = displayName;
-        if (emailEl) emailEl.textContent = email;
-    }
+    // App Entry Screen güncelle
+    const appFullname = document.querySelector('#app-entry-user-name .user-fullname');
+    const appEmail = document.getElementById('app-entry-user-email');
+    if (appFullname) appFullname.textContent = fullName;
+    if (appEmail) appEmail.textContent = email;
 
-    // Admin (varsa)
-    const adminEl = document.getElementById('admin-user-name');
-    if (adminEl) {
-        const fullnameEl = adminEl.querySelector('.user-fullname');
-        const emailEl = document.getElementById('admin-user-email');
-        if (fullnameEl) fullnameEl.textContent = displayName;
-        else adminEl.textContent = displayName;
-        if (emailEl) emailEl.textContent = email;
-    }
+    // Admin Panel güncelle
+    const adminFullname = document.querySelector('#admin-user-name .user-fullname');
+    const adminEmail = document.getElementById('admin-user-email');
+    if (adminFullname) adminFullname.textContent = fullName;
+    if (adminEmail) adminEmail.textContent = email;
 }
 
 // Auth form toggles
