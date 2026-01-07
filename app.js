@@ -217,6 +217,37 @@ auth.onAuthStateChanged(async (user) => {
 });
 
 // Update panel user info
+async function updatePanelUserInfo() {
+    if (!currentUser) return;
+
+    // Varsayılan değerler (fallback)
+    let firstName = '';
+    let lastName = '';
+    let email = currentUser.email || '';
+
+    // Önce Firestore'dan kullanıcının detaylarını almaya çalış
+    try {
+        const userDoc = await db.collection('users').doc(currentUser.uid).get();
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            firstName = userData.firstName || '';
+            lastName = userData.lastName || '';
+            email = userData.email || email;
+        } else {
+            // Firestore kaydı yoksa, displayName'den ayıklamaya çalış
+            if (currentUser.displayName) {
+                const parts = currentUser.displayName.split(' ');
+                firstName = parts[0] || '';
+                lastName = parts.slice(1).join(' ') || '';
+            }
+        }
+    } catch (err) {
+        console.error('Kullanıcı verisi alınırken hata:', err);
+        // hata olsa da displayName veya email ile devam et
+        if (!firstName && currentUser.displayName) {
+            const parts = currentUser.displayName.split(' ');
+            firstName = parts[0] || '';
+            lastName = parts.slice(1).join(' ') || '';
 function updatePanelUserInfo() {
     if (currentUser && currentUser.displayName) {
         // Use email from auth (if available) or Firestore, with fallback to just name
@@ -231,6 +262,38 @@ function updatePanelUserInfo() {
         if (adminUserName) {
             adminUserName.textContent = fullUserInfo;
         }
+    }
+
+    const displayName = (firstName || lastName) ? `${firstName} ${lastName}`.trim() : (currentUser.displayName || 'Kullanıcı');
+
+    // Panel (ana panel üstü)
+    const panelNameEl = document.getElementById('panel-user-name');
+    if (panelNameEl) {
+        const fullnameEl = panelNameEl.querySelector('.user-fullname');
+        const emailEl = document.getElementById('panel-user-email');
+        if (fullnameEl) fullnameEl.textContent = displayName;
+        else panelNameEl.textContent = displayName; // eski yapı için fallback
+        if (emailEl) emailEl.textContent = email;
+    }
+
+    // App-entry (uygulama giriş ekranı)
+    const appEntryEl = document.getElementById('app-entry-user-name');
+    if (appEntryEl) {
+        const fullnameEl = appEntryEl.querySelector('.user-fullname');
+        const emailEl = document.getElementById('app-entry-user-email');
+        if (fullnameEl) fullnameEl.textContent = displayName;
+        else appEntryEl.textContent = displayName;
+        if (emailEl) emailEl.textContent = email;
+    }
+
+    // Admin (varsa)
+    const adminEl = document.getElementById('admin-user-name');
+    if (adminEl) {
+        const fullnameEl = adminEl.querySelector('.user-fullname');
+        const emailEl = document.getElementById('admin-user-email');
+        if (fullnameEl) fullnameEl.textContent = displayName;
+        else adminEl.textContent = displayName;
+        if (emailEl) emailEl.textContent = email;
     }
 }
 
