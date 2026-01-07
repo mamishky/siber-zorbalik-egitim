@@ -1949,20 +1949,14 @@ function displayAdminData(data) {
 
 // Filtreleme
 document.getElementById('filter-session').addEventListener('change', applyFilters);
-document.getElementById('filter-type').addEventListener('change', applyFilters);
 
 function applyFilters() {
     const sessionFilter = document.getElementById('filter-session').value;
-    const typeFilter = document.getElementById('filter-type').value;
     
     let allData = JSON.parse(localStorage.getItem('siberguven_data') || '[]');
     
     if (sessionFilter) {
         allData = allData.filter(item => item.sessionType === sessionFilter);
-    }
-    
-    if (typeFilter) {
-        allData = allData.filter(item => item.bullyingType === typeFilter);
     }
     
     displayAdminData(allData);
