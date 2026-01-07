@@ -14,156 +14,70 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Gemini API Key (obfuscated)
-const _0x = ['QUl6YVN5Qnh0Zl9kR1ZVUV9OUTZJRk5rZVRjWlMya3pyR09ybHc4'];
-const getGeminiKey = () => atob(_0x[0]);
-
-// Gemini AI Integration Functions
-async function generateBullyingMessage(bullyingType) {
-    const bullyingTypeLabels = {
-        'sozel': 'Sözel/Psikolojik Saldırı',
-        'dislanma': 'Sosyal Dışlanma',
-        'tehdit': 'Tehdit ve Şantaj',
-        'iftira': 'Yanlış Bilgi/İftira/Dedikodu',
-        'kimlik': 'Kimlik Taklidi/Sahte Hesap'
+// Predefined message functions
+function generateBullyingMessage(bullyingType) {
+    const messages = {
+        'sozel': [
+            'Sen gerçekten çok aptalsın, hiçbir şey bilmiyorsun!',
+            'Neden hep yanlış yapıyorsun? Hiçbir işe yaramıyorsun.',
+            'Sınıfın en kötüsü sensin, herkes bunu biliyor.'
+        ],
+        'dislanma': [
+            'Seni partiye davet etmedik, kimse seni istemiyor.',
+            'Bizim gruba giremezsin, sen bizden değilsin.',
+            'Kimse seninle oturmak istemiyor.'
+        ],
+        'tehdit': [
+            'Eğer bunu birine söylersen seni döverim!',
+            'Yarın buluşalım, hesaplaşacağız!',
+            'Sen bittin, göreceksin!'
+        ],
+        'iftira': [
+            'Herkes senin hırsızlık yaptığını söylüyor, doğru mu?',
+            'Öğretmene şikayet etmişsin diye duydum, hain!',
+            'Sen herkesi arkadan konuşuyormuşsun.'
+        ],
+        'kimlik': [
+            'Ben senin en iyi arkadaşınım, şifreni söyler misin?',
+            'Merhaba ben öğretmenim, not bilgilerini gönderir misin?',
+            'Arkadaşınım, acil param bitti, para gönderebilir misin?'
+        ]
     };
     
-    const prompt = `Sen bir lise öğrencisisin. Özel eğitim meslek okulunda okuyan, zihin yetersizliği olan bir öğrenciye yönelik "${bullyingTypeLabels[bullyingType]}" türünde siber zorbalık içeren KISA bir mesaj yaz.
-
-Kurallar:
-- Mesaj 1-2 cümle olsun
-- Basit ve anlaşılır Türkçe kullan
-- Emoji kullanabilirsin
-- Sadece mesajı yaz, başka açıklama ekleme
-
-Zorbalık türleri:
-- Sözel/Psikolojik Saldırı: Hakaret, aşağılama, küçümseme
-- Sosyal Dışlanma: Gruptan atma, yalnız bırakma
-- Tehdit ve Şantaj: Korkutma, tehdit etme
-- Yanlış Bilgi/İftira/Dedikodu: Yalan haber yayma
-- Kimlik Taklidi/Sahte Hesap: Başkası gibi davranma`;
-    
-    try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${getGeminiKey()}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{
-                        text: prompt
-                    }]
-                }]
-            })
-        });
-        
-        const data = await response.json();
-        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-            return data.candidates[0].content.parts[0].text.trim();
-        }
-    } catch (error) {
-        console.error('Error generating bullying message:', error);
-    }
-    
-    // Fallback to predefined messages if API fails
-    const fallbacks = {
-        'sozel': 'Sen gerçekten çok aptalsın, hiçbir şey bilmiyorsun!',
-        'dislanma': 'Seni partiye davet etmedik, kimse seni istemiyor.',
-        'tehdit': 'Eğer bunu birine söylersen seni döverim!',
-        'iftira': 'Herkes senin hırsızlık yaptığını söylüyor, doğru mu?',
-        'kimlik': 'Ben senin en iyi arkadaşınım, şifreni söyler misin?'
-    };
-    return fallbacks[bullyingType] || 'Mesaj yüklenemedi.';
+    const typeMessages = messages[bullyingType] || ['Mesaj yüklenemedi.'];
+    return typeMessages[Math.floor(Math.random() * typeMessages.length)];
 }
 
-async function generateFriendlyMessage() {
-    const prompt = `Sen bir lise öğrencisisin. Özel eğitim meslek okulunda okuyan, zihin yetersizliği olan bir arkadaşına mesaj atacaksın.
-
-Konular (birini seç):
-- Film/dizi önerisi
-- Hafta sonu planı
-- Okul hakkında sohbet
-- Hobi paylaşımı
-- Doğum günü/kutlama
-
-Kurallar:
-- Arkadaşça bir sohbet başlat
-- Basit ve anlaşılır Türkçe kullan
-- 1-2 cümle olsun
-- Cevap bekleyen bir soru sor
-- Emoji kullanabilirsin`;
+function generateFriendlyMessage() {
+    const messages = [
+        'Bugün okul nasıldı? Ben çok eğlendim! 😊',
+        'Hafta sonu sinemaya gidelim mi? 🎬',
+        'O diziyi izledin mi? Çok güzeldi! 📺',
+        'Yarın buluşalım mı? Çok özledim seni! 🤗',
+        'Doğum günün için sana hediye aldım! 🎁',
+        'Maç çok heyecanlıydı, izledin mi? ⚽',
+        'Yeni oyunu denedim, çok güzel! Sen de oyna! 🎮',
+        'Ödevde yardım ister misin? Beraber yapalım! 📚'
+    ];
     
-    try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${getGeminiKey()}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{
-                        text: prompt
-                    }]
-                }]
-            })
-        });
-        
-        const data = await response.json();
-        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-            return data.candidates[0].content.parts[0].text.trim();
-        }
-    } catch (error) {
-        console.error('Error generating friendly message:', error);
-    }
-    
-    return 'Selam! Nasılsın? 😊';
+    return messages[Math.floor(Math.random() * messages.length)];
 }
 
-async function continueConversation(conversationHistory, userMessage) {
-    const historyText = conversationHistory.map(msg => 
-        `${msg.sender === 'user' ? 'Ben' : 'Arkadaşın'}: ${msg.text}`
-    ).join('\n');
+function continueConversation(conversationHistory, userMessage) {
+    const responses = [
+        'Anladım 😊 Ben de öyle düşünüyorum!',
+        'Harika! Çok güzel fikir! 👍',
+        'Evet, kesinlikle! Ben de çok seviyorum.',
+        'Çok eğlenceli olur! Ne zaman buluşalım?',
+        'Teşekkürler! Sen de çok iyisin! 🤗',
+        'Tamam, anlaştık! Görüşürüz! 😊',
+        'Bence de öyle! Çok iyi oldu!',
+        'Haklısın! Ben de aynı şeyi düşünüyordum.',
+        'Süper! Bunu deneyeceğim! 🎉',
+        'Güzel fikir! Beraber yapalım! 💪'
+    ];
     
-    const prompt = `Sen bir lise öğrencisisin. Özel eğitim meslek okulunda okuyan, zihin yetersizliği olan bir arkadaşınla sohbet ediyorsun.
-
-Sohbet geçmişi:
-${historyText}
-
-Kullanıcının son mesajı: "${userMessage}"
-
-Kurallar:
-- Arkadaşça ve sıcak ol
-- Basit ve anlaşılır Türkçe kullan
-- 1-2 cümle cevap ver
-- Sohbeti devam ettirecek bir soru sorabilirsin
-- Emoji kullanabilirsin
-- 2-3 mesaj sonra sohbeti doğal şekilde bitir`;
-    
-    try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${getGeminiKey()}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{
-                        text: prompt
-                    }]
-                }]
-            })
-        });
-        
-        const data = await response.json();
-        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-            return data.candidates[0].content.parts[0].text.trim();
-        }
-    } catch (error) {
-        console.error('Error continuing conversation:', error);
-    }
-    
-    return 'Anladım 😊 Teşekkürler!';
+    return responses[Math.floor(Math.random() * responses.length)];
 }
 
 // Current user state
