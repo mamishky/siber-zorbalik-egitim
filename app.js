@@ -218,7 +218,7 @@ auth.onAuthStateChanged(async (user) => {
 
 // Update panel user info
 function updatePanelUserInfo() {
-    if (currentUser && currentUser.displayName) {
+    if (currentUser && currentUser.displayName && currentUser.email) {
         const fullUserInfo = `${currentUser.displayName} - ${currentUser.email}`;
         document.getElementById('panel-user-name').textContent = fullUserInfo;
         const appEntryUserName = document.getElementById('app-entry-user-name');
