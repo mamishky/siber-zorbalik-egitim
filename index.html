@@ -14,464 +14,67 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <style>
-        /* Auth screen - yeni tasarım */
-        #auth-screen {
-            min-height: 100vh;
-            overflow: hidden;
-            background:
-                radial-gradient(1100px 760px at 16% 18%, rgba(125,211,252,.10), transparent 60%),
-                radial-gradient(900px 650px at 82% 26%, rgba(196,181,253,.10), transparent 58%),
-                radial-gradient(900px 650px at 60% 92%, rgba(251,191,36,.08), transparent 60%),
-                linear-gradient(135deg, #0c1633 0%, #0a2a4a 45%, #2a1157 100%);
-        }
-
-        /* Soft background pattern */
-        .pattern{
-            position:fixed;
-            inset:0;
-            opacity:.18;
-            pointer-events:none;
-            filter: blur(.2px);
-            mask-image: radial-gradient(1000px 600px at 50% 35%, #000 40%, transparent 85%);
-            -webkit-mask-image: radial-gradient(1000px 600px at 50% 35%, #000 40%, transparent 85%);
-        }
-        .pattern svg{
-            width:100%;
-            height:100%;
-            display:block;
-        }
-
-        .wrap{
-            min-height:100%;
-            display:grid;
-            place-items:center;
-            padding: 44px 18px;
-            position:relative;
-            z-index:1;
-        }
-
-        /* Header / brand */
-        .brand{
-            text-align:center;
-            margin-bottom: 22px;
-            user-select:none;
-        }
-
-        .logo{
-            position:relative;
-            display:inline-block;
-            margin:0;
-            font-family:"Righteous", system-ui, sans-serif;
-            font-size: clamp(46px, 6vw, 88px);
-            letter-spacing:.25px;
-            line-height:1.02;
-            color: rgba(238,242,255,.98);
-            text-shadow: 0 2px 18px rgba(0,0,0,.28);
-        }
-
-        .logo::before,.logo::after{
-            content: attr(data-text);
-            position:absolute;
-            inset:0;
-            pointer-events:none;
-            opacity:0;
-            mix-blend-mode: screen;
-        }
-        .logo::before{
-            color: rgba(125,211,252,.70);
-            transform: translate(1px,0);
-        }
-        .logo::after{
-            color: rgba(196,181,253,.65);
-            transform: translate(-1px,0);
-        }
-
-        .logo.is-glitch::before,.logo.is-glitch::after{
-            opacity:.24;
-            animation: microGlitch 220ms steps(2,end) 1;
-        }
-        @keyframes microGlitch{
-            0%{ clip-path: inset(0 0 78% 0); transform: translate(2px, -1px); }
-            40%{ clip-path: inset(34% 0 34% 0); transform: translate(-2px, 1px); }
-            75%{ clip-path: inset(62% 0 8% 0); transform: translate(1px, 0); }
-            100%{ clip-path: inset(0 0 0 0); transform: translate(0, 0); }
-        }
-
-        .logoText{
-            display:inline-flex;
-            align-items:baseline;
-            gap:0;
-        }
-        .chunk{
-            display:inline-block;
-        }
-
-        /* Special S + shield */
-        .specialS{
-            position:relative;
-            display:inline-grid;
-            place-items:center;
-            width: 0.95em;
-            margin:0;
-            color: #fbbf24;
-            text-shadow: 0 0 10px rgba(251,191,36,.18);
-        }
-
-        .specialS svg{
-            position:absolute;
-            inset: -26% -30%;
-            width: 160%;
-            height: 160%;
-            z-index:-1;
-            opacity:.98;
-            filter: drop-shadow(0 0 12px rgba(251,191,36,.14));
-            pointer-events:none;
-        }
-
-        .shieldOuter{
-            fill: rgba(251,191,36,.06);
-            stroke: url(#shieldStroke);
-            stroke-width: 2.2;
-            stroke-linejoin: round;
-        }
-        .shieldInner{
-            fill:none;
-            stroke: rgba(253,230,138,.60);
-            stroke-width: 1.3;
-            stroke-linejoin: round;
-            opacity:.92;
-        }
-        .shieldLine{
-            stroke: rgba(245,158,11,.58);
-            stroke-width: 1.2;
-            stroke-linecap: round;
-            opacity:.9;
-        }
-
-        /* Actions row */
-        .actions{
-            margin-top: 22px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            gap: 14px;
-            font-family:"Righteous", system-ui, sans-serif;
-            font-size: 15px;
-            letter-spacing: .25px;
-            color: rgba(238,242,255,.92);
-        }
-
-        .action{
-            position:relative;
-            padding: 8px 12px;
-            border-radius: 999px;
-            border: 1px solid rgba(251,191,36,.18);
-            background: rgba(15,23,42,.16);
-            transition: transform .18s ease, background-color .18s ease, box-shadow .18s ease, border-color .18s ease;
-            color: inherit;
-            font-family: inherit;
-            font-size: inherit;
-            user-select: none;
-            pointer-events: none;
-        }
-
-        .dot{
-            width:6px;
-            height:6px;
-            border-radius:999px;
-            background: rgba(251,191,36,.65);
-            box-shadow: 0 0 10px rgba(251,191,36,.16);
-            opacity:.9;
-        }
-
-        /* Card */
-        .card{
-            width:min(640px, 92vw);
-            background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(243,245,249,.92));
-            border: 1px solid rgba(255,255,255,.18);
-            border-radius: 18px;
-            box-shadow: 0 26px 70px rgba(2,6,23,.35);
-            padding: 26px 28px 24px;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-        }
-
-        .field{
-            display:flex;
-            flex-direction:column;
-            gap:8px;
-            margin-bottom: 16px;
-            color: rgba(15,23,42,.86);
-        }
-
-        .label{
-            font-weight: 700;
-            font-size: 14px;
-            letter-spacing:.2px;
-            color: rgba(15,23,42,.85);
-        }
-
-        .input, .select{
-            appearance:none;
-            width:100%;
-            border: 2px solid rgba(148,163,184,.28);
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 14px 14px;
-            font-size: 16px;
-            outline:none;
-            transition: border-color .16s ease, box-shadow .16s ease;
-        }
-
-        .input::placeholder{
-            color: rgba(100,116,139,.75);
-        }
-
-        .input:focus, .select:focus{
-            border-color: rgba(109,76,255,.55);
-            box-shadow: 0 0 0 4px rgba(109,76,255,.12);
-        }
-
-        .row{
-            display:grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-            margin-top: 10px;
-        }
-
-        .btn{
-            border:0;
-            border-radius: 14px;
-            padding: 14px 14px;
-            font-weight: 800;
-            font-size: 16px;
-            letter-spacing:.2px;
-            cursor:pointer;
-            color:white;
-            box-shadow: 0 16px 30px rgba(2,6,23,.18);
-            transition: transform .16s ease, filter .16s ease, box-shadow .16s ease;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            gap:10px;
-            min-height: 52px;
-        }
-
-        .btn:hover{
-            transform: translateY(-1px);
-            filter: brightness(1.02);
-        }
-        .btn:active{
-            transform: translateY(0px);
-            filter: brightness(.98);
-        }
-
-        .btn-primary{
-            background: linear-gradient(180deg, #6d4cff, #5b34ff);
-        }
-        .btn-secondary{
-            background: linear-gradient(180deg, #3aa7c7, #2b93b2);
-        }
-
-        .icon{
-            width:18px;
-            height:18px;
-            display:inline-block;
-        }
-
-        @media (max-width: 560px){
-            .card{ padding: 22px 18px 20px; }
-            .row{ grid-template-columns: 1fr; }
-            .actions{ flex-wrap: wrap; gap:10px; }
-            .dot{ display:none; }
-        }
-
-        /* Cyber buttons - keeping for compatibility */
-        .cyber-btnRow {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 4px;
-        }
-
-        .cyber-btn {
-            height: 52px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 15px;
-            letter-spacing: .3px;
-            cursor: pointer;
-            transition: all .2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            user-select: none;
-            font-family: system-ui, -apple-system, sans-serif;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .cyber-btn:active {
-            transform: scale(.97);
-        }
-
-        .cyber-btn.primary {
-            color: #fff;
-            background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
-            box-shadow: 0 10px 25px rgba(124,58,237,.4);
-        }
-
-        .cyber-btn.primary:hover {
-            box-shadow: 0 12px 30px rgba(124,58,237,.5);
-            transform: translateY(-2px);
-        }
-
-        .cyber-btn.secondary {
-            color: #fff;
-            background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
-            box-shadow: 0 10px 25px rgba(8,145,178,.4);
-        }
-
-        .cyber-btn.secondary:hover {
-            box-shadow: 0 12px 30px rgba(8,145,178,.5);
-            transform: translateY(-2px);
-        }
-
-        .cyber-icon {
-            width: 20px;
-            height: 20px;
-            display: inline-block;
-        }
-
-        .cyber-btn.full-width {
-            width: 100%;
-        }
-
-        /* Cyber form - keeping for compatibility */
-        .cyber-form {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .cyber-field {
-            position: relative;
-        }
-
-        .cyber-field input,
-        .cyber-field select {
-            width: 100%;
-            height: 50px;
-            border-radius: 10px;
-            border: 2px solid rgba(203,213,225,.8);
-            background: #ffffff;
-            padding: 0 15px;
-            font-size: 15px;
-            font-family: system-ui, -apple-system, sans-serif;
-            outline: none;
-            transition: all .2s ease;
-            color: #1e293b;
-            font-weight: 500;
-        }
-
-        .cyber-field input::placeholder {
-            color: #94a3b8;
-            font-weight: 400;
-        }
-
-        .cyber-field input:focus,
-        .cyber-field select:focus {
-            border-color: #7c3aed;
-            box-shadow: 0 0 0 3px rgba(124,58,237,.1);
-        }
-
-        .cyber-field label {
-            display: block;
-            font-size: 14px;
-            font-weight: 700;
-            color: #0f172a;
-            margin-bottom: 8px;
-            font-family: system-ui, -apple-system, sans-serif;
-        }
-
-        /* Responsive */
-        @media (max-width: 600px) {
-            .cyber-btnRow { grid-template-columns: 1fr; }
-        }
-    </style>
 </head>
 <body>
     <!-- Authentication Screen - Login & Signup -->
     <div id="auth-screen" class="screen active">
-        <div class="pattern" aria-hidden="true">
-            <svg viewBox="0 0 1200 700" preserveAspectRatio="none">
-                <defs>
-                    <linearGradient id="p" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0" stop-color="rgba(125,211,252,.22)"/>
-                        <stop offset=".6" stop-color="rgba(196,181,253,.18)"/>
-                        <stop offset="1" stop-color="rgba(251,191,36,.12)"/>
-                    </linearGradient>
-                </defs>
-                <g fill="none" stroke="url(#p)" stroke-width="6" opacity=".65">
-                    <path d="M190 175 h120 a20 20 0 0 1 20 20 v90 a20 20 0 0 1-20 20 H190 a20 20 0 0 1-20-20 v-90 a20 20 0 0 1 20-20z" opacity=".25"/>
-                    <path d="M240 215 a26 26 0 1 0 0.01 0" opacity=".25"/>
-                    <path d="M260 250 l50 0" opacity=".20"/>
-                    <path d="M870 170 a52 52 0 0 1 0 104 a62 62 0 0 1-98 18 a46 46 0 0 1 12-90 a52 52 0 0 1 86-32z" opacity=".22"/>
-                    <path d="M980 520 h120 a22 22 0 0 1 22 22 v74 a22 22 0 0 1-22 22 H980 a22 22 0 0 1-22-22 v-74 a22 22 0 0 1 22-22z" opacity=".18"/>
-                    <path d="M1010 548 h60" opacity=".16"/>
-                    <path d="M1010 576 h86" opacity=".16"/>
-                    <path d="M1010 604 h50" opacity=".16"/>
-                    <path d="M150 520 a62 62 0 0 1 124 0 v16 h-124z" opacity=".16"/>
-                    <path d="M110 590 h210" opacity=".12"/>
-                </g>
-                <g fill="rgba(238,242,255,.14)" opacity=".28">
-                    <circle cx="430" cy="120" r="2"/><circle cx="470" cy="120" r="2"/><circle cx="510" cy="120" r="2"/>
-                    <circle cx="430" cy="160" r="2"/><circle cx="470" cy="160" r="2"/><circle cx="510" cy="160" r="2"/>
-                    <circle cx="690" cy="460" r="2"/><circle cx="730" cy="460" r="2"/><circle cx="770" cy="460" r="2"/>
-                    <circle cx="690" cy="500" r="2"/><circle cx="730" cy="500" r="2"/><circle cx="770" cy="500" r="2"/>
-                </g>
-            </svg>
+        <!-- Cyber background -->
+        <div class="cyber-bg">
+            <div class="cyber-line h1"></div>
+            <div class="cyber-line h2"></div>
+            <div class="cyber-line h3"></div>
+            <div class="cyber-line v1"></div>
+            <div class="cyber-line v2"></div>
+            <div class="cyber-line v3"></div>
         </div>
 
-        <main class="wrap">
-            <header class="brand">
-                <h1 class="logo" data-text="safestagram" aria-label="SafeStagram - Güvenli Sosyal Medya Platformu">
-                    <span class="logoText" aria-hidden="true">
-                        <span class="chunk">safe</span>
-                        <span class="specialS" aria-label="Güvenlik kalkanı ile S harfi">
-                            s
-                            <svg viewBox="0 0 64 64" aria-hidden="true">
-                                <defs>
-                                    <linearGradient id="shieldStroke" x1="0" y1="0" x2="1" y2="1">
-                                        <stop offset="0%" stop-color="rgba(253,230,138,0.95)"/>
-                                        <stop offset="45%" stop-color="rgba(251,191,36,0.85)"/>
-                                        <stop offset="100%" stop-color="rgba(245,158,11,0.85)"/>
-                                    </linearGradient>
-                                </defs>
-                                <path class="shieldOuter" d="M32 7 L52 14.5 V30.5 C52 45 41.3 54.5 32 58 C22.7 54.5 12 45 12 30.5 V14.5 Z"/>
-                                <path class="shieldInner" d="M32 12 L46 18.2 V30.5 C46 41 38.8 48.6 32 51.4 C25.2 48.6 18 41 18 30.5 V18.2 Z"/>
-                                <path class="shieldLine" d="M32 13.5 V53.2" opacity=".55"/>
-                                <path class="shieldLine" d="M22 30 H42" opacity=".35"/>
-                                <path class="shieldLine" d="M24 35.5 H40" opacity=".28"/>
-                            </svg>
-                        </span>
-                        <span class="chunk">tagram</span>
-                    </span>
-                </h1>
+        <!-- Floating cyber icons -->
+        <i class="fas fa-shield-alt floating-icon icon-shield-left"></i>
+        <i class="fas fa-shield-alt floating-icon icon-shield-right"></i>
+        <i class="fas fa-lock floating-icon icon-lock-left"></i>
+        <i class="fas fa-lock floating-icon icon-lock-right"></i>
+        <i class="fas fa-user-shield floating-icon icon-robot-left"></i>
+        <i class="fas fa-ban floating-icon icon-robot-right"></i>
+        <i class="fas fa-flag floating-icon icon-phone-left"></i>
+        <i class="fas fa-exclamation-triangle floating-icon icon-phone-right"></i>
+        <i class="fas fa-wifi floating-icon icon-wifi-left"></i>
+        <i class="fas fa-eye floating-icon icon-wifi-right"></i>
+        <i class="fas fa-cloud floating-icon icon-cloud"></i>
+        <i class="fas fa-shield-alt floating-icon icon-security-top"></i>
 
-                <nav class="actions" aria-label="Hızlı eylemler" aria-hidden="true">
-                    <span class="action">Şikayet Et</span>
-                    <span class="dot" aria-hidden="true"></span>
-                    <span class="action">Engelle</span>
-                    <span class="dot" aria-hidden="true"></span>
-                    <span class="action">Bildir</span>
-                </nav>
+        <!-- Sliding messages -->
+        <div class="message-slider msg1">Siber zorbalığa dur de!</div>
+        <div class="message-slider msg2">Şikayet et • Engelle • Bildir!</div>
+        <div class="message-slider msg3">Güvenli internet kullan</div>
+        <div class="message-slider msg4">Dijital dünyada güvendeyim</div>
+
+        <div class="cyber-welcome-container">
+            <header class="cyber-brand">
+                <div class="logo-text-container">
+                    <h1 class="logo-title">
+                        <span class="letter">S</span>
+                        <span class="letter">a</span>
+                        <span class="letter">f</span>
+                        <span class="letter">e</span>
+                        <span class="letter special yellow-s">s</span>
+                        <span class="letter">t</span>
+                        <span class="letter">a</span>
+                        <span class="letter">g</span>
+                        <span class="letter">r</span>
+                        <span class="letter">a</span>
+                        <span class="letter">m</span>
+                    </h1>
+                    <div class="logo-subtitle">
+                        <span class="subtitle-text">Şikayet Et</span>
+                        <span class="subtitle-dot">•</span>
+                        <span class="subtitle-text">Engelle</span>
+                        <span class="subtitle-dot">•</span>
+                        <span class="subtitle-text">Bildir</span>
+                    </div>
+                </div>
             </header>
 
-            <main class="card" id="auth-card">
+            <main class="cyber-card" id="auth-card">
                 <!-- Login Form -->
                 <form class="cyber-form auth-form" id="loginForm" style="display: block;">
                     <h3 class="form-title">Üye Girişi</h3>
@@ -524,7 +127,7 @@
                     </div>
                 </form>
             </main>
-        </main>
+        </div>
     </div>
 
     <!-- Panel Screen - After Login -->
