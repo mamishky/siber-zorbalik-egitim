@@ -3,416 +3,922 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafeStagram - Siber Zorbalık Eğitim Platformu</title>
+    <title>SafeStagram - Güvenli Sosyal Medya Eğitimi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Satisfy&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Poppins:wght@400;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Righteous&display=swap">
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Firebase SDK (compat version) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        /* Cyber-Themed Welcome Screen Styles */
+        #welcome-screen {
             position: relative;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: linear-gradient(135deg, #2d1b69 0%, #1e4a7f 50%, #2d1b69 100%);
+        }
+
+        #welcome-screen::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 15% 25%, rgba(124,58,237,.15), transparent 35%),
+                radial-gradient(circle at 85% 25%, rgba(34,211,238,.12), transparent 35%),
+                radial-gradient(circle at 15% 75%, rgba(236,72,153,.1), transparent 30%),
+                radial-gradient(circle at 85% 75%, rgba(168,85,247,.12), transparent 30%);
+            pointer-events: none;
+        }
+
+        /* Circuit lines animation */
+        .cyber-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: .25;
             overflow: hidden;
         }
 
-        /* Animated background elements */
-        .bg-animation {
+        .cyber-line {
             position: absolute;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: 0;
+            background: linear-gradient(90deg, transparent, rgba(34,211,238,.4), transparent);
+            height: 1px;
         }
 
+        .cyber-line.h1 { top: 20%; left: 0; width: 100%; animation: slideH 8s linear infinite; }
+        .cyber-line.h2 { top: 45%; left: 0; width: 100%; animation: slideH 12s linear infinite reverse; }
+        .cyber-line.h3 { top: 70%; left: 0; width: 100%; animation: slideH 10s linear infinite; }
+
+        .cyber-line.v1 { left: 15%; top: 0; height: 100%; width: 1px; background: linear-gradient(180deg, transparent, rgba(124,58,237,.3), transparent); animation: slideV 9s linear infinite; }
+        .cyber-line.v2 { left: 50%; top: 0; height: 100%; width: 1px; background: linear-gradient(180deg, transparent, rgba(34,211,238,.3), transparent); animation: slideV 11s linear infinite reverse; }
+        .cyber-line.v3 { left: 85%; top: 0; height: 100%; width: 1px; background: linear-gradient(180deg, transparent, rgba(168,85,247,.3), transparent); animation: slideV 13s linear infinite; }
+
+        @keyframes slideH {
+            0%, 100% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+        }
+
+        @keyframes slideV {
+            0%, 100% { transform: translateY(-100%); }
+            50% { transform: translateY(100%); }
+        }
+
+        /* Floating icons */
         .floating-icon {
-            position: absolute;
-            font-size: 2rem;
-            opacity: 0.1;
-            animation: float 15s infinite;
+            position: fixed;
+            pointer-events: none;
+            opacity: .18;
+            filter: drop-shadow(0 0 10px rgba(34,211,238,.3));
+            font-size: 80px;
+            color: rgba(34,211,238,.5);
         }
+
+        .icon-shield-left { left: 8%; top: 30%; animation: float 6s ease-in-out infinite; }
+        .icon-shield-right { right: 8%; top: 30%; animation: float 7s ease-in-out infinite reverse; }
+        .icon-lock-left { left: 12%; bottom: 25%; animation: float 8s ease-in-out infinite; }
+        .icon-lock-right { right: 12%; bottom: 25%; animation: float 7.5s ease-in-out infinite reverse; }
+        .icon-robot-left { left: 5%; top: 15%; animation: float 9s ease-in-out infinite; color: rgba(168,85,247,.5); }
+        .icon-robot-right { right: 5%; top: 15%; animation: float 8.5s ease-in-out infinite reverse; color: rgba(168,85,247,.5); }
+        .icon-phone-left { left: 8%; bottom: 35%; animation: float 10s ease-in-out infinite; color: rgba(236,72,153,.5); }
+        .icon-phone-right { right: 8%; bottom: 35%; animation: float 9.5s ease-in-out infinite reverse; color: rgba(236,72,153,.5); }
+        .icon-wifi-left { left: 3%; top: 55%; animation: float 10.5s ease-in-out infinite; }
+        .icon-wifi-right { right: 10%; bottom: 18%; animation: float 9.5s ease-in-out infinite reverse; }
+        .icon-cloud { right: 6%; top: 50%; animation: float 11s ease-in-out infinite; color: rgba(34,211,238,.4); }
+        .icon-security-top { left: 50%; top: 8%; transform: translateX(-50%); animation: float 7s ease-in-out infinite; }
 
         @keyframes float {
-            0%, 100% {
-                transform: translateY(0) rotate(0deg);
-            }
-            50% {
-                transform: translateY(-50px) rotate(180deg);
-            }
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
         }
 
-        .floating-icon:nth-child(1) { left: 10%; top: 20%; animation-delay: 0s; }
-        .floating-icon:nth-child(2) { left: 80%; top: 30%; animation-delay: 2s; }
-        .floating-icon:nth-child(3) { left: 50%; top: 60%; animation-delay: 4s; }
-        .floating-icon:nth-child(4) { left: 20%; top: 80%; animation-delay: 6s; }
-        .floating-icon:nth-child(5) { left: 70%; top: 70%; animation-delay: 8s; }
+        /* Sliding messages */
+        .message-slider {
+            position: fixed;
+            pointer-events: none;
+            opacity: .12;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: clamp(18px, 2vw, 26px);
+            letter-spacing: 1px;
+            color: #22d3ee;
+            text-shadow: 0 0 20px rgba(34,211,238,.6);
+            white-space: nowrap;
+        }
 
-        .auth-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            padding: 3rem;
-            width: 90%;
-            max-width: 400px;
+        .msg1 { top: 12%; left: -100%; animation: slideRight 25s linear infinite; }
+        .msg2 { top: 38%; right: -100%; animation: slideLeft 28s linear infinite; color: #a78bfa; text-shadow: 0 0 20px rgba(168,85,247,.6); }
+        .msg3 { bottom: 15%; left: -100%; animation: slideRight 30s linear infinite; color: #ec4899; text-shadow: 0 0 20px rgba(236,72,153,.6); animation-delay: 5s; }
+        .msg4 { top: 58%; right: -100%; animation: slideLeft 26s linear infinite; color: #22d3ee; text-shadow: 0 0 20px rgba(34,211,238,.6); animation-delay: 8s; }
+
+        @keyframes slideRight {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(calc(200vw)); }
+        }
+
+        @keyframes slideLeft {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(calc(-200vw)); }
+        }
+
+        /* Cyber welcome container */
+        .cyber-welcome-container {
             position: relative;
-            z-index: 1;
-            animation: slideIn 0.5s ease-out;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 10;
         }
 
-        @keyframes slideIn {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .logo {
+        /* Cyber brand */
+        .cyber-brand {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 35px;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
         }
 
-        .logo h1 {
-            font-size: 2.5rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .logo-shield {
+            font-size: clamp(50px, 6vw, 70px);
+            color: #22d3ee;
+            filter: drop-shadow(0 0 15px rgba(34,211,238,.6)) drop-shadow(0 0 25px rgba(124,58,237,.4));
+            animation: shieldPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes shieldPulse {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(34,211,238,.6)) drop-shadow(0 0 25px rgba(124,58,237,.4)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 20px rgba(34,211,238,.8)) drop-shadow(0 0 35px rgba(124,58,237,.6)); }
+        }
+
+        .cyber-brand h1 {
+            margin: 0;
+            font-size: clamp(44px, 6.5vw, 76px);
+            font-weight: 800;
+            letter-spacing: 2px;
+            font-family: 'Orbitron', sans-serif;
+            position: relative;
+            display: inline-block;
+        }
+
+        .cyber-brand h1 .letter {
+            display: inline-block;
+            background: linear-gradient(180deg, #22d3ee 0%, #a78bfa 60%, #ec4899 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 0.5rem;
+            filter: drop-shadow(0 0 20px rgba(34,211,238,.4));
         }
 
-        .logo h1 .special-s {
-            font-size: 3rem;
-            font-weight: bold;
+        .cyber-brand h1 .letter.special {
+            font-size: 1.15em;
+            background: linear-gradient(135deg, #22d3ee 0%, #a78bfa 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 30px rgba(34,211,238,.7)) drop-shadow(0 0 40px rgba(236,72,153,.5));
+            animation: specialGlow 2s ease-in-out infinite;
+            transform-origin: center;
+            position: relative;
             display: inline-block;
-            transform: rotate(-10deg);
+            font-weight: 900;
         }
 
-        .logo p {
-            color: #666;
-            font-size: 0.9rem;
+        @keyframes specialGlow {
+            0%, 100% { 
+                filter: drop-shadow(0 0 30px rgba(34,211,238,.7)) drop-shadow(0 0 40px rgba(236,72,153,.5));
+                transform: scale(1);
+            }
+            50% { 
+                filter: drop-shadow(0 0 40px rgba(34,211,238,.9)) drop-shadow(0 0 50px rgba(236,72,153,.7));
+                transform: scale(1.08);
+            }
         }
 
-        .form-group {
-            margin-bottom: 1.5rem;
+        .cyber-brand h1::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 120%;
+            height: 120%;
+            z-index: -1;
+            background: radial-gradient(circle, rgba(34,211,238,.3), transparent 70%);
+            filter: blur(30px);
+            opacity: .6;
         }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #333;
-            font-weight: 500;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 0.8rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .btn {
-            width: 100%;
-            padding: 1rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .divider {
-            text-align: center;
-            margin: 1.5rem 0;
-            color: #999;
+        /* Cyber form card */
+        .cyber-card {
+            width: min(480px, 90vw);
+            background: rgba(248,250,252,.96);
+            border-radius: 20px;
+            box-shadow:
+                0 25px 70px rgba(0,0,0,.5),
+                0 0 0 1px rgba(255,255,255,.6) inset;
+            backdrop-filter: blur(10px);
+            padding: 28px 32px 32px;
             position: relative;
         }
 
-        .divider::before,
-        .divider::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            width: 40%;
-            height: 1px;
-            background: #e0e0e0;
-        }
-
-        .divider::before {
-            left: 0;
-        }
-
-        .divider::after {
-            right: 0;
-        }
-
-        .social-login {
+        .cyber-form {
             display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            flex-direction: column;
+            gap: 16px;
         }
 
-        .social-btn {
-            flex: 1;
-            padding: 0.8rem;
-            border: 2px solid #e0e0e0;
+        .cyber-field {
+            position: relative;
+        }
+
+        .cyber-field input,
+        .cyber-field select {
+            width: 100%;
+            height: 50px;
             border-radius: 10px;
-            background: white;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 1.5rem;
+            border: 2px solid rgba(203,213,225,.8);
+            background: #ffffff;
+            padding: 0 15px;
+            font-size: 15px;
+            font-family: system-ui, -apple-system, sans-serif;
+            outline: none;
+            transition: all .2s ease;
+            color: #1e293b;
+            font-weight: 500;
         }
 
-        .social-btn:hover {
-            border-color: #667eea;
+        .cyber-field input::placeholder {
+            color: #94a3b8;
+            font-weight: 400;
+        }
+
+        .cyber-field input:focus,
+        .cyber-field select:focus {
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124,58,237,.1);
+        }
+
+        .cyber-field label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 8px;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        /* Cyber buttons */
+        .cyber-btnRow {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .cyber-btn {
+            height: 52px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 15px;
+            letter-spacing: .3px;
+            cursor: pointer;
+            transition: all .2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            user-select: none;
+            font-family: system-ui, -apple-system, sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cyber-btn:active {
+            transform: scale(.97);
+        }
+
+        .cyber-btn.primary {
+            color: #fff;
+            background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+            box-shadow: 0 10px 25px rgba(124,58,237,.4);
+        }
+
+        .cyber-btn.primary:hover {
+            box-shadow: 0 12px 30px rgba(124,58,237,.5);
             transform: translateY(-2px);
         }
 
-        .toggle-form {
-            text-align: center;
-            margin-top: 1.5rem;
-            color: #666;
+        .cyber-btn.secondary {
+            color: #fff;
+            background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+            box-shadow: 0 10px 25px rgba(8,145,178,.4);
         }
 
-        .toggle-form a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
+        .cyber-btn.secondary:hover {
+            box-shadow: 0 12px 30px rgba(8,145,178,.5);
+            transform: translateY(-2px);
         }
 
-        .toggle-form a:hover {
-            text-decoration: underline;
+        .cyber-icon {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
         }
 
-        .success-message {
-            background: #4caf50;
-            color: white;
-            padding: 1rem;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-            text-align: center;
-            display: none;
-        }
-
-        /* Sliding information messages */
-        .info-slider {
-            position: absolute;
-            bottom: 20px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            color: white;
-            font-size: 0.9rem;
-            z-index: 1;
-        }
-
-        .slide-message {
-            display: none;
-            animation: fadeSlide 1s ease-in-out;
-        }
-
-        .slide-message.active {
-            display: block;
-        }
-
-        @keyframes fadeSlide {
-            0% {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            10%, 90% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .auth-container {
-                padding: 2rem;
-            }
-
-            .logo h1 {
-                font-size: 2rem;
-            }
+        /* Responsive */
+        @media (max-width: 600px) {
+            .cyber-btnRow { grid-template-columns: 1fr; }
+            .cyber-brand { margin-bottom: 25px; flex-direction: column; gap: 10px; }
+            .cyber-card { padding: 24px 20px; }
+            .cyber-brand h1 { font-size: 40px; }
+            .floating-icon { opacity: .08; font-size: 60px; }
+            .logo-shield { font-size: 45px; }
+            .message-slider { font-size: 14px; opacity: .08; }
+            .icon-security-top { transform: translateX(-50%) translateY(0); }
         }
     </style>
 </head>
 <body>
-    <!-- Background Animation -->
-    <div class="bg-animation">
-        <div class="floating-icon">🛡️</div>
-        <div class="floating-icon">🔒</div>
-        <div class="floating-icon">💬</div>
-        <div class="floating-icon">👥</div>
-        <div class="floating-icon">⚠️</div>
+    <!-- Authentication Screen - Login & Signup -->
+    <div id="auth-screen" class="screen active">
+        <!-- Cyber background -->
+        <div class="cyber-bg">
+            <div class="cyber-line h1"></div>
+            <div class="cyber-line h2"></div>
+            <div class="cyber-line h3"></div>
+            <div class="cyber-line v1"></div>
+            <div class="cyber-line v2"></div>
+            <div class="cyber-line v3"></div>
+        </div>
+
+        <!-- Floating cyber icons -->
+        <i class="fas fa-shield-alt floating-icon icon-shield-left"></i>
+        <i class="fas fa-shield-alt floating-icon icon-shield-right"></i>
+        <i class="fas fa-lock floating-icon icon-lock-left"></i>
+        <i class="fas fa-lock floating-icon icon-lock-right"></i>
+        <i class="fas fa-user-shield floating-icon icon-robot-left"></i>
+        <i class="fas fa-ban floating-icon icon-robot-right"></i>
+        <i class="fas fa-flag floating-icon icon-phone-left"></i>
+        <i class="fas fa-exclamation-triangle floating-icon icon-phone-right"></i>
+        <i class="fas fa-wifi floating-icon icon-wifi-left"></i>
+        <i class="fas fa-eye floating-icon icon-wifi-right"></i>
+        <i class="fas fa-cloud floating-icon icon-cloud"></i>
+        <i class="fas fa-shield-alt floating-icon icon-security-top"></i>
+
+        <!-- Sliding messages -->
+        <div class="message-slider msg1">Siber zorbalığa dur de!</div>
+        <div class="message-slider msg2">Şikayet et • Engelle • Bildir!</div>
+        <div class="message-slider msg3">Güvenli internet kullan</div>
+        <div class="message-slider msg4">Dijital dünyada güvendeyim</div>
+
+        <div class="cyber-welcome-container">
+            <header class="cyber-brand">
+                <div class="logo-text-container">
+                    <h1 class="logo-title"><span class="letter">S</span><span class="letter">a</span><span class="letter">f</span><span class="letter">e</span><span class="letter yellow-s">s</span><span class="letter">t</span><span class="letter">a</span><span class="letter">g</span><span class="letter">r</span><span class="letter">a</span><span class="letter">m</span></h1>
+                    <div class="logo-subtitle">
+                        <span class="subtitle-text">Şikayet Et</span>
+                        <span class="subtitle-dot">•</span>
+                        <span class="subtitle-text">Engelle</span>
+                        <span class="subtitle-dot">•</span>
+                        <span class="subtitle-text">Bildir</span>
+                    </div>
+                </div>
+            </header>
+
+            <main class="cyber-card" id="auth-card">
+                <!-- Login Form -->
+                <form class="cyber-form auth-form" id="loginForm" style="display: block;">
+                    <h3 class="form-title">Üye Girişi</h3>
+                    <div class="cyber-field">
+                        <input type="email" id="login-email" placeholder="E-posta" autocomplete="email" required />
+                    </div>
+
+                    <div class="cyber-field">
+                        <input type="password" id="login-password" placeholder="Şifre" autocomplete="current-password" required />
+                    </div>
+
+                    <button class="cyber-btn primary full-width" type="submit">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Giriş Yap
+                    </button>
+
+                    <div class="form-switch">
+                        <span>Hesabınız yok mu?</span>
+                        <button type="button" class="switch-btn" id="show-signup">Üye Ol</button>
+                    </div>
+                </form>
+
+                <!-- Signup Form -->
+                <form class="cyber-form auth-form" id="signupForm" style="display: none;">
+                    <h3 class="form-title">Üye Ol</h3>
+                    <div class="cyber-field">
+                        <input type="text" id="signup-firstname" placeholder="İsim" autocomplete="given-name" required />
+                    </div>
+
+                    <div class="cyber-field">
+                        <input type="text" id="signup-lastname" placeholder="Soyisim" autocomplete="family-name" required />
+                    </div>
+
+                    <div class="cyber-field">
+                        <input type="email" id="signup-email" placeholder="E-posta" autocomplete="email" required />
+                    </div>
+
+                    <div class="cyber-field">
+                        <input type="password" id="signup-password" placeholder="Şifre (en az 6 karakter)" autocomplete="new-password" minlength="6" required />
+                    </div>
+
+                    <button class="cyber-btn primary full-width" type="submit">
+                        <i class="fas fa-user-plus"></i>
+                        Üye Ol
+                    </button>
+
+                    <div class="form-switch">
+                        <span>Zaten hesabınız var mı?</span>
+                        <button type="button" class="switch-btn" id="show-login">Giriş Yap</button>
+                    </div>
+                </form>
+            </main>
+        </div>
     </div>
 
-    <!-- Auth Container -->
-    <div class="auth-container">
-        <div class="logo">
-            <h1><span class="special-s">S</span>afeStagram</h1>
-            <p>Güvenli Sosyal Medya Deneyimi</p>
+    <!-- Panel Screen - After Login -->
+    <div id="panel-screen" class="screen">
+        <!-- Cyber background -->
+        <div class="cyber-bg">
+            <div class="cyber-line h1"></div>
+            <div class="cyber-line h2"></div>
+            <div class="cyber-line h3"></div>
+            <div class="cyber-line v1"></div>
+            <div class="cyber-line v2"></div>
+            <div class="cyber-line v3"></div>
         </div>
 
-        <div class="success-message" id="successMessage">
-            Hesabınız başarıyla oluşturuldu!
-        </div>
+        <!-- Floating cyber icons -->
+        <i class="fas fa-shield-alt floating-icon icon-shield-left"></i>
+        <i class="fas fa-shield-alt floating-icon icon-shield-right"></i>
+        <i class="fas fa-lock floating-icon icon-lock-left"></i>
+        <i class="fas fa-lock floating-icon icon-lock-right"></i>
+        <i class="fas fa-user-shield floating-icon icon-robot-left"></i>
+        <i class="fas fa-ban floating-icon icon-robot-right"></i>
+        <i class="fas fa-flag floating-icon icon-phone-left"></i>
+        <i class="fas fa-exclamation-triangle floating-icon icon-phone-right"></i>
+        <i class="fas fa-wifi floating-icon icon-wifi-left"></i>
+        <i class="fas fa-eye floating-icon icon-wifi-right"></i>
+        <i class="fas fa-cloud floating-icon icon-cloud"></i>
+        <i class="fas fa-shield-alt floating-icon icon-security-top"></i>
 
-        <!-- Login Form -->
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="loginEmail">E-posta</label>
-                <input type="email" id="loginEmail" placeholder="ornek@email.com" required>
+        <!-- Sliding messages -->
+        <div class="message-slider msg1">Siber zorbalığa dur de!</div>
+        <div class="message-slider msg2">Şikayet et • Engelle • Bildir!</div>
+        <div class="message-slider msg3">Güvenli internet kullan</div>
+        <div class="message-slider msg4">Dijital dünyada güvendeyim</div>
+
+        <div class="cyber-welcome-container">
+            <!-- User Info Display -->
+            <div class="user-info-display">
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-name" id="panel-user-name">
+                    <div class="user-fullname">Kullanıcı Adı</div>
+                    <div class="user-email" id="panel-user-email" style="font-size:0.85em;opacity:0.85">e-posta@ornek.com</div>
+                </div>
+                <button class="cyber-btn-logout" id="panel-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Çıkış Yap
+                </button>
             </div>
-            <div class="form-group">
-                <label for="loginPassword">Şifre</label>
-                <input type="password" id="loginPassword" placeholder="••••••••" required>
-            </div>
-            <button type="submit" class="btn">Giriş Yap</button>
-        </form>
 
-        <div class="divider">veya</div>
+            <header class="cyber-brand">
+                <div class="logo-text-container">
+                    <h1 class="logo-title"><span class="letter">S</span><span class="letter">a</span><span class="letter">f</span><span class="letter">e</span><span class="letter yellow-s">s</span><span class="letter">t</span><span class="letter">a</span><span class="letter">g</span><span class="letter">r</span><span class="letter">a</span><span class="letter">m</span></h1>
+                    <div class="logo-subtitle">
+                        <span class="subtitle-text">Şikayet Et</span>
+                        <span class="subtitle-dot">•</span>
+                        <span class="subtitle-text">Engelle</span>
+                        <span class="subtitle-dot">•</span>
+                        <span class="subtitle-text">Bildir</span>
+                    </div>
+                </div>
+            </header>
 
-        <div class="social-login">
-            <button class="social-btn" onclick="alert('Google ile giriş yakında eklenecek!')">📧</button>
-            <button class="social-btn" onclick="alert('Facebook ile giriş yakında eklenecek!')">📘</button>
-            <button class="social-btn" onclick="alert('Apple ile giriş yakında eklenecek!')">🍎</button>
-        </div>
+            <main class="cyber-card">
+                <div class="panel-options">
+                    <button class="cyber-btn primary panel-option" id="app-entry-btn">
+                        <i class="fas fa-play-circle"></i>
+                        <span>Uygulamaya Giriş</span>
+                        <p>Simülasyonu başlatmak için tıklayın</p>
+                    </button>
 
-        <div class="toggle-form">
-            Hesabın yok mu? <a href="#" onclick="toggleForms(); return false;">Kayıt Ol</a>
+                    <button class="cyber-btn secondary panel-option" id="academic-panel-btn">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Uygulamacı Paneli</span>
+                        <p>Verilerinizi görüntüleyin</p>
+                    </button>
+                </div>
+            </main>
         </div>
     </div>
 
-    <!-- Register Form (Hidden by default) -->
-    <div class="auth-container" id="registerContainer" style="display: none;">
-        <div class="logo">
-            <h1><span class="special-s">S</span>afeStagram</h1>
-            <p>Güvenli Sosyal Medya Deneyimi</p>
+    <!-- App Entry Screen -->
+    <div id="app-entry-screen" class="screen">
+        <!-- Cyber background -->
+        <div class="cyber-bg">
+            <div class="cyber-line h1"></div>
+            <div class="cyber-line h2"></div>
+            <div class="cyber-line h3"></div>
+            <div class="cyber-line v1"></div>
+            <div class="cyber-line v2"></div>
+            <div class="cyber-line v3"></div>
         </div>
 
-        <form id="registerForm">
-            <div class="form-group">
-                <label for="registerName">Ad Soyad</label>
-                <input type="text" id="registerName" placeholder="Adınız Soyadınız" required>
-            </div>
-            <div class="form-group">
-                <label for="registerEmail">E-posta</label>
-                <input type="email" id="registerEmail" placeholder="ornek@email.com" required>
-            </div>
-            <div class="form-group">
-                <label for="registerPassword">Şifre</label>
-                <input type="password" id="registerPassword" placeholder="••••••••" required>
-            </div>
-            <button type="submit" class="btn">Kayıt Ol</button>
-        </form>
+        <!-- Floating cyber icons -->
+        <i class="fas fa-shield-alt floating-icon icon-shield-left"></i>
+        <i class="fas fa-shield-alt floating-icon icon-shield-right"></i>
+        <i class="fas fa-lock floating-icon icon-lock-left"></i>
+        <i class="fas fa-lock floating-icon icon-lock-right"></i>
+        <i class="fas fa-user-shield floating-icon icon-robot-left"></i>
+        <i class="fas fa-ban floating-icon icon-robot-right"></i>
+        <i class="fas fa-flag floating-icon icon-phone-left"></i>
+        <i class="fas fa-exclamation-triangle floating-icon icon-phone-right"></i>
+        <i class="fas fa-wifi floating-icon icon-wifi-left"></i>
+        <i class="fas fa-eye floating-icon icon-wifi-right"></i>
+        <i class="fas fa-cloud floating-icon icon-cloud"></i>
+        <i class="fas fa-shield-alt floating-icon icon-security-top"></i>
 
-        <div class="toggle-form">
-            Zaten hesabın var mı? <a href="#" onclick="toggleForms(); return false;">Giriş Yap</a>
+        <!-- Sliding messages -->
+        <div class="message-slider msg1">Siber zorbalığa dur de!</div>
+        <div class="message-slider msg2">Şikayet et • Engelle • Bildir!</div>
+        <div class="message-slider msg3">Güvenli internet kullan</div>
+        <div class="message-slider msg4">Dijital dünyada güvendeyim</div>
+
+        <div class="cyber-welcome-container">
+            <!-- User Info Display -->
+            <div class="user-info-display">
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-name" id="app-entry-user-name">
+                    <div class="user-fullname">Kullanıcı Adı</div>
+                    <div class="user-email" id="app-entry-user-email" style="font-size:0.85em;opacity:0.85">e-posta@ornek.com</div>
+                </div>
+            </div>
+            
+            <header class="cyber-brand">
+                <div class="logo-text-container">
+                    <h1 class="logo-title"><span class="letter">S</span><span class="letter">a</span><span class="letter">f</span><span class="letter">e</span><span class="letter yellow-s">s</span><span class="letter">t</span><span class="letter">a</span><span class="letter">g</span><span class="letter">r</span><span class="letter">a</span><span class="letter">m</span></h1>
+                    <div class="logo-subtitle">
+                        <span class="subtitle-text">Şikayet Et</span>
+                        <span class="subtitle-dot">•</span>
+                        <span class="subtitle-text">Engelle</span>
+                        <span class="subtitle-dot">•</span>
+                        <span class="subtitle-text">Bildir</span>
+                    </div>
+                </div>
+            </header>
+
+            <main class="cyber-card">
+                <form class="cyber-form" id="sessionForm">
+                    <h3 class="form-title">Simülasyon Başlat</h3>
+                    
+                    <div class="cyber-field">
+                        <input type="text" id="participant-name" placeholder="Adınız" autocomplete="name" required />
+                    </div>
+
+                    <div class="cyber-field">
+                        <input type="number" id="participant-age" placeholder="Yaşınız" min="1" max="120" required />
+                    </div>
+
+                    <div class="cyber-field">
+                        <label for="session-type">Oturum Türü:</label>
+                        <select id="session-type" required>
+                            <option value="genelleme-on">Genelleme Ön-Test</option>
+                            <option value="baslama" selected>Başlama Düzeyi</option>
+                            <option value="uygulama">Uygulama</option>
+                            <option value="genelleme-son">Genelleme Son-Test</option>
+                            <option value="izleme-2">İzleme (2. Hafta)</option>
+                            <option value="izleme-4">İzleme (4. Hafta)</option>
+                            <option value="izleme-8">İzleme (8. Hafta)</option>
+                        </select>
+                    </div>
+
+                    <div class="cyber-field">
+                        <label>İpucu Ayarları:</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="radio" name="hint-option" id="hint-use" value="use" checked />
+                                <span>İpucu Kullan</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="radio" name="hint-option" id="hint-no-use" value="no-use" />
+                                <span>İpucu Kullanma</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="cyber-btnRow">
+                        <button class="cyber-btn primary" type="submit">
+                            <i class="fas fa-play"></i>
+                            Başla
+                        </button>
+
+                        <button class="cyber-btn secondary" type="button" id="back-to-panel">
+                            <i class="fas fa-arrow-left"></i>
+                            Geri
+                        </button>
+                    </div>
+                </form>
+            </main>
         </div>
     </div>
 
-    <!-- Information Slider -->
-    <div class="info-slider">
-        <div class="slide-message active">🛡️ Siber zorbalığa karşı güvendeyiz</div>
-        <div class="slide-message">💬 Saygılı iletişim için buradayız</div>
-        <div class="slide-message">🤝 Birlikte daha güvenli bir topluluk</div>
-        <div class="slide-message">⚠️ Uygunsuz içerikleri hemen bildir</div>
-    </div>
 
-    <script>
-        // Toggle between login and register forms
-        function toggleForms() {
-            const loginForm = document.getElementById('loginForm').parentElement;
-            const registerContainer = document.getElementById('registerContainer');
-            
-            if (loginForm.style.display === 'none') {
-                loginForm.style.display = 'block';
-                registerContainer.style.display = 'none';
-            } else {
-                loginForm.style.display = 'none';
-                registerContainer.style.display = 'block';
-            }
-        }
-
-        // Handle login
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            // Simulate login
-            console.log('Login attempt:', email);
-            alert('Giriş başarılı! Eğitim platformuna yönlendiriliyorsunuz...');
-            // In real application, redirect to main app
-            // window.location.href = 'app.html';
-        });
-
-        // Handle registration
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('registerName').value;
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            
-            // Simulate registration
-            console.log('Registration attempt:', name, email);
-            
-            // Show success message
-            document.getElementById('successMessage').style.display = 'block';
-            
-            // Switch back to login form after 2 seconds
-            setTimeout(() => {
-                toggleForms();
-                document.getElementById('successMessage').style.display = 'none';
-                document.getElementById('registerForm').reset();
-            }, 2000);
-        });
-
-        // Sliding messages
-        let currentSlide = 0;
-        const slides = document.querySelectorAll('.slide-message');
+    <!-- Uygulamacı Kontrol Paneli -->
+    <div id="admin-panel" class="screen">
+        <div class="admin-panel-header">
+            <button class="btn-secondary" id="admin-back-btn">
+                <i class="fas fa-arrow-left"></i>
+                Geri
+            </button>
+            <h2>Uygulamacı Kontrol Paneli</h2>
+            <div class="admin-user-info">
+                <span id="admin-user-name">
+                    <div class="user-fullname">Kullanıcı</div>
+                    <div class="user-email" id="admin-user-email" style="font-size:0.85em;opacity:0.85">e-posta@ornek.com</div>
+                </span>
+                <button class="btn-secondary" id="admin-logout">Çıkış</button>
+            </div>
+        </div>
         
-        function nextSlide() {
-            slides[currentSlide].classList.remove('active');
-            currentSlide = (currentSlide + 1) % slides.length;
-            slides[currentSlide].classList.add('active');
-        }
+        <div class="admin-controls">
+            <button class="btn-primary" id="export-excel">Excel'e Aktar</button>
+            <button class="btn-danger" id="clear-data">Tüm Verileri Temizle</button>
+        </div>
+        
+        <div class="data-filters">
+            <select id="filter-session">
+                <option value="">Tüm Oturumlar</option>
+                <option value="genelleme-on">Genelleme Ön-Test</option>
+                <option value="baslama">Başlama Düzeyi</option>
+                <option value="uygulama">Uygulama</option>
+                <option value="genelleme-son">Genelleme Son-Test</option>
+                <option value="izleme-2">İzleme (2. Hafta)</option>
+                <option value="izleme-4">İzleme (4. Hafta)</option>
+                <option value="izleme-8">İzleme (8. Hafta)</option>
+            </select>
+        </div>
+        
+        <div id="data-display" class="data-table"></div>
+    </div>
 
-        setInterval(nextSlide, 4000);
-    </script>
+    <!-- Instagram Benzeri Ana Ekran -->
+    <div id="main-app" class="screen">
+        <!-- Instagram DM Notification Toast -->
+        <div class="dm-notification-toast" id="dm-notification-toast" style="display: none;">
+            <div class="dm-notif-avatar">
+                <img id="dm-notif-avatar" src="" alt="Avatar">
+            </div>
+            <div class="dm-notif-content">
+                <div class="dm-notif-sender" id="dm-notif-sender"></div>
+                <div class="dm-notif-preview" id="dm-notif-preview"></div>
+            </div>
+        </div>
+
+        <!-- Üst Bar -->
+        <header class="top-bar">
+            <div class="logo-container">
+                <i class="fab fa-instagram"></i>
+                <div class="logo-text">Instagram</div>
+            </div>
+            <div class="top-icons">
+                <i class="far fa-heart"></i>
+                <div class="message-icon-container">
+                    <i class="fab fa-facebook-messenger" id="message-icon"></i>
+                    <span class="message-badge" id="message-badge" style="display: none;">0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hikayeler -->
+        <div class="stories-container" id="stories-container">
+            <!-- Stories will be generated by JavaScript -->
+        </div>
+
+        <!-- Feed -->
+        <div class="feed-container" id="feed-container">
+            <!-- Posts will be generated by JavaScript -->
+        </div>
+
+        <!-- Alt Navigasyon -->
+        <nav class="bottom-nav">
+            <i class="fas fa-home active" data-nav="home"></i>
+            <i class="fas fa-search" data-nav="search"></i>
+            <i class="fas fa-film" data-nav="reels"></i>
+            <i class="far fa-heart" data-nav="likes"></i>
+            <i class="far fa-user" data-nav="profile"></i>
+        </nav>
+        
+        <!-- Logout Overlay (shown when profile is clicked) -->
+        <div class="logout-overlay" id="logout-overlay" style="display: none;">
+            <div class="logout-modal">
+                <h3>Profil Ayarları</h3>
+                <button class="logout-btn" id="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Çıkış Yap
+                </button>
+                <button class="btn-secondary" id="close-logout-modal">İptal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reels Screen -->
+    <div id="reels-screen" class="screen">
+        <div class="reels-header">
+            <i class="fas fa-times reels-close-btn" id="reels-close-btn"></i>
+            <span class="reels-title">Reels</span>
+        </div>
+        <div class="reels-container">
+            <div class="reels-scroll" id="reels-scroll">
+                <!-- Reels will be populated here -->
+            </div>
+        </div>
+        <!-- Reels Navigation Overlay -->
+        <nav class="bottom-nav reels-nav">
+            <i class="fas fa-home" data-nav="home"></i>
+            <i class="fas fa-search" data-nav="search"></i>
+            <i class="fas fa-film active" data-nav="reels"></i>
+            <i class="far fa-heart" data-nav="likes"></i>
+            <i class="far fa-user" data-nav="profile"></i>
+        </nav>
+    </div>
+
+    <!-- Inbox / Message List Screen -->
+    <div id="inbox-screen" class="screen">
+        <div class="dm-header">
+            <i class="fas fa-arrow-left" id="inbox-back-to-feed"></i>
+            <div class="dm-user-info">
+                <span style="font-weight: 600; font-size: 18px;">Direkt</span>
+            </div>
+            <i class="far fa-edit"></i>
+        </div>
+        <div id="inbox-list" class="inbox-list">
+            <!-- Message list will be populated here -->
+        </div>
+    </div>
+
+    <!-- Direkt Mesaj Ekranı -->
+    <div id="dm-screen" class="screen">
+        <div class="dm-header">
+            <i class="fas fa-arrow-left" id="back-to-inbox"></i>
+            <div class="dm-user-info">
+                <img id="dm-avatar" src="" alt="User">
+                <span id="dm-username"></span>
+            </div>
+            <i class="fas fa-ellipsis-v"></i>
+        </div>
+
+        <div class="dm-messages" id="dm-messages">
+            <!-- Mesajlar buraya eklenecek -->
+        </div>
+
+        <div class="dm-input-container" id="dm-input-container">
+            <input type="text" id="dm-input" placeholder="Mesaj yaz..." maxlength="180">
+            <button id="dm-send"><i class="far fa-paper-plane"></i></button>
+        </div>
+
+        <!-- Zorbalık Aksiyonları -->
+        <div class="action-buttons" id="action-buttons" style="display: none;">
+            <div class="unfollowed-message">
+                📩 Takip etmediğin birinden gelen mesaj
+            </div>
+            <button class="action-btn report-btn" id="report-btn">
+                <i class="fas fa-flag"></i> ŞİKAYET ET
+            </button>
+            <button class="action-btn block-btn" id="block-btn">
+                <i class="fas fa-ban"></i> ENGELLE
+            </button>
+        </div>
+
+        <!-- İpucu Overlay -->
+        <div class="hint-overlay" id="hint-overlay" style="display: none;">
+            <div class="hint-content">
+                <i class="fas fa-lightbulb"></i>
+                <p id="hint-text"></p>
+            </div>
+        </div>
+
+        <!-- Şikayet Nedeni Seçim Modalı -->
+        <div class="complaint-modal" id="complaint-modal" style="display: none;">
+            <div class="complaint-modal-content">
+                <h3>Şikayet Nedeni Seçin:</h3>
+                <div class="complaint-reasons" id="complaint-reasons">
+                    <!-- Reasons will be populated by JavaScript -->
+                </div>
+                <button class="btn-primary" id="submit-complaint" disabled>Şikayeti Gönder</button>
+            </div>
+        </div>
+
+        <!-- Teşekkür Mesajı Modalı -->
+        <div class="thank-you-modal" id="thank-you-modal" style="display: none;">
+            <div class="thank-you-content">
+                <div class="checkmark-animation">✓</div>
+                <h3>Şikayetin için teşekkürler!</h3>
+                <p>Gerekli incelemeleri yapacağız.</p>
+                <button class="btn-primary" id="close-thank-you-modal">Tamam</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Özet Ekranı -->
+    <div id="summary-screen" class="screen">
+        <div class="summary-container">
+            <h2>Oturum Tamamlandı!</h2>
+            
+            <div class="summary-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="correct-count">0</div>
+                    <div class="stat-label">Doğru Cevap</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="wrong-count">0</div>
+                    <div class="stat-label">Yanlış Cevap</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="hint-count">0</div>
+                    <div class="stat-label">İpucu Kullanımı</div>
+                </div>
+            </div>
+
+            <div class="skills-table">
+                <h3>Beceri Analizi</h3>
+                <table id="skills-summary">
+                    <thead>
+                        <tr>
+                            <th>Beceri</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sosyal medyada gezinme</td>
+                            <td id="skill-navigation">-</td>
+                        </tr>
+                        <tr>
+                            <td>Gelen mesajı okuma</td>
+                            <td id="skill-reading">-</td>
+                        </tr>
+                        <tr>
+                            <td>Güvenli mesajı cevaplama</td>
+                            <td id="skill-replying">-</td>
+                        </tr>
+                        <tr>
+                            <td>Siber zorbalığı şikâyet etme</td>
+                            <td id="skill-reporting">-</td>
+                        </tr>
+                        <tr>
+                            <td>Zorbalığı yapan kişiyi engelleme</td>
+                            <td id="skill-blocking">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <button class="btn-primary" id="finish-session">Bitir</button>
+        </div>
+    </div>
+
+    <!-- Story Overlay -->
+    <div class="story-overlay" id="story-overlay">
+        <div class="story-progress-container" id="story-progress-container">
+            <!-- Progress segments will be added dynamically -->
+        </div>
+        <div class="story-header">
+            <div class="story-user-info">
+                <img id="story-avatar" src="" alt="User">
+                <span id="story-username"></span>
+            </div>
+            <i class="fas fa-times story-close" id="story-close"></i>
+        </div>
+        <div class="story-content" id="story-content">
+            <div class="story-nav-left" id="story-nav-left"></div>
+            <img id="story-image" src="" alt="Story">
+            <div class="story-nav-right" id="story-nav-right"></div>
+        </div>
+    </div>
+
+    <script src="scenarios.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
