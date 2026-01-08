@@ -143,79 +143,157 @@
             margin-bottom: 35px;
             user-select: none;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 15px;
         }
 
-        .logo-shield {
-            font-size: clamp(50px, 6vw, 70px);
-            color: #22d3ee;
-            filter: drop-shadow(0 0 15px rgba(34,211,238,.6)) drop-shadow(0 0 25px rgba(124,58,237,.4));
-            animation: shieldPulse 3s ease-in-out infinite;
-        }
-
-        @keyframes shieldPulse {
-            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(34,211,238,.6)) drop-shadow(0 0 25px rgba(124,58,237,.4)); }
-            50% { transform: scale(1.05); filter: drop-shadow(0 0 20px rgba(34,211,238,.8)) drop-shadow(0 0 35px rgba(124,58,237,.6)); }
-        }
-
-        .cyber-brand h1 {
+        /* Logo text */
+        .logo {
+            font-family: "Righteous", sans-serif;
+            font-size: clamp(46px, 6vw, 88px);
+            color: #eef2ff;
             margin: 0;
-            font-size: clamp(44px, 6.5vw, 76px);
-            font-weight: 800;
-            letter-spacing: 2px;
-            font-family: 'Orbitron', sans-serif;
             position: relative;
             display: inline-block;
+            animation: breathe 6s ease-in-out infinite;
         }
 
-        .cyber-brand h1 .letter {
-            display: inline-block;
-            background: linear-gradient(180deg, #22d3ee 0%, #a78bfa 60%, #ec4899 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            filter: drop-shadow(0 0 20px rgba(34,211,238,.4));
-        }
-
-        .cyber-brand h1 .letter.special {
-            font-size: 1.15em;
-            background: linear-gradient(135deg, #22d3ee 0%, #a78bfa 50%, #ec4899 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            filter: drop-shadow(0 0 30px rgba(34,211,238,.7)) drop-shadow(0 0 40px rgba(236,72,153,.5));
-            animation: specialGlow 2s ease-in-out infinite;
-            transform-origin: center;
-            position: relative;
-            display: inline-block;
-            font-weight: 900;
-        }
-
-        @keyframes specialGlow {
+        @keyframes breathe {
             0%, 100% { 
-                filter: drop-shadow(0 0 30px rgba(34,211,238,.7)) drop-shadow(0 0 40px rgba(236,72,153,.5));
                 transform: scale(1);
+                opacity: 0.95;
             }
             50% { 
-                filter: drop-shadow(0 0 40px rgba(34,211,238,.9)) drop-shadow(0 0 50px rgba(236,72,153,.7));
-                transform: scale(1.08);
+                transform: scale(1.02);
+                opacity: 1.0;
             }
         }
 
-        .cyber-brand h1::after {
-            content: '';
+        .logoText {
+            position: relative;
+            display: inline-block;
+        }
+
+        .chunk {
+            display: inline;
+        }
+
+        /* Special S with shield */
+        .specialS {
+            color: #fbbf24;
+            position: relative;
+            display: inline-block;
+        }
+
+        .specialS svg {
             position: absolute;
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
-            width: 120%;
-            height: 120%;
+            width: 1.4em;
+            height: 1.4em;
             z-index: -1;
-            background: radial-gradient(circle, rgba(34,211,238,.3), transparent 70%);
-            filter: blur(30px);
-            opacity: .6;
+            opacity: 0.3;
+        }
+
+        .shieldOuter {
+            fill: none;
+            stroke: #fbbf24;
+            stroke-width: 2;
+        }
+
+        .shieldInner {
+            fill: none;
+            stroke: #fbbf24;
+            stroke-width: 1.5;
+            opacity: 0.6;
+        }
+
+        .shieldLine {
+            fill: none;
+            stroke: #fbbf24;
+            stroke-width: 1;
+            opacity: 0.5;
+        }
+
+        /* Subtle glitch effect - creates split layers that shift briefly */
+        .logo::before,
+        .logo::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .logo::before {
+            color: #fbbf24;
+            animation: microGlitch 4s infinite;
+            /* Clips the top portion (0-45%) of the text for glitch effect */
+            clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+        }
+
+        .logo::after {
+            color: #22d3ee;
+            animation: microGlitch 3.5s infinite reverse;
+            /* Clips the bottom portion (55-100%) of the text for glitch effect */
+            clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+        }
+
+        @keyframes microGlitch {
+            0%, 96% {
+                opacity: 0;
+                transform: translate(0);
+            }
+            97% {
+                opacity: 0.7;
+                transform: translate(-2px, 1px);
+            }
+            98% {
+                opacity: 0.7;
+                transform: translate(2px, -1px);
+            }
+            99%, 100% {
+                opacity: 0;
+                transform: translate(0);
+            }
+        }
+
+        /* Actions/Subtitle */
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .action {
+            background: transparent;
+            border: 1px solid transparent;
+            color: #eef2ff;
+            font-family: "Righteous", sans-serif;
+            font-size: clamp(11px, 1.3vw, 15px);
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 6px;
+        }
+
+        .action:hover {
+            background: rgba(251, 191, 36, 0.15);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .dot {
+            color: #eef2ff;
+            opacity: 0.6;
+            font-size: clamp(8px, 1vw, 12px);
         }
 
         /* Cyber form card */
@@ -339,11 +417,11 @@
         /* Responsive */
         @media (max-width: 600px) {
             .cyber-btnRow { grid-template-columns: 1fr; }
-            .cyber-brand { margin-bottom: 25px; flex-direction: column; gap: 10px; }
+            .cyber-brand { margin-bottom: 25px; gap: 15px; }
             .cyber-card { padding: 24px 20px; }
-            .cyber-brand h1 { font-size: 40px; }
+            .logo { font-size: clamp(36px, 8vw, 50px); }
+            .action { font-size: clamp(10px, 1.5vw, 13px); padding: 6px 10px; }
             .floating-icon { opacity: .08; font-size: 60px; }
-            .logo-shield { font-size: 45px; }
             .message-slider { font-size: 14px; opacity: .08; }
             .icon-security-top { transform: translateX(-50%) translateY(0); }
         }
@@ -384,16 +462,24 @@
 
         <div class="cyber-welcome-container">
             <header class="cyber-brand">
-                <div class="logo-text-container">
-                    <h1 class="logo-title"><span class="letter">S</span><span class="letter">a</span><span class="letter">f</span><span class="letter">e</span><span class="letter yellow-s">s</span><span class="letter">t</span><span class="letter">a</span><span class="letter">g</span><span class="letter">r</span><span class="letter">a</span><span class="letter">m</span></h1>
-                    <div class="logo-subtitle">
-                        <span class="subtitle-text">Şikayet Et</span>
-                        <span class="subtitle-dot">•</span>
-                        <span class="subtitle-text">Engelle</span>
-                        <span class="subtitle-dot">•</span>
-                        <span class="subtitle-text">Bildir</span>
-                    </div>
-                </div>
+                <h1 class="logo" data-text="safestagram">
+                    <span class="logoText">
+                        <span class="chunk">safe</span><span class="specialS">s<svg viewBox="0 0 64 64">
+                            <path class="shieldOuter" d="M32 8 L48 16 L48 32 Q48 48 32 56 Q16 48 16 32 L16 16 Z"/>
+                            <path class="shieldInner" d="M32 14 L42 20 L42 32 Q42 44 32 50 Q22 44 22 32 L22 20 Z"/>
+                            <path class="shieldLine" d="M32 20 L32 50"/>
+                            <path class="shieldLine" d="M26 32 L38 32"/>
+                        </svg></span><span class="chunk">tagram</span>
+                    </span>
+                </h1>
+                
+                <nav class="actions">
+                    <button type="button" class="action">Şikayet Et</button>
+                    <span class="dot">•</span>
+                    <button type="button" class="action">Engelle</button>
+                    <span class="dot">•</span>
+                    <button type="button" class="action">Bildir</button>
+                </nav>
             </header>
 
             <main class="cyber-card" id="auth-card">
@@ -501,16 +587,24 @@
             </div>
 
             <header class="cyber-brand">
-                <div class="logo-text-container">
-                    <h1 class="logo-title"><span class="letter">S</span><span class="letter">a</span><span class="letter">f</span><span class="letter">e</span><span class="letter yellow-s">s</span><span class="letter">t</span><span class="letter">a</span><span class="letter">g</span><span class="letter">r</span><span class="letter">a</span><span class="letter">m</span></h1>
-                    <div class="logo-subtitle">
-                        <span class="subtitle-text">Şikayet Et</span>
-                        <span class="subtitle-dot">•</span>
-                        <span class="subtitle-text">Engelle</span>
-                        <span class="subtitle-dot">•</span>
-                        <span class="subtitle-text">Bildir</span>
-                    </div>
-                </div>
+                <h1 class="logo" data-text="safestagram">
+                    <span class="logoText">
+                        <span class="chunk">safe</span><span class="specialS">s<svg viewBox="0 0 64 64">
+                            <path class="shieldOuter" d="M32 8 L48 16 L48 32 Q48 48 32 56 Q16 48 16 32 L16 16 Z"/>
+                            <path class="shieldInner" d="M32 14 L42 20 L42 32 Q42 44 32 50 Q22 44 22 32 L22 20 Z"/>
+                            <path class="shieldLine" d="M32 20 L32 50"/>
+                            <path class="shieldLine" d="M26 32 L38 32"/>
+                        </svg></span><span class="chunk">tagram</span>
+                    </span>
+                </h1>
+                
+                <nav class="actions">
+                    <button type="button" class="action">Şikayet Et</button>
+                    <span class="dot">•</span>
+                    <button type="button" class="action">Engelle</button>
+                    <span class="dot">•</span>
+                    <button type="button" class="action">Bildir</button>
+                </nav>
             </header>
 
             <main class="cyber-card">
@@ -576,16 +670,24 @@
             </div>
             
             <header class="cyber-brand">
-                <div class="logo-text-container">
-                    <h1 class="logo-title"><span class="letter">S</span><span class="letter">a</span><span class="letter">f</span><span class="letter">e</span><span class="letter yellow-s">s</span><span class="letter">t</span><span class="letter">a</span><span class="letter">g</span><span class="letter">r</span><span class="letter">a</span><span class="letter">m</span></h1>
-                    <div class="logo-subtitle">
-                        <span class="subtitle-text">Şikayet Et</span>
-                        <span class="subtitle-dot">•</span>
-                        <span class="subtitle-text">Engelle</span>
-                        <span class="subtitle-dot">•</span>
-                        <span class="subtitle-text">Bildir</span>
-                    </div>
-                </div>
+                <h1 class="logo" data-text="safestagram">
+                    <span class="logoText">
+                        <span class="chunk">safe</span><span class="specialS">s<svg viewBox="0 0 64 64">
+                            <path class="shieldOuter" d="M32 8 L48 16 L48 32 Q48 48 32 56 Q16 48 16 32 L16 16 Z"/>
+                            <path class="shieldInner" d="M32 14 L42 20 L42 32 Q42 44 32 50 Q22 44 22 32 L22 20 Z"/>
+                            <path class="shieldLine" d="M32 20 L32 50"/>
+                            <path class="shieldLine" d="M26 32 L38 32"/>
+                        </svg></span><span class="chunk">tagram</span>
+                    </span>
+                </h1>
+                
+                <nav class="actions">
+                    <button type="button" class="action">Şikayet Et</button>
+                    <span class="dot">•</span>
+                    <button type="button" class="action">Engelle</button>
+                    <span class="dot">•</span>
+                    <button type="button" class="action">Bildir</button>
+                </nav>
             </header>
 
             <main class="cyber-card">
