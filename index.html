@@ -184,14 +184,20 @@
         .specialS {
             position: relative;
             display: inline-block;
-            width: 0.95em;
-            margin: 0 0.05em;
+            width: 1.35em; /* Increased from 0.95em for better visibility */
+            height: 1.3em; /* Add explicit height */
+            margin: 0 0.08em;
+            vertical-align: baseline; /* Align with other letters */
+            transform: translateY(0.05em); /* Slight downward adjustment */
         }
 
         .specialS svg.shield-combo {
-            width: 100%;
-            height: auto;
-            display: block;
+            width: 140%; /* Scaled up from 100% for prominence */
+            height: 140%;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
             opacity: 0.98;
             filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.14));
         }
@@ -279,25 +285,64 @@
         }
 
         .action {
-            background: transparent;
+            background: linear-gradient(
+                90deg,
+                #60a5fa,  /* blue */
+                #a78bfa,  /* purple */
+                #f472b6,  /* pink */
+                #fb923c,  /* orange */
+                #fbbf24,  /* yellow */
+                #60a5fa   /* back to blue */
+            );
+            background-size: 400% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientFlow 8s linear infinite;
             border: 1px solid transparent;
-            color: #eef2ff;
             font-family: "Righteous", sans-serif;
             font-size: clamp(11px, 1.3vw, 15px);
             padding: 8px 12px;
             cursor: pointer;
             transition: all 0.3s ease;
             border-radius: 6px;
+            font-weight: 600;
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
         }
 
         .action:hover {
-            background: rgba(251, 191, 36, 0.15);
-            border: 1px solid rgba(251, 191, 36, 0.3);
-            transform: translateY(-2px);
+            background: linear-gradient(
+                90deg,
+                #3b82f6,
+                #8b5cf6,
+                #ec4899,
+                #f97316,
+                #f59e0b,
+                #3b82f6
+            );
+            background-size: 400% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientFlow 4s linear infinite; /* Faster animation on hover */
+            transform: translateY(-3px);
+            filter: drop-shadow(0 4px 8px rgba(251, 191, 36, 0.25));
         }
 
+        .subtitle-dot {
+            color: #cbd5e1;
+            opacity: 0.6;
+            font-weight: 400;
+            font-size: clamp(8px, 1vw, 12px);
+        }
+
+        /* Legacy dot class for compatibility */
         .dot {
-            color: #eef2ff;
+            color: #cbd5e1;
             opacity: 0.6;
             font-size: clamp(8px, 1vw, 12px);
         }
@@ -471,7 +516,7 @@
                 <h1 class="logo" data-text="safestagram">
                     <span class="logoText">
                         <span class="chunk">safe</span><span class="specialS">
-    <svg viewBox="0 0 100 120" class="shield-combo">
+    <svg viewBox="0 0 90 110" class="shield-combo">
         <!-- Arka plan kalkan -->
         <defs>
             <linearGradient id="shieldStroke" x1="0" y1="0" x2="1" y2="1">
@@ -512,10 +557,10 @@
               opacity="0.35"/>
         
         <!-- "s" harfi kalkanın içinde -->
-        <text x="50" y="68" 
+        <text x="50" y="70" 
               text-anchor="middle" 
               font-family="Righteous" 
-              font-size="58"
+              font-size="72"
               font-weight="400"
               fill="#fbbf24"
               opacity="0.98">s</text>
@@ -641,7 +686,7 @@
                 <h1 class="logo" data-text="safestagram">
                     <span class="logoText">
                         <span class="chunk">safe</span><span class="specialS">
-    <svg viewBox="0 0 100 120" class="shield-combo">
+    <svg viewBox="0 0 90 110" class="shield-combo">
         <!-- Arka plan kalkan -->
         <defs>
             <linearGradient id="shieldStroke2" x1="0" y1="0" x2="1" y2="1">
@@ -682,10 +727,10 @@
               opacity="0.35"/>
         
         <!-- "s" harfi kalkanın içinde -->
-        <text x="50" y="68" 
+        <text x="50" y="70" 
               text-anchor="middle" 
               font-family="Righteous" 
-              font-size="58"
+              font-size="72"
               font-weight="400"
               fill="#fbbf24"
               opacity="0.98">s</text>
@@ -769,7 +814,7 @@
                 <h1 class="logo" data-text="safestagram">
                     <span class="logoText">
                         <span class="chunk">safe</span><span class="specialS">
-    <svg viewBox="0 0 100 120" class="shield-combo">
+    <svg viewBox="0 0 90 110" class="shield-combo">
         <!-- Arka plan kalkan -->
         <defs>
             <linearGradient id="shieldStroke3" x1="0" y1="0" x2="1" y2="1">
@@ -810,10 +855,10 @@
               opacity="0.35"/>
         
         <!-- "s" harfi kalkanın içinde -->
-        <text x="50" y="68" 
+        <text x="50" y="70" 
               text-anchor="middle" 
               font-family="Righteous" 
-              font-size="58"
+              font-size="72"
               font-weight="400"
               fill="#fbbf24"
               opacity="0.98">s</text>
