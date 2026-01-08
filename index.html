@@ -91,6 +91,31 @@
         .icon-cloud { right: 6%; top: 50%; animation: float 11s ease-in-out infinite; color: rgba(34,211,238,.4); }
         .icon-security-top { left: 50%; top: 8%; transform: translateX(-50%); animation: float 7s ease-in-out infinite; }
 
+        /* Yeni İconlar */
+        .icon10 { left: 8%; top: 15%; animation: float 18s ease-in-out infinite; }
+        .icon11 { left: 88%; top: 22%; animation: float 22s ease-in-out infinite 2s; }
+        .icon12 { left: 12%; top: 65%; animation: float 20s ease-in-out infinite 4s; }
+        .icon13 { left: 82%; top: 72%; animation: float 24s ease-in-out infinite 1s; }
+        .icon14 { left: 25%; top: 35%; animation: float 19s ease-in-out infinite 3s; }
+        .icon15 { left: 72%; top: 45%; animation: float 21s ease-in-out infinite 5s; }
+        .icon16 { left: 18%; top: 82%; animation: float 23s ease-in-out infinite 2s; }
+        .icon17 { left: 68%; top: 12%; animation: float 17s ease-in-out infinite 4s; }
+        .icon18 { left: 35%; top: 78%; animation: float 25s ease-in-out infinite 1s; }
+        .icon19 { left: 78%; top: 58%; animation: float 20s ease-in-out infinite 3s; }
+        .icon20 { left: 22%; top: 48%; animation: float 22s ease-in-out infinite 5s; }
+        .icon21 { left: 85%; top: 35%; animation: float 18s ease-in-out infinite 2s; }
+        .icon22 { left: 15%; top: 25%; animation: float 24s ease-in-out infinite 4s; }
+        .icon23 { left: 58%; top: 68%; animation: float 19s ease-in-out infinite 1s; }
+        .icon24 { left: 42%; top: 18%; animation: float 21s ease-in-out infinite 3s; }
+        .icon25 { left: 28%; top: 88%; animation: float 23s ease-in-out infinite 5s; }
+        .icon26 { left: 75%; top: 28%; animation: float 20s ease-in-out infinite 2s; }
+        .icon27 { left: 32%; top: 58%; animation: float 22s ease-in-out infinite 4s; }
+        .icon28 { left: 65%; top: 82%; animation: float 18s ease-in-out infinite 1s; }
+        .icon29 { left: 48%; top: 38%; animation: float 24s ease-in-out infinite 3s; }
+        .icon30 { left: 8%; top: 75%; animation: float 19s ease-in-out infinite 5s; }
+        .icon31 { left: 90%; top: 48%; animation: float 21s ease-in-out infinite 2s; }
+        .icon32 { left: 52%; top: 8%; animation: float 23s ease-in-out infinite 4s; }
+
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-20px); }
@@ -110,10 +135,14 @@
             white-space: nowrap;
         }
 
-        .msg1 { top: 12%; left: -100%; animation: slideRight 25s linear infinite; }
-        .msg2 { top: 38%; right: -100%; animation: slideLeft 28s linear infinite; color: #a78bfa; text-shadow: 0 0 20px rgba(168,85,247,.6); }
-        .msg3 { bottom: 15%; left: -100%; animation: slideRight 30s linear infinite; color: #ec4899; text-shadow: 0 0 20px rgba(236,72,153,.6); animation-delay: 5s; }
-        .msg4 { top: 58%; right: -100%; animation: slideLeft 26s linear infinite; color: #22d3ee; text-shadow: 0 0 20px rgba(34,211,238,.6); animation-delay: 8s; }
+        .msg1 { top: 12%; left: -100%; animation: slideRight 18s linear infinite; }
+        .msg2 { top: 24%; right: -100%; animation: slideLeft 22s linear infinite 2s; color: #a78bfa; text-shadow: 0 0 20px rgba(168,85,247,.6); }
+        .msg3 { top: 36%; left: -100%; animation: slideRight 16s linear infinite 4s; color: #ec4899; text-shadow: 0 0 20px rgba(236,72,153,.6); }
+        .msg4 { top: 48%; right: -100%; animation: slideLeft 20s linear infinite 1s; color: #22d3ee; text-shadow: 0 0 20px rgba(34,211,238,.6); }
+        .msg5 { top: 60%; left: -100%; animation: slideRight 19s linear infinite 3s; font-size: clamp(14px, 1.8vw, 20px); opacity: 0.15; color: rgba(99, 179, 237, 0.4); text-shadow: 0 0 20px rgba(99, 179, 237, 0.5); }
+        .msg6 { top: 72%; right: -100%; animation: slideLeft 17s linear infinite 5s; font-size: clamp(14px, 1.8vw, 20px); opacity: 0.15; color: rgba(99, 179, 237, 0.4); text-shadow: 0 0 20px rgba(99, 179, 237, 0.5); }
+        .msg7 { top: 84%; left: -100%; animation: slideRight 21s linear infinite 2s; font-size: clamp(14px, 1.8vw, 20px); opacity: 0.15; color: rgba(99, 179, 237, 0.4); text-shadow: 0 0 20px rgba(99, 179, 237, 0.5); }
+        .msg8 { top: 92%; right: -100%; animation: slideLeft 23s linear infinite 4s; font-size: clamp(14px, 1.8vw, 20px); opacity: 0.15; color: rgba(99, 179, 237, 0.4); text-shadow: 0 0 20px rgba(99, 179, 237, 0.5); }
 
         @keyframes slideRight {
             0% { transform: translateX(0); }
@@ -124,6 +153,24 @@
             0% { transform: translateX(0); }
             100% { transform: translateX(calc(-200vw)); }
         }
+
+        /* Emoji İconları */
+        .emoji-float {
+            position: fixed;
+            font-size: clamp(24px, 3vw, 40px);
+            opacity: 0.12;
+            pointer-events: none;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .emoji1 { left: 10%; top: 20%; animation-duration: 22s; }
+        .emoji2 { left: 85%; top: 30%; animation-duration: 18s; animation-delay: 2s; }
+        .emoji3 { left: 20%; top: 70%; animation-duration: 24s; animation-delay: 4s; }
+        .emoji4 { left: 75%; top: 60%; animation-duration: 20s; animation-delay: 1s; }
+        .emoji5 { left: 40%; top: 15%; animation-duration: 23s; animation-delay: 3s; }
+        .emoji6 { left: 60%; top: 80%; animation-duration: 19s; animation-delay: 5s; }
+        .emoji7 { left: 30%; top: 50%; animation-duration: 21s; animation-delay: 2s; }
+        .emoji8 { left: 70%; top: 40%; animation-duration: 25s; animation-delay: 4s; }
 
         /* Cyber welcome container */
         .cyber-welcome-container {
@@ -184,11 +231,13 @@
         .specialS {
             position: relative;
             display: inline-block;
-            width: 1.12em;  /* 1.4em → 1.12em (much smaller) */
-            height: 1.05em; /* 1.35em → 1.05em (shorter) */
-            margin: 0 0.03em; /* Minimal spacing */
-            vertical-align: baseline; /* Same line as other letters */
-            font-size: 1.08em; /* Only 8% bigger */
+            width: 0.95em;  /* Çok daha küçük */
+            height: 0.95em; /* Normal harf boyutu */
+            margin: 0;      /* Boşluk KALDIR */
+            padding: 0;
+            font-size: 1em; /* Diğerleriyle AYNI boyut */
+            vertical-align: -0.05em; /* Hafif aşağı çek */
+            line-height: 1;
         }
 
         .s-letter,
@@ -205,44 +254,44 @@
             align-items: center;
             justify-content: center;
             transform-origin: center;
-            animation: morph-cycle-letter 8s ease-in-out infinite;
+            animation: morph-cycle-letter 10s ease-in-out infinite;
             filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.2));
         }
 
         .shield-shape {
-            animation: morph-cycle-shield 8s ease-in-out infinite;
+            animation: morph-cycle-shield 10s ease-in-out infinite;
         }
 
         /* "s" harfi animasyonu */
-        /* Timing breakdown:
-           0-37.5% (0-3s): "s" visible
-           37.5-50% (3-4s): transition to shield
-           50-75% (4-6s): shield visible
-           75-87.5% (6-7s): transition to "s"
-           87.5-100% (7-8s): "s" visible again
+        /* Timing breakdown (10s cycle):
+           0-35% (0-3.5s): "s" visible
+           35-50% (3.5-5s): transition to shield
+           50-65% (5-6.5s): shield visible
+           65-85% (6.5-8.5s): transition to "s"
+           85-100% (8.5-10s): "s" visible again
         */
         @keyframes morph-cycle-letter {
-            0%, 37.5% {
+            0%, 35% {
                 opacity: 1;
                 transform: scale(1) rotate(0deg);
                 filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.2));
             }
-            43.75% {
+            42.5% {
                 opacity: 0;
                 transform: scale(0.7) rotate(180deg);
                 filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.15));
             }
-            50%, 75% {
+            50%, 65% {
                 opacity: 0;
                 transform: scale(1) rotate(360deg);
                 filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.2));
             }
-            81.25% {
+            77.5% {
                 opacity: 0;
                 transform: scale(0.7) rotate(540deg);
                 filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.15));
             }
-            87.5%, 100% {
+            85%, 100% {
                 opacity: 1;
                 transform: scale(1) rotate(720deg);
                 filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.2));
@@ -250,35 +299,35 @@
         }
 
         /* Kalkan animasyonu */
-        /* Timing breakdown:
-           0-37.5% (0-3s): shield hidden
-           37.5-50% (3-4s): transition from "s"
-           50-75% (4-6s): shield visible
-           75-87.5% (6-7s): transition back to "s"
-           87.5-100% (7-8s): shield hidden
+        /* Timing breakdown (10s cycle):
+           0-35% (0-3.5s): shield hidden
+           35-50% (3.5-5s): transition from "s"
+           50-65% (5-6.5s): shield visible
+           65-85% (6.5-8.5s): transition back to "s"
+           85-100% (8.5-10s): shield hidden
         */
         @keyframes morph-cycle-shield {
-            0%, 37.5% {
+            0%, 35% {
                 opacity: 0;
                 transform: scale(0.5) rotate(0deg);
                 filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.15));
             }
-            43.75% {
+            42.5% {
                 opacity: 0.5;
                 transform: scale(0.85) rotate(-10deg);
                 filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.25));
             }
-            50%, 75% {
+            50%, 65% {
                 opacity: 1;
                 transform: scale(1) rotate(0deg);
                 filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.35));
             }
-            81.25% {
+            77.5% {
                 opacity: 0.5;
                 transform: scale(0.85) rotate(10deg);
                 filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.25));
             }
-            87.5%, 100% {
+            85%, 100% {
                 opacity: 0;
                 transform: scale(0.5) rotate(0deg);
                 filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.15));
@@ -287,14 +336,14 @@
 
         /* Glow efekti için container animasyonu */
         .specialS {
-            animation: morphGlow 8s ease-in-out infinite;
+            animation: morphGlow 10s ease-in-out infinite, morphBlur 10s ease-in-out infinite;
         }
 
         @keyframes morphGlow {
             0%, 100% { 
                 filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.2)); 
             }
-            37.5%, 62.5% { 
+            35%, 57.5% { 
                 filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.15)); 
             }
             50% { 
@@ -302,9 +351,19 @@
             }
         }
 
+        /* Morph sırasında hafif blur */
+        @keyframes morphBlur {
+            0%, 35%, 65%, 100% { 
+                filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.15)) blur(0px); 
+            }
+            40%, 50%, 80% { 
+                filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.25)) blur(1.5px); 
+            }
+        }
+
         /* Glitch efekti - logo genelinde */
         .logo.is-glitch .specialS {
-            animation: microShake 220ms steps(2, end) 1, morphGlow 8s ease-in-out infinite;
+            animation: microShake 220ms steps(2, end) 1, morphGlow 10s ease-in-out infinite, morphBlur 10s ease-in-out infinite;
         }
 
         @keyframes microShake {
@@ -604,12 +663,51 @@
         <i class="fas fa-eye floating-icon icon-wifi-right"></i>
         <i class="fas fa-cloud floating-icon icon-cloud"></i>
         <i class="fas fa-shield-alt floating-icon icon-security-top"></i>
+        
+        <!-- Yeni İconlar -->
+        <i class="fas fa-shield-virus floating-icon icon10"></i>
+        <i class="fas fa-shield-check floating-icon icon11"></i>
+        <i class="fas fa-key floating-icon icon12"></i>
+        <i class="fas fa-fingerprint floating-icon icon13"></i>
+        <i class="fas fa-user-lock floating-icon icon14"></i>
+        <i class="fas fa-user-slash floating-icon icon15"></i>
+        <i class="fas fa-users-slash floating-icon icon16"></i>
+        <i class="fas fa-exclamation-circle floating-icon icon17"></i>
+        <i class="fas fa-info-circle floating-icon icon18"></i>
+        <i class="fas fa-exclamation-triangle floating-icon icon19"></i>
+        <i class="fas fa-mobile-alt floating-icon icon20"></i>
+        <i class="fas fa-tablet-alt floating-icon icon21"></i>
+        <i class="fas fa-laptop floating-icon icon22"></i>
+        <i class="fas fa-comment-slash floating-icon icon23"></i>
+        <i class="fas fa-comment-dots floating-icon icon24"></i>
+        <i class="fas fa-comments floating-icon icon25"></i>
+        <i class="fas fa-hand-paper floating-icon icon26"></i>
+        <i class="fas fa-times-circle floating-icon icon27"></i>
+        <i class="fas fa-ban floating-icon icon28"></i>
+        <i class="fas fa-check-circle floating-icon icon29"></i>
+        <i class="fas fa-thumbs-up floating-icon icon30"></i>
+        <i class="fas fa-envelope floating-icon icon31"></i>
+        <i class="fas fa-bell floating-icon icon32"></i>
 
         <!-- Sliding messages -->
         <div class="message-slider msg1">Siber zorbalığa dur de!</div>
         <div class="message-slider msg2">Şikayet et • Engelle • Bildir!</div>
         <div class="message-slider msg3">Güvenli internet kullan</div>
         <div class="message-slider msg4">Dijital dünyada güvendeyim</div>
+        <div class="message-slider msg5">Zorbalığa karşı güvendeyim</div>
+        <div class="message-slider msg6">Anonim mesajlara dikkat!</div>
+        <div class="message-slider msg7">Seni koruyan araçları kullan</div>
+        <div class="message-slider msg8">İnternette güvendesin</div>
+
+        <!-- Emoji İconları -->
+        <span class="emoji-float emoji1">🛡️</span>
+        <span class="emoji-float emoji2">🔒</span>
+        <span class="emoji-float emoji3">👤</span>
+        <span class="emoji-float emoji4">⚠️</span>
+        <span class="emoji-float emoji5">📱</span>
+        <span class="emoji-float emoji6">💬</span>
+        <span class="emoji-float emoji7">🚫</span>
+        <span class="emoji-float emoji8">✅</span>
 
         <div class="cyber-welcome-container">
             <header class="cyber-brand">
@@ -732,12 +830,51 @@
         <i class="fas fa-eye floating-icon icon-wifi-right"></i>
         <i class="fas fa-cloud floating-icon icon-cloud"></i>
         <i class="fas fa-shield-alt floating-icon icon-security-top"></i>
+        
+        <!-- Yeni İconlar -->
+        <i class="fas fa-shield-virus floating-icon icon10"></i>
+        <i class="fas fa-shield-check floating-icon icon11"></i>
+        <i class="fas fa-key floating-icon icon12"></i>
+        <i class="fas fa-fingerprint floating-icon icon13"></i>
+        <i class="fas fa-user-lock floating-icon icon14"></i>
+        <i class="fas fa-user-slash floating-icon icon15"></i>
+        <i class="fas fa-users-slash floating-icon icon16"></i>
+        <i class="fas fa-exclamation-circle floating-icon icon17"></i>
+        <i class="fas fa-info-circle floating-icon icon18"></i>
+        <i class="fas fa-exclamation-triangle floating-icon icon19"></i>
+        <i class="fas fa-mobile-alt floating-icon icon20"></i>
+        <i class="fas fa-tablet-alt floating-icon icon21"></i>
+        <i class="fas fa-laptop floating-icon icon22"></i>
+        <i class="fas fa-comment-slash floating-icon icon23"></i>
+        <i class="fas fa-comment-dots floating-icon icon24"></i>
+        <i class="fas fa-comments floating-icon icon25"></i>
+        <i class="fas fa-hand-paper floating-icon icon26"></i>
+        <i class="fas fa-times-circle floating-icon icon27"></i>
+        <i class="fas fa-ban floating-icon icon28"></i>
+        <i class="fas fa-check-circle floating-icon icon29"></i>
+        <i class="fas fa-thumbs-up floating-icon icon30"></i>
+        <i class="fas fa-envelope floating-icon icon31"></i>
+        <i class="fas fa-bell floating-icon icon32"></i>
 
         <!-- Sliding messages -->
         <div class="message-slider msg1">Siber zorbalığa dur de!</div>
         <div class="message-slider msg2">Şikayet et • Engelle • Bildir!</div>
         <div class="message-slider msg3">Güvenli internet kullan</div>
         <div class="message-slider msg4">Dijital dünyada güvendeyim</div>
+        <div class="message-slider msg5">Zorbalığa karşı güvendeyim</div>
+        <div class="message-slider msg6">Anonim mesajlara dikkat!</div>
+        <div class="message-slider msg7">Seni koruyan araçları kullan</div>
+        <div class="message-slider msg8">İnternette güvendesin</div>
+
+        <!-- Emoji İconları -->
+        <span class="emoji-float emoji1">🛡️</span>
+        <span class="emoji-float emoji2">🔒</span>
+        <span class="emoji-float emoji3">👤</span>
+        <span class="emoji-float emoji4">⚠️</span>
+        <span class="emoji-float emoji5">📱</span>
+        <span class="emoji-float emoji6">💬</span>
+        <span class="emoji-float emoji7">🚫</span>
+        <span class="emoji-float emoji8">✅</span>
 
         <div class="cyber-welcome-container">
             <!-- User Info Display -->
@@ -836,12 +973,51 @@
         <i class="fas fa-eye floating-icon icon-wifi-right"></i>
         <i class="fas fa-cloud floating-icon icon-cloud"></i>
         <i class="fas fa-shield-alt floating-icon icon-security-top"></i>
+        
+        <!-- Yeni İconlar -->
+        <i class="fas fa-shield-virus floating-icon icon10"></i>
+        <i class="fas fa-shield-check floating-icon icon11"></i>
+        <i class="fas fa-key floating-icon icon12"></i>
+        <i class="fas fa-fingerprint floating-icon icon13"></i>
+        <i class="fas fa-user-lock floating-icon icon14"></i>
+        <i class="fas fa-user-slash floating-icon icon15"></i>
+        <i class="fas fa-users-slash floating-icon icon16"></i>
+        <i class="fas fa-exclamation-circle floating-icon icon17"></i>
+        <i class="fas fa-info-circle floating-icon icon18"></i>
+        <i class="fas fa-exclamation-triangle floating-icon icon19"></i>
+        <i class="fas fa-mobile-alt floating-icon icon20"></i>
+        <i class="fas fa-tablet-alt floating-icon icon21"></i>
+        <i class="fas fa-laptop floating-icon icon22"></i>
+        <i class="fas fa-comment-slash floating-icon icon23"></i>
+        <i class="fas fa-comment-dots floating-icon icon24"></i>
+        <i class="fas fa-comments floating-icon icon25"></i>
+        <i class="fas fa-hand-paper floating-icon icon26"></i>
+        <i class="fas fa-times-circle floating-icon icon27"></i>
+        <i class="fas fa-ban floating-icon icon28"></i>
+        <i class="fas fa-check-circle floating-icon icon29"></i>
+        <i class="fas fa-thumbs-up floating-icon icon30"></i>
+        <i class="fas fa-envelope floating-icon icon31"></i>
+        <i class="fas fa-bell floating-icon icon32"></i>
 
         <!-- Sliding messages -->
         <div class="message-slider msg1">Siber zorbalığa dur de!</div>
         <div class="message-slider msg2">Şikayet et • Engelle • Bildir!</div>
         <div class="message-slider msg3">Güvenli internet kullan</div>
         <div class="message-slider msg4">Dijital dünyada güvendeyim</div>
+        <div class="message-slider msg5">Zorbalığa karşı güvendeyim</div>
+        <div class="message-slider msg6">Anonim mesajlara dikkat!</div>
+        <div class="message-slider msg7">Seni koruyan araçları kullan</div>
+        <div class="message-slider msg8">İnternette güvendesin</div>
+
+        <!-- Emoji İconları -->
+        <span class="emoji-float emoji1">🛡️</span>
+        <span class="emoji-float emoji2">🔒</span>
+        <span class="emoji-float emoji3">👤</span>
+        <span class="emoji-float emoji4">⚠️</span>
+        <span class="emoji-float emoji5">📱</span>
+        <span class="emoji-float emoji6">💬</span>
+        <span class="emoji-float emoji7">🚫</span>
+        <span class="emoji-float emoji8">✅</span>
 
         <div class="cyber-welcome-container">
             <!-- User Info Display -->
