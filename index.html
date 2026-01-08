@@ -197,15 +197,15 @@
         .specialS {
             position: relative;
             display: inline-block;
-            width: 1.35em; /* 0.95em → 1.35em (daha büyük) */
-            height: 1.3em; /* Yükseklik ekle */
+            width: 1.35em; /* Increased from 0.95em for better visibility */
+            height: 1.3em; /* Add explicit height */
             margin: 0 0.08em;
-            vertical-align: baseline; /* Aynı hizada */
-            transform: translateY(0.05em); /* Hafif aşağı */
+            vertical-align: baseline; /* Align with other letters */
+            transform: translateY(0.05em); /* Slight downward adjustment */
         }
 
         .specialS svg.shield-combo {
-            width: 140%; /* 100% → 140% */
+            width: 140%; /* Scaled up from 100% for prominence */
             height: 140%;
             position: absolute;
             left: 50%;
@@ -300,12 +300,12 @@
         .action {
             background: linear-gradient(
                 90deg,
-                #60a5fa,  /* mavi */
-                #a78bfa,  /* mor */
-                #f472b6,  /* pembe */
-                #fb923c,  /* turuncu */
-                #fbbf24,  /* sarı */
-                #60a5fa   /* mavi (başa dön) */
+                #60a5fa,  /* blue */
+                #a78bfa,  /* purple */
+                #f472b6,  /* pink */
+                #fb923c,  /* orange */
+                #fbbf24,  /* yellow */
+                #60a5fa   /* back to blue */
             );
             background-size: 400% 100%;
             -webkit-background-clip: text;
@@ -341,7 +341,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            animation: gradientFlow 4s linear infinite; /* Daha hızlı */
+            animation: gradientFlow 4s linear infinite; /* Faster animation on hover */
             transform: translateY(-3px);
             filter: drop-shadow(0 4px 8px rgba(251, 191, 36, 0.25));
         }
