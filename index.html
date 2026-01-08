@@ -218,7 +218,7 @@
             opacity: 0.5;
         }
 
-        /* Subtle glitch effect */
+        /* Subtle glitch effect - creates split layers that shift briefly */
         .logo::before,
         .logo::after {
             content: attr(data-text);
@@ -234,12 +234,14 @@
         .logo::before {
             color: #fbbf24;
             animation: microGlitch 4s infinite;
+            /* Clips the top portion (0-45%) of the text for glitch effect */
             clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
         }
 
         .logo::after {
             color: #22d3ee;
             animation: microGlitch 3.5s infinite reverse;
+            /* Clips the bottom portion (55-100%) of the text for glitch effect */
             clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
         }
 
@@ -472,11 +474,11 @@
                 </h1>
                 
                 <nav class="actions">
-                    <button class="action">Şikayet Et</button>
+                    <button type="button" class="action">Şikayet Et</button>
                     <span class="dot">•</span>
-                    <button class="action">Engelle</button>
+                    <button type="button" class="action">Engelle</button>
                     <span class="dot">•</span>
-                    <button class="action">Bildir</button>
+                    <button type="button" class="action">Bildir</button>
                 </nav>
             </header>
 
@@ -597,11 +599,11 @@
                 </h1>
                 
                 <nav class="actions">
-                    <button class="action">Şikayet Et</button>
+                    <button type="button" class="action">Şikayet Et</button>
                     <span class="dot">•</span>
-                    <button class="action">Engelle</button>
+                    <button type="button" class="action">Engelle</button>
                     <span class="dot">•</span>
-                    <button class="action">Bildir</button>
+                    <button type="button" class="action">Bildir</button>
                 </nav>
             </header>
 
@@ -680,11 +682,11 @@
                 </h1>
                 
                 <nav class="actions">
-                    <button class="action">Şikayet Et</button>
+                    <button type="button" class="action">Şikayet Et</button>
                     <span class="dot">•</span>
-                    <button class="action">Engelle</button>
+                    <button type="button" class="action">Engelle</button>
                     <span class="dot">•</span>
-                    <button class="action">Bildir</button>
+                    <button type="button" class="action">Bildir</button>
                 </nav>
             </header>
 
