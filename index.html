@@ -184,11 +184,11 @@
         .specialS {
             position: relative;
             display: inline-block;
-            width: 1.4em;
-            height: 1.35em;
-            margin: 0 0.08em;
-            vertical-align: baseline;
-            transform: translateY(0.05em);
+            width: 1.12em;  /* 1.4em → 1.12em (much smaller) */
+            height: 1.05em; /* 1.35em → 1.05em (shorter) */
+            margin: 0 0.03em; /* Minimal spacing */
+            vertical-align: baseline; /* Same line as other letters */
+            font-size: 1.08em; /* Only 8% bigger */
         }
 
         .s-letter,
@@ -308,10 +308,10 @@
         }
 
         @keyframes microShake {
-            0% { transform: translate(0, 0) translateY(0.05em); }
-            33% { transform: translate(-1px, 1px) translateY(0.05em); }
-            66% { transform: translate(1px, -1px) translateY(0.05em); }
-            100% { transform: translate(0, 0) translateY(0.05em); }
+            0% { transform: translate(0, 0); }
+            33% { transform: translate(-1px, 1px); }
+            66% { transform: translate(1px, -1px); }
+            100% { transform: translate(0, 0); }
         }
 
         /* prefers-reduced-motion için erişilebilirlik */
@@ -618,25 +618,25 @@
                         <span class="chunk">safe</span><span class="specialS">
     <span class="s-letter">s</span>
     <!-- Note: Each SVG needs a unique gradient ID because multiple instances exist on the same page -->
-    <svg class="shield-shape" viewBox="0 0 100 120">
+    <svg class="shield-shape" viewBox="0 0 100 90">
         <defs>
             <linearGradient id="goldGradient1" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#fcd34d"/>
                 <stop offset="100%" stop-color="#f59e0b"/>
             </linearGradient>
         </defs>
-        <path d="M50,10 L75,18 L75,50 Q75,75 62.5,90 L50,100 L37.5,90 Q25,75 25,50 L25,18 Z"
+        <path d="M50,18 L68,24 V48 Q68,62 59,70 L50,76 L41,70 Q32,62 32,48 V24 Z"
               fill="url(#goldGradient1)"
               stroke="#fbbf24"
               stroke-width="2"
               opacity="0.95"/>
-        <!-- İç detay çizgileri -->
-        <line x1="50" y1="20" x2="50" y2="90" 
-              stroke="rgba(245, 158, 11, 0.4)" 
-              stroke-width="1.2"/>
-        <line x1="35" y1="50" x2="65" y2="50" 
-              stroke="rgba(245, 158, 11, 0.3)" 
-              stroke-width="1.2"/>
+        <!-- Detail lines -->
+        <line x1="50" y1="26" x2="50" y2="70" 
+              stroke="rgba(245, 158, 11, 0.35)" 
+              stroke-width="1"/>
+        <line x1="38" y1="48" x2="62" y2="48" 
+              stroke="rgba(245, 158, 11, 0.25)" 
+              stroke-width="0.9"/>
     </svg>
 </span><span class="chunk">tagram</span>
                     </span>
@@ -760,25 +760,25 @@
                     <span class="logoText">
                         <span class="chunk">safe</span><span class="specialS">
     <span class="s-letter">s</span>
-    <svg class="shield-shape" viewBox="0 0 100 120">
+    <svg class="shield-shape" viewBox="0 0 100 90">
         <defs>
             <linearGradient id="goldGradient2" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#fcd34d"/>
                 <stop offset="100%" stop-color="#f59e0b"/>
             </linearGradient>
         </defs>
-        <path d="M50,10 L75,18 L75,50 Q75,75 62.5,90 L50,100 L37.5,90 Q25,75 25,50 L25,18 Z"
+        <path d="M50,18 L68,24 V48 Q68,62 59,70 L50,76 L41,70 Q32,62 32,48 V24 Z"
               fill="url(#goldGradient2)"
               stroke="#fbbf24"
               stroke-width="2"
               opacity="0.95"/>
-        <!-- İç detay çizgileri -->
-        <line x1="50" y1="20" x2="50" y2="90" 
-              stroke="rgba(245, 158, 11, 0.4)" 
-              stroke-width="1.2"/>
-        <line x1="35" y1="50" x2="65" y2="50" 
-              stroke="rgba(245, 158, 11, 0.3)" 
-              stroke-width="1.2"/>
+        <!-- Detail lines -->
+        <line x1="50" y1="26" x2="50" y2="70" 
+              stroke="rgba(245, 158, 11, 0.35)" 
+              stroke-width="1"/>
+        <line x1="38" y1="48" x2="62" y2="48" 
+              stroke="rgba(245, 158, 11, 0.25)" 
+              stroke-width="0.9"/>
     </svg>
 </span><span class="chunk">tagram</span>
                     </span>
@@ -860,25 +860,25 @@
                     <span class="logoText">
                         <span class="chunk">safe</span><span class="specialS">
     <span class="s-letter">s</span>
-    <svg class="shield-shape" viewBox="0 0 100 120">
+    <svg class="shield-shape" viewBox="0 0 100 90">
         <defs>
             <linearGradient id="goldGradient3" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#fcd34d"/>
                 <stop offset="100%" stop-color="#f59e0b"/>
             </linearGradient>
         </defs>
-        <path d="M50,10 L75,18 L75,50 Q75,75 62.5,90 L50,100 L37.5,90 Q25,75 25,50 L25,18 Z"
+        <path d="M50,18 L68,24 V48 Q68,62 59,70 L50,76 L41,70 Q32,62 32,48 V24 Z"
               fill="url(#goldGradient3)"
               stroke="#fbbf24"
               stroke-width="2"
               opacity="0.95"/>
-        <!-- İç detay çizgileri -->
-        <line x1="50" y1="20" x2="50" y2="90" 
-              stroke="rgba(245, 158, 11, 0.4)" 
-              stroke-width="1.2"/>
-        <line x1="35" y1="50" x2="65" y2="50" 
-              stroke="rgba(245, 158, 11, 0.3)" 
-              stroke-width="1.2"/>
+        <!-- Detail lines -->
+        <line x1="50" y1="26" x2="50" y2="70" 
+              stroke="rgba(245, 158, 11, 0.35)" 
+              stroke-width="1"/>
+        <line x1="38" y1="48" x2="62" y2="48" 
+              stroke="rgba(245, 158, 11, 0.25)" 
+              stroke-width="0.9"/>
     </svg>
 </span><span class="chunk">tagram</span>
                     </span>
