@@ -180,54 +180,140 @@
             display: inline;
         }
 
-        /* Special S with shield - Hybrid Approach (Method 5) */
+        /* Special S with morph animation - CSS-only Approach */
         .specialS {
             position: relative;
             display: inline-block;
-            width: 1.35em; /* Increased from 0.95em for better visibility */
-            height: 1.3em; /* Add explicit height */
+            width: 1.4em;
+            height: 1.35em;
             margin: 0 0.08em;
-            vertical-align: baseline; /* Align with other letters */
-            transform: translateY(0.05em); /* Slight downward adjustment */
+            vertical-align: baseline;
+            transform: translateY(0.05em);
         }
 
-        .specialS svg.shield-combo {
-            width: 140%; /* Scaled up from 100% for prominence */
-            height: 140%;
+        .s-letter,
+        .shield-shape {
             position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            opacity: 0.98;
-            filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.14));
+            inset: 0;
         }
 
-        /* Kalkan animasyonu - çok hafif pulse */
-        .shieldOuter {
-            animation: shieldPulse 4s ease-in-out infinite;
+        .s-letter {
+            font-family: "Righteous", sans-serif;
+            font-size: 1em;
+            color: #fbbf24;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform-origin: center;
+            animation: morph-cycle-letter 8s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.2));
         }
 
-        @keyframes shieldPulse {
-            0%, 100% { 
+        .shield-shape {
+            animation: morph-cycle-shield 8s ease-in-out infinite;
+        }
+
+        /* "s" harfi animasyonu */
+        @keyframes morph-cycle-letter {
+            0%, 37.5% {
                 opacity: 1;
-                filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.2));
+                transform: scale(1) rotate(0deg);
+                filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.2));
+            }
+            43.75% {
+                opacity: 0;
+                transform: scale(0.7) rotate(180deg);
+                filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.15));
+            }
+            50%, 75% {
+                opacity: 0;
+                transform: scale(1) rotate(360deg);
+                filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.2));
+            }
+            81.25% {
+                opacity: 0;
+                transform: scale(0.7) rotate(540deg);
+                filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.15));
+            }
+            87.5%, 100% {
+                opacity: 1;
+                transform: scale(1) rotate(720deg);
+                filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.2));
+            }
+        }
+
+        /* Kalkan animasyonu */
+        @keyframes morph-cycle-shield {
+            0%, 37.5% {
+                opacity: 0;
+                transform: scale(0.5) rotate(0deg);
+                filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.15));
+            }
+            43.75% {
+                opacity: 0.5;
+                transform: scale(0.85) rotate(-10deg);
+                filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.25));
+            }
+            50%, 75% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+                filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.35));
+            }
+            81.25% {
+                opacity: 0.5;
+                transform: scale(0.85) rotate(10deg);
+                filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.25));
+            }
+            87.5%, 100% {
+                opacity: 0;
+                transform: scale(0.5) rotate(0deg);
+                filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.15));
+            }
+        }
+
+        /* Glow efekti için container animasyonu */
+        .specialS {
+            animation: morphGlow 8s ease-in-out infinite;
+        }
+
+        @keyframes morphGlow {
+            0%, 100% { 
+                filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.2)); 
+            }
+            37.5%, 62.5% { 
+                filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.15)); 
             }
             50% { 
-                opacity: 0.95;
-                filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.3));
+                filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.35)); 
             }
         }
 
         /* Glitch efekti - logo genelinde */
-        .logo.is-glitch .specialS svg {
-            animation: microShake 220ms steps(2, end) 1;
+        .logo.is-glitch .specialS {
+            animation: microShake 220ms steps(2, end) 1, morphGlow 8s ease-in-out infinite;
         }
 
         @keyframes microShake {
-            0% { transform: translate(0, 0); }
-            33% { transform: translate(-1px, 1px); }
-            66% { transform: translate(1px, -1px); }
-            100% { transform: translate(0, 0); }
+            0% { transform: translate(0, 0) translateY(0.05em); }
+            33% { transform: translate(-1px, 1px) translateY(0.05em); }
+            66% { transform: translate(1px, -1px) translateY(0.05em); }
+            100% { transform: translate(0, 0) translateY(0.05em); }
+        }
+
+        /* prefers-reduced-motion için erişilebilirlik */
+        @media (prefers-reduced-motion: reduce) {
+            .s-letter,
+            .shield-shape,
+            .specialS {
+                animation: none !important;
+            }
+            .s-letter {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+            .shield-shape {
+                opacity: 0;
+            }
         }
 
         /* Subtle glitch effect - creates split layers that shift briefly */
@@ -516,54 +602,26 @@
                 <h1 class="logo" data-text="safestagram">
                     <span class="logoText">
                         <span class="chunk">safe</span><span class="specialS">
-    <svg viewBox="0 0 90 110" class="shield-combo">
-        <!-- Arka plan kalkan -->
+    <span class="s-letter">s</span>
+    <svg class="shield-shape" viewBox="0 0 100 120">
         <defs>
-            <linearGradient id="shieldStroke" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="rgba(253, 230, 138, 0.95)"/>
-                <stop offset="45%" stop-color="rgba(251, 191, 36, 0.85)"/>
-                <stop offset="100%" stop-color="rgba(245, 158, 11, 0.85)"/>
+            <linearGradient id="goldGradient1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#fcd34d"/>
+                <stop offset="100%" stop-color="#f59e0b"/>
             </linearGradient>
         </defs>
-        
-        <!-- Dış kalkan çerçevesi -->
-        <path class="shieldOuter" 
-              d="M50 10 L75 18 V50 C75 75 62.5 90 50 100 C37.5 90 25 75 25 50 V18 Z"
-              fill="rgba(251, 191, 36, 0.06)"
-              stroke="url(#shieldStroke)"
-              stroke-width="2.2"/>
-        
-        <!-- İç kalkan çerçevesi -->
-        <path class="shieldInner"
-              d="M50 16 L68 22 V50 C68 70 58 82 50 90 C42 82 32 70 32 50 V22 Z"
-              fill="none"
-              stroke="rgba(253, 230, 138, 0.60)"
-              stroke-width="1.3"/>
-        
-        <!-- Dikey çizgi -->
-        <path class="shieldLine"
-              d="M50 17 V92"
-              stroke="rgba(245, 158, 11, 0.58)"
-              stroke-width="1.2"
-              stroke-linecap="round"
-              opacity="0.55"/>
-        
-        <!-- Yatay detay çizgisi -->
-        <path class="shieldLine"
-              d="M35 50 H65"
-              stroke="rgba(245, 158, 11, 0.58)"
-              stroke-width="1.2"
-              stroke-linecap="round"
-              opacity="0.35"/>
-        
-        <!-- "s" harfi kalkanın içinde -->
-        <text x="50" y="70" 
-              text-anchor="middle" 
-              font-family="Righteous" 
-              font-size="72"
-              font-weight="400"
-              fill="#fbbf24"
-              opacity="0.98">s</text>
+        <path d="M50,10 L75,18 L75,50 Q75,75 62.5,90 L50,100 L37.5,90 Q25,75 25,50 L25,18 Z"
+              fill="url(#goldGradient1)"
+              stroke="#fbbf24"
+              stroke-width="2"
+              opacity="0.95"/>
+        <!-- İç detay çizgileri -->
+        <line x1="50" y1="20" x2="50" y2="90" 
+              stroke="rgba(245, 158, 11, 0.4)" 
+              stroke-width="1.2"/>
+        <line x1="35" y1="50" x2="65" y2="50" 
+              stroke="rgba(245, 158, 11, 0.3)" 
+              stroke-width="1.2"/>
     </svg>
 </span><span class="chunk">tagram</span>
                     </span>
@@ -686,54 +744,26 @@
                 <h1 class="logo" data-text="safestagram">
                     <span class="logoText">
                         <span class="chunk">safe</span><span class="specialS">
-    <svg viewBox="0 0 90 110" class="shield-combo">
-        <!-- Arka plan kalkan -->
+    <span class="s-letter">s</span>
+    <svg class="shield-shape" viewBox="0 0 100 120">
         <defs>
-            <linearGradient id="shieldStroke2" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="rgba(253, 230, 138, 0.95)"/>
-                <stop offset="45%" stop-color="rgba(251, 191, 36, 0.85)"/>
-                <stop offset="100%" stop-color="rgba(245, 158, 11, 0.85)"/>
+            <linearGradient id="goldGradient2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#fcd34d"/>
+                <stop offset="100%" stop-color="#f59e0b"/>
             </linearGradient>
         </defs>
-        
-        <!-- Dış kalkan çerçevesi -->
-        <path class="shieldOuter" 
-              d="M50 10 L75 18 V50 C75 75 62.5 90 50 100 C37.5 90 25 75 25 50 V18 Z"
-              fill="rgba(251, 191, 36, 0.06)"
-              stroke="url(#shieldStroke2)"
-              stroke-width="2.2"/>
-        
-        <!-- İç kalkan çerçevesi -->
-        <path class="shieldInner"
-              d="M50 16 L68 22 V50 C68 70 58 82 50 90 C42 82 32 70 32 50 V22 Z"
-              fill="none"
-              stroke="rgba(253, 230, 138, 0.60)"
-              stroke-width="1.3"/>
-        
-        <!-- Dikey çizgi -->
-        <path class="shieldLine"
-              d="M50 17 V92"
-              stroke="rgba(245, 158, 11, 0.58)"
-              stroke-width="1.2"
-              stroke-linecap="round"
-              opacity="0.55"/>
-        
-        <!-- Yatay detay çizgisi -->
-        <path class="shieldLine"
-              d="M35 50 H65"
-              stroke="rgba(245, 158, 11, 0.58)"
-              stroke-width="1.2"
-              stroke-linecap="round"
-              opacity="0.35"/>
-        
-        <!-- "s" harfi kalkanın içinde -->
-        <text x="50" y="70" 
-              text-anchor="middle" 
-              font-family="Righteous" 
-              font-size="72"
-              font-weight="400"
-              fill="#fbbf24"
-              opacity="0.98">s</text>
+        <path d="M50,10 L75,18 L75,50 Q75,75 62.5,90 L50,100 L37.5,90 Q25,75 25,50 L25,18 Z"
+              fill="url(#goldGradient2)"
+              stroke="#fbbf24"
+              stroke-width="2"
+              opacity="0.95"/>
+        <!-- İç detay çizgileri -->
+        <line x1="50" y1="20" x2="50" y2="90" 
+              stroke="rgba(245, 158, 11, 0.4)" 
+              stroke-width="1.2"/>
+        <line x1="35" y1="50" x2="65" y2="50" 
+              stroke="rgba(245, 158, 11, 0.3)" 
+              stroke-width="1.2"/>
     </svg>
 </span><span class="chunk">tagram</span>
                     </span>
@@ -814,54 +844,26 @@
                 <h1 class="logo" data-text="safestagram">
                     <span class="logoText">
                         <span class="chunk">safe</span><span class="specialS">
-    <svg viewBox="0 0 90 110" class="shield-combo">
-        <!-- Arka plan kalkan -->
+    <span class="s-letter">s</span>
+    <svg class="shield-shape" viewBox="0 0 100 120">
         <defs>
-            <linearGradient id="shieldStroke3" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="rgba(253, 230, 138, 0.95)"/>
-                <stop offset="45%" stop-color="rgba(251, 191, 36, 0.85)"/>
-                <stop offset="100%" stop-color="rgba(245, 158, 11, 0.85)"/>
+            <linearGradient id="goldGradient3" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#fcd34d"/>
+                <stop offset="100%" stop-color="#f59e0b"/>
             </linearGradient>
         </defs>
-        
-        <!-- Dış kalkan çerçevesi -->
-        <path class="shieldOuter" 
-              d="M50 10 L75 18 V50 C75 75 62.5 90 50 100 C37.5 90 25 75 25 50 V18 Z"
-              fill="rgba(251, 191, 36, 0.06)"
-              stroke="url(#shieldStroke3)"
-              stroke-width="2.2"/>
-        
-        <!-- İç kalkan çerçevesi -->
-        <path class="shieldInner"
-              d="M50 16 L68 22 V50 C68 70 58 82 50 90 C42 82 32 70 32 50 V22 Z"
-              fill="none"
-              stroke="rgba(253, 230, 138, 0.60)"
-              stroke-width="1.3"/>
-        
-        <!-- Dikey çizgi -->
-        <path class="shieldLine"
-              d="M50 17 V92"
-              stroke="rgba(245, 158, 11, 0.58)"
-              stroke-width="1.2"
-              stroke-linecap="round"
-              opacity="0.55"/>
-        
-        <!-- Yatay detay çizgisi -->
-        <path class="shieldLine"
-              d="M35 50 H65"
-              stroke="rgba(245, 158, 11, 0.58)"
-              stroke-width="1.2"
-              stroke-linecap="round"
-              opacity="0.35"/>
-        
-        <!-- "s" harfi kalkanın içinde -->
-        <text x="50" y="70" 
-              text-anchor="middle" 
-              font-family="Righteous" 
-              font-size="72"
-              font-weight="400"
-              fill="#fbbf24"
-              opacity="0.98">s</text>
+        <path d="M50,10 L75,18 L75,50 Q75,75 62.5,90 L50,100 L37.5,90 Q25,75 25,50 L25,18 Z"
+              fill="url(#goldGradient3)"
+              stroke="#fbbf24"
+              stroke-width="2"
+              opacity="0.95"/>
+        <!-- İç detay çizgileri -->
+        <line x1="50" y1="20" x2="50" y2="90" 
+              stroke="rgba(245, 158, 11, 0.4)" 
+              stroke-width="1.2"/>
+        <line x1="35" y1="50" x2="65" y2="50" 
+              stroke="rgba(245, 158, 11, 0.3)" 
+              stroke-width="1.2"/>
     </svg>
 </span><span class="chunk">tagram</span>
                     </span>
