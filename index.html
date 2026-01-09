@@ -187,6 +187,7 @@
             position: relative;
             display: inline-block;
             animation: breathe 6s ease-in-out infinite;
+            letter-spacing: -0.03em; /* Harfler YAKIN */
         }
 
         @keyframes breathe {
@@ -215,11 +216,12 @@
             display: inline-block;
             width: 1em;      /* 0.95em → 1em (normal harf genişliği) */
             height: 1em;     /* Normal harf yüksekliği */
-            margin: 0 0.05em; /* Normal harf arası boşluk (diğer harfler gibi) */
+            margin: 0; /* Boşluk YOK */
             padding: 0;
             font-size: 1em;  /* Diğer harflerle AYNI */
             vertical-align: baseline;
             line-height: 1;
+            z-index: 1; /* "s" harfi ÜSTTE */
         }
 
         .s-letter,
@@ -238,16 +240,19 @@
             transform-origin: center;
             animation: morph-cycle-letter 10s ease-in-out infinite;
             filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.2));
+            z-index: 2; /* En üstte */
         }
 
         .shield-shape {
             animation: morph-cycle-shield 10s ease-in-out infinite;
-            width: 135%;     /* 100% → 135% (daha büyük, s'yi tam kaplamalı) */
-            height: 135%;
+            width: 140%;     /* Kalkan daha büyük */
+            height: 140%;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             display: block;
+            z-index: -1; /* ARKADA! */
+            pointer-events: none;
         }
 
         /* "s" harfi animasyonu */
