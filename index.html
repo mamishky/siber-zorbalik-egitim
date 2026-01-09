@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Satisfy&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Poppins:wght@400;600;700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Righteous&display=swap">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     
     <!-- Firebase SDK (compat version) -->
@@ -20,7 +22,7 @@
             position: relative;
             min-height: 100vh;
             overflow-x: hidden;
-            background: linear-gradient(135deg, #2d1b69 0%, #1e4a7f 50%, #2d1b69 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         #welcome-screen::before {
@@ -180,14 +182,18 @@
 
         /* Logo text */
         .logo {
-            font-family: "Righteous", sans-serif;
-            font-size: clamp(46px, 6vw, 88px);
-            color: #eef2ff;
-            margin: 0;
+            font-family: 'DM Sans', sans-serif;
+            font-size: clamp(48px, 8vw, 120px);
+            color: #ffffff;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+            margin: 0 0 2rem 0;
             position: relative;
-            display: inline-block;
-            animation: breathe 6s ease-in-out infinite;
-            letter-spacing: -0.05em; /* Harfler ÇOK YAKIN */
+            display: inline-flex;
+            align-items: baseline;
+            gap: 0;
         }
 
         @keyframes breathe {
@@ -201,231 +207,58 @@
             }
         }
 
-        .logoText {
-            position: relative;
+        .letter, .morph-letter {
             display: inline-block;
+            opacity: 0;
+            animation: revealLetter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
-
-        .chunk {
-            display: inline;
-        }
-
-        /* Special S with morph animation - CSS-only Approach */
-        .specialS {
+        
+        .letter:nth-child(1) { animation-delay: 0s; }
+        .letter:nth-child(2) { animation-delay: 0.08s; }
+        .letter:nth-child(3) { animation-delay: 0.16s; }
+        .letter:nth-child(4) { animation-delay: 0.24s; }
+        .morph-letter { 
             position: relative;
-            display: inline-block;
-            width: 1em;      /* 0.95em → 1em (normal harf genişliği) */
-            height: 1em;     /* Normal harf yüksekliği */
-            margin: 0; /* Boşluk YOK */
-            padding: 0;
-            font-size: 1em;  /* Diğer harflerle AYNI */
+            width: 1em;
+            height: 1em;
+            margin: 0;
             vertical-align: baseline;
-            line-height: 1;
-            z-index: 1; /* "s" harfi ÜSTTE */
+            animation-delay: 0.32s;
+            animation: revealLetter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+                       microBounce 0.4s ease-in-out 0.9s;
         }
+        .letter:nth-child(6) { animation-delay: 0.4s; }
+        .letter:nth-child(7) { animation-delay: 0.48s; }
+        .letter:nth-child(8) { animation-delay: 0.56s; }
+        .letter:nth-child(9) { animation-delay: 0.64s; }
+        .letter:nth-child(10) { animation-delay: 0.72s; }
+        .letter:nth-child(11) { animation-delay: 0.8s; }
 
-        .s-letter,
-        .shield-shape {
-            position: absolute;
-            inset: 0;
-        }
-
-        .s-letter {
-            font-family: "Righteous", sans-serif;
-            font-size: 1em;
-            color: #fbbf24;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transform-origin: center;
-            animation: morph-cycle-letter 10s ease-in-out infinite;
-            filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.2));
-            z-index: 2; /* En üstte */
-        }
-
-        .shield-shape {
-            animation: morph-cycle-shield 10s ease-in-out infinite;
-            width: 100%;     /* Kalkan "s" harfi ile AYNI boyutta */
-            height: 100%;
-            top: 0;
-            left: 0;
-            transform: none;
-            display: block;
-            z-index: -1; /* ARKADA! */
-            pointer-events: none;
-        }
-
-        /* "s" harfi animasyonu */
-        /* Timing breakdown (10s cycle):
-           0-35% (0-3.5s): "s" visible
-           35-50% (3.5-5s): transition to shield
-           50-65% (5-6.5s): shield visible
-           65-85% (6.5-8.5s): transition to "s"
-           85-100% (8.5-10s): "s" visible again
-        */
-        @keyframes morph-cycle-letter {
-            0%, 35% {
+        @keyframes revealLetter {
+            from {
+                opacity: 0;
+                transform: translateX(-20px) scale(0.8);
+            }
+            to {
                 opacity: 1;
-                transform: scale(1) rotate(0deg);
-                filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.2));
-            }
-            42.5% {
-                opacity: 0;
-                transform: scale(0.7) rotate(180deg);
-                filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.15));
-            }
-            50%, 65% {
-                opacity: 0;
-                transform: scale(1) rotate(360deg);
-                filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.2));
-            }
-            77.5% {
-                opacity: 0;
-                transform: scale(0.7) rotate(540deg);
-                filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.15));
-            }
-            85%, 100% {
-                opacity: 1;
-                transform: scale(1) rotate(720deg);
-                filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.2));
+                transform: translateX(0) scale(1);
             }
         }
-
-        /* Kalkan animasyonu */
-        /* Timing breakdown (10s cycle):
-           0-35% (0-3.5s): shield hidden
-           35-50% (3.5-5s): transition from "s"
-           50-65% (5-6.5s): shield visible
-           65-85% (6.5-8.5s): transition back to "s"
-           85-100% (8.5-10s): shield hidden
-        */
-        @keyframes morph-cycle-shield {
-            0%, 35% {
-                opacity: 0;
-                transform: scale(0.5) rotate(0deg);
-                filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.15));
-            }
-            42.5% {
-                opacity: 0.5;
-                transform: scale(0.85) rotate(-10deg);
-                filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.25));
-            }
-            50%, 65% {
-                opacity: 1;
-                transform: scale(1) rotate(0deg);
-                filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.35));
-            }
-            77.5% {
-                opacity: 0.5;
-                transform: scale(0.85) rotate(10deg);
-                filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.25));
-            }
-            85%, 100% {
-                opacity: 0;
-                transform: scale(0.5) rotate(0deg);
-                filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.15));
-            }
+        
+        @keyframes microBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
         }
 
-        /* Glow efekti için container animasyonu */
-        .specialS {
-            animation: morphGlow 10s ease-in-out infinite, morphBlur 10s ease-in-out infinite;
-        }
-
-        @keyframes morphGlow {
-            0%, 100% { 
-                filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.2)); 
-            }
-            35%, 57.5% { 
-                filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.15)); 
-            }
-            50% { 
-                filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.35)); 
-            }
-        }
-
-        /* Morph sırasında hafif blur */
-        @keyframes morphBlur {
-            0%, 35%, 65%, 100% { 
-                filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.15)) blur(0px); 
-            }
-            40%, 50%, 80% { 
-                filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.25)) blur(1.5px); 
-            }
-        }
-
-        /* Glitch efekti - logo genelinde */
-        .logo.is-glitch .specialS {
-            animation: microShake 220ms steps(2, end) 1, morphGlow 10s ease-in-out infinite, morphBlur 10s ease-in-out infinite;
-        }
-
-        @keyframes microShake {
-            0% { transform: translate(0, 0); }
-            33% { transform: translate(-1px, 1px); }
-            66% { transform: translate(1px, -1px); }
-            100% { transform: translate(0, 0); }
-        }
-
-        /* prefers-reduced-motion için erişilebilirlik */
-        @media (prefers-reduced-motion: reduce) {
-            .s-letter,
-            .shield-shape,
-            .specialS {
-                animation: none !important;
-            }
-            .s-letter {
-                opacity: 1;
-                transform: scale(1) rotate(0deg);
-            }
-            .shield-shape {
-                opacity: 0;
-            }
-        }
-
-        /* Subtle glitch effect - creates split layers that shift briefly */
-        .logo::before,
-        .logo::after {
-            content: attr(data-text);
-            position: absolute;
-            top: 0;
-            left: 0;
+        .morph-letter svg {
             width: 100%;
             height: 100%;
-            opacity: 0;
-            pointer-events: none;
+            display: block;
+            overflow: visible;
         }
 
-        .logo::before {
-            color: #fbbf24;
-            animation: microGlitch 4s infinite;
-            /* Clips the top portion (0-45%) of the text for glitch effect */
-            clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
-        }
-
-        .logo::after {
-            color: #22d3ee;
-            animation: microGlitch 3.5s infinite reverse;
-            /* Clips the bottom portion (55-100%) of the text for glitch effect */
-            clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
-        }
-
-        @keyframes microGlitch {
-            0%, 96% {
-                opacity: 0;
-                transform: translate(0);
-            }
-            97% {
-                opacity: 0.7;
-                transform: translate(-2px, 1px);
-            }
-            98% {
-                opacity: 0.7;
-                transform: translate(2px, -1px);
-            }
-            99%, 100% {
-                opacity: 0;
-                transform: translate(0);
-            }
+        .morph-letter svg path {
+            filter: drop-shadow(0 2px 8px rgba(251, 191, 36, 0.3));
         }
 
         /* Actions/Subtitle */
@@ -622,11 +455,21 @@
             .cyber-btnRow { grid-template-columns: 1fr; }
             .cyber-brand { margin-bottom: 25px; gap: 15px; }
             .cyber-card { padding: 24px 20px; }
-            .logo { font-size: clamp(36px, 8vw, 50px); }
+            .logo { 
+                font-size: clamp(32px, 10vw, 48px);
+                letter-spacing: -0.01em;
+            }
             .action { font-size: clamp(10px, 1.5vw, 13px); padding: 6px 10px; }
             .floating-icon { opacity: .08; font-size: 60px; }
             .message-slider { font-size: 14px; opacity: .08; }
             .icon-security-top { transform: translateX(-50%) translateY(0); }
+        }
+        
+        @media (min-width: 1200px) {
+            .logo {
+                font-size: 120px;
+                letter-spacing: -0.03em;
+            }
         }
     </style>
 </head>
@@ -694,65 +537,46 @@
 
         <div class="cyber-welcome-container">
             <header class="cyber-brand">
-                <h1 class="logo" data-text="safestagram">
-                    <span class="logoText">
-                        <span class="chunk">safe</span><span class="specialS">
-    <span class="s-letter">s</span>
-    <!-- Note: Each SVG needs a unique gradient ID because multiple instances exist on the same page -->
-    <svg class="shield-shape" viewBox="0 0 100 100">
-        <defs>
-            <linearGradient id="goldGradient1" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#fcd34d"/>
-                <stop offset="100%" stop-color="#f59e0b"/>
-            </linearGradient>
-        </defs>
-        
-        <!-- Morphing path -->
-        <path class="morphing-shape" 
-              fill="url(#goldGradient1)" 
-              stroke="#fbbf24" 
-              stroke-width="1.5"
-              opacity="0.95">
-            <animate attributeName="d" 
-                     dur="10s" 
-                     repeatCount="indefinite"
-                     calcMode="spline"
-                     keySplines="0.42 0 0.58 1; 0.42 0 0.58 1; 0.42 0 0.58 1; 0.42 0 0.58 1"
-                     keyTimes="0; 0.3; 0.7; 0.85; 1"
-                     values="
-                         M30,35 Q30,20 50,20 Q70,20 70,35 Q70,45 62,52 L50,65 Q57,72 62,78 Q70,88 50,95 Q30,88 30,78 Q30,68 43,62 L38,52 Q30,45 30,35;
-                         
-                         M50,15 L72,22 V58 Q72,75 62,85 L50,92 L38,85 Q28,75 28,58 V22 Z;
-                         
-                         M50,15 L72,22 V58 Q72,75 62,85 L50,92 L38,85 Q28,75 28,58 V22 Z;
-                         
-                         M30,35 Q30,20 50,20 Q70,20 70,35 Q70,45 62,52 L50,65 Q57,72 62,78 Q70,88 50,95 Q30,88 30,78 Q30,68 43,62 L38,52 Q30,45 30,35;
-                         
-                         M30,35 Q30,20 50,20 Q70,20 70,35 Q70,45 62,52 L50,65 Q57,72 62,78 Q70,88 50,95 Q30,88 30,78 Q30,68 43,62 L38,52 Q30,45 30,35
-                     "/>
-        </path>
-        
-        <!-- Kalkan detayları -->
-        <g class="shield-details">
-            <!-- Dikey çizgi -->
-            <line x1="50" y1="25" x2="50" y2="85" 
-                  stroke="rgba(245, 158, 11, 0.3)" 
-                  stroke-width="1"/>
-            
-            <!-- Yatay çizgi -->
-            <line x1="35" y1="58" x2="65" y2="58" 
-                  stroke="rgba(245, 158, 11, 0.25)" 
-                  stroke-width="1"/>
-            
-            <animate attributeName="opacity"
-                     dur="10s"
-                     repeatCount="indefinite"
-                     values="0; 0.5; 0.5; 0; 0"
-                     keyTimes="0; 0.3; 0.7; 0.85; 1"/>
-        </g>
-    </svg>
-</span><span class="chunk">tagram</span>
+                <h1 class="logo">
+                    <span class="letter">s</span>
+                    <span class="letter">a</span>
+                    <span class="letter">f</span>
+                    <span class="letter">e</span>
+                    <span class="morph-letter">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="warmGold1" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#fbbf24"/>
+                                    <stop offset="100%" stop-color="#f59e0b"/>
+                                </linearGradient>
+                            </defs>
+                            <path fill="url(#warmGold1)" stroke="none" stroke-linejoin="round" stroke-linecap="round">
+                                <animate 
+                                    attributeName="d"
+                                    dur="3s"
+                                    repeatCount="indefinite"
+                                    calcMode="spline"
+                                    keySplines="0.34 1.56 0.64 1; 0.34 1.56 0.64 1; 0.34 1.56 0.64 1"
+                                    keyTimes="0; 0.4; 0.6; 1"
+                                    values="
+                                        M30,35 Q28,25 40,22 Q52,20 58,25 Q62,30 60,38 Q58,46 52,52 L48,65 Q50,72 54,78 Q58,86 48,92 Q38,86 34,78 Q30,70 38,64 L42,52 Q36,46 34,38 Q32,30 30,35;
+                                        
+                                        M40,15 L60,22 Q72,25 72,38 L72,58 Q72,75 60,85 L50,92 L40,85 Q28,75 28,58 L28,38 Q28,25 40,22 Z;
+                                        
+                                        M40,15 L60,22 Q72,25 72,38 L72,58 Q72,75 60,85 L50,92 L40,85 Q28,75 28,58 L28,38 Q28,25 40,22 Z;
+                                        
+                                        M30,35 Q28,25 40,22 Q52,20 58,25 Q62,30 60,38 Q58,46 52,52 L48,65 Q50,72 54,78 Q58,86 48,92 Q38,86 34,78 Q30,70 38,64 L42,52 Q36,46 34,38 Q32,30 30,35
+                                    "
+                                />
+                            </path>
+                        </svg>
                     </span>
+                    <span class="letter">t</span>
+                    <span class="letter">a</span>
+                    <span class="letter">g</span>
+                    <span class="letter">r</span>
+                    <span class="letter">a</span>
+                    <span class="letter">m</span>
                 </h1>
                 
                 <nav class="actions">
@@ -898,64 +722,46 @@
             </div>
 
             <header class="cyber-brand">
-                <h1 class="logo" data-text="safestagram">
-                    <span class="logoText">
-                        <span class="chunk">safe</span><span class="specialS">
-    <span class="s-letter">s</span>
-    <svg class="shield-shape" viewBox="0 0 100 100">
-        <defs>
-            <linearGradient id="goldGradient2" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#fcd34d"/>
-                <stop offset="100%" stop-color="#f59e0b"/>
-            </linearGradient>
-        </defs>
-        
-        <!-- Morphing path -->
-        <path class="morphing-shape" 
-              fill="url(#goldGradient2)" 
-              stroke="#fbbf24" 
-              stroke-width="1.5"
-              opacity="0.95">
-            <animate attributeName="d" 
-                     dur="10s" 
-                     repeatCount="indefinite"
-                     calcMode="spline"
-                     keySplines="0.42 0 0.58 1; 0.42 0 0.58 1; 0.42 0 0.58 1; 0.42 0 0.58 1"
-                     keyTimes="0; 0.3; 0.7; 0.85; 1"
-                     values="
-                         M30,35 Q30,20 50,20 Q70,20 70,35 Q70,45 62,52 L50,65 Q57,72 62,78 Q70,88 50,95 Q30,88 30,78 Q30,68 43,62 L38,52 Q30,45 30,35;
-                         
-                         M50,15 L72,22 V58 Q72,75 62,85 L50,92 L38,85 Q28,75 28,58 V22 Z;
-                         
-                         M50,15 L72,22 V58 Q72,75 62,85 L50,92 L38,85 Q28,75 28,58 V22 Z;
-                         
-                         M30,35 Q30,20 50,20 Q70,20 70,35 Q70,45 62,52 L50,65 Q57,72 62,78 Q70,88 50,95 Q30,88 30,78 Q30,68 43,62 L38,52 Q30,45 30,35;
-                         
-                         M30,35 Q30,20 50,20 Q70,20 70,35 Q70,45 62,52 L50,65 Q57,72 62,78 Q70,88 50,95 Q30,88 30,78 Q30,68 43,62 L38,52 Q30,45 30,35
-                     "/>
-        </path>
-        
-        <!-- Kalkan detayları -->
-        <g class="shield-details">
-            <!-- Dikey çizgi -->
-            <line x1="50" y1="25" x2="50" y2="85" 
-                  stroke="rgba(245, 158, 11, 0.3)" 
-                  stroke-width="1"/>
-            
-            <!-- Yatay çizgi -->
-            <line x1="35" y1="58" x2="65" y2="58" 
-                  stroke="rgba(245, 158, 11, 0.25)" 
-                  stroke-width="1"/>
-            
-            <animate attributeName="opacity"
-                     dur="10s"
-                     repeatCount="indefinite"
-                     values="0; 0.5; 0.5; 0; 0"
-                     keyTimes="0; 0.3; 0.7; 0.85; 1"/>
-        </g>
-    </svg>
-</span><span class="chunk">tagram</span>
+                <h1 class="logo">
+                    <span class="letter">s</span>
+                    <span class="letter">a</span>
+                    <span class="letter">f</span>
+                    <span class="letter">e</span>
+                    <span class="morph-letter">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="warmGold2" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#fbbf24"/>
+                                    <stop offset="100%" stop-color="#f59e0b"/>
+                                </linearGradient>
+                            </defs>
+                            <path fill="url(#warmGold2)" stroke="none" stroke-linejoin="round" stroke-linecap="round">
+                                <animate 
+                                    attributeName="d"
+                                    dur="3s"
+                                    repeatCount="indefinite"
+                                    calcMode="spline"
+                                    keySplines="0.34 1.56 0.64 1; 0.34 1.56 0.64 1; 0.34 1.56 0.64 1"
+                                    keyTimes="0; 0.4; 0.6; 1"
+                                    values="
+                                        M30,35 Q28,25 40,22 Q52,20 58,25 Q62,30 60,38 Q58,46 52,52 L48,65 Q50,72 54,78 Q58,86 48,92 Q38,86 34,78 Q30,70 38,64 L42,52 Q36,46 34,38 Q32,30 30,35;
+                                        
+                                        M40,15 L60,22 Q72,25 72,38 L72,58 Q72,75 60,85 L50,92 L40,85 Q28,75 28,58 L28,38 Q28,25 40,22 Z;
+                                        
+                                        M40,15 L60,22 Q72,25 72,38 L72,58 Q72,75 60,85 L50,92 L40,85 Q28,75 28,58 L28,38 Q28,25 40,22 Z;
+                                        
+                                        M30,35 Q28,25 40,22 Q52,20 58,25 Q62,30 60,38 Q58,46 52,52 L48,65 Q50,72 54,78 Q58,86 48,92 Q38,86 34,78 Q30,70 38,64 L42,52 Q36,46 34,38 Q32,30 30,35
+                                    "
+                                />
+                            </path>
+                        </svg>
                     </span>
+                    <span class="letter">t</span>
+                    <span class="letter">a</span>
+                    <span class="letter">g</span>
+                    <span class="letter">r</span>
+                    <span class="letter">a</span>
+                    <span class="letter">m</span>
                 </h1>
                 
                 <nav class="actions">
@@ -1059,64 +865,46 @@
             </div>
             
             <header class="cyber-brand">
-                <h1 class="logo" data-text="safestagram">
-                    <span class="logoText">
-                        <span class="chunk">safe</span><span class="specialS">
-    <span class="s-letter">s</span>
-    <svg class="shield-shape" viewBox="0 0 100 100">
-        <defs>
-            <linearGradient id="goldGradient3" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#fcd34d"/>
-                <stop offset="100%" stop-color="#f59e0b"/>
-            </linearGradient>
-        </defs>
-        
-        <!-- Morphing path -->
-        <path class="morphing-shape" 
-              fill="url(#goldGradient3)" 
-              stroke="#fbbf24" 
-              stroke-width="1.5"
-              opacity="0.95">
-            <animate attributeName="d" 
-                     dur="10s" 
-                     repeatCount="indefinite"
-                     calcMode="spline"
-                     keySplines="0.42 0 0.58 1; 0.42 0 0.58 1; 0.42 0 0.58 1; 0.42 0 0.58 1"
-                     keyTimes="0; 0.3; 0.7; 0.85; 1"
-                     values="
-                         M30,35 Q30,20 50,20 Q70,20 70,35 Q70,45 62,52 L50,65 Q57,72 62,78 Q70,88 50,95 Q30,88 30,78 Q30,68 43,62 L38,52 Q30,45 30,35;
-                         
-                         M50,15 L72,22 V58 Q72,75 62,85 L50,92 L38,85 Q28,75 28,58 V22 Z;
-                         
-                         M50,15 L72,22 V58 Q72,75 62,85 L50,92 L38,85 Q28,75 28,58 V22 Z;
-                         
-                         M30,35 Q30,20 50,20 Q70,20 70,35 Q70,45 62,52 L50,65 Q57,72 62,78 Q70,88 50,95 Q30,88 30,78 Q30,68 43,62 L38,52 Q30,45 30,35;
-                         
-                         M30,35 Q30,20 50,20 Q70,20 70,35 Q70,45 62,52 L50,65 Q57,72 62,78 Q70,88 50,95 Q30,88 30,78 Q30,68 43,62 L38,52 Q30,45 30,35
-                     "/>
-        </path>
-        
-        <!-- Kalkan detayları -->
-        <g class="shield-details">
-            <!-- Dikey çizgi -->
-            <line x1="50" y1="25" x2="50" y2="85" 
-                  stroke="rgba(245, 158, 11, 0.3)" 
-                  stroke-width="1"/>
-            
-            <!-- Yatay çizgi -->
-            <line x1="35" y1="58" x2="65" y2="58" 
-                  stroke="rgba(245, 158, 11, 0.25)" 
-                  stroke-width="1"/>
-            
-            <animate attributeName="opacity"
-                     dur="10s"
-                     repeatCount="indefinite"
-                     values="0; 0.5; 0.5; 0; 0"
-                     keyTimes="0; 0.3; 0.7; 0.85; 1"/>
-        </g>
-    </svg>
-</span><span class="chunk">tagram</span>
+                <h1 class="logo">
+                    <span class="letter">s</span>
+                    <span class="letter">a</span>
+                    <span class="letter">f</span>
+                    <span class="letter">e</span>
+                    <span class="morph-letter">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="warmGold3" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#fbbf24"/>
+                                    <stop offset="100%" stop-color="#f59e0b"/>
+                                </linearGradient>
+                            </defs>
+                            <path fill="url(#warmGold3)" stroke="none" stroke-linejoin="round" stroke-linecap="round">
+                                <animate 
+                                    attributeName="d"
+                                    dur="3s"
+                                    repeatCount="indefinite"
+                                    calcMode="spline"
+                                    keySplines="0.34 1.56 0.64 1; 0.34 1.56 0.64 1; 0.34 1.56 0.64 1"
+                                    keyTimes="0; 0.4; 0.6; 1"
+                                    values="
+                                        M30,35 Q28,25 40,22 Q52,20 58,25 Q62,30 60,38 Q58,46 52,52 L48,65 Q50,72 54,78 Q58,86 48,92 Q38,86 34,78 Q30,70 38,64 L42,52 Q36,46 34,38 Q32,30 30,35;
+                                        
+                                        M40,15 L60,22 Q72,25 72,38 L72,58 Q72,75 60,85 L50,92 L40,85 Q28,75 28,58 L28,38 Q28,25 40,22 Z;
+                                        
+                                        M40,15 L60,22 Q72,25 72,38 L72,58 Q72,75 60,85 L50,92 L40,85 Q28,75 28,58 L28,38 Q28,25 40,22 Z;
+                                        
+                                        M30,35 Q28,25 40,22 Q52,20 58,25 Q62,30 60,38 Q58,46 52,52 L48,65 Q50,72 54,78 Q58,86 48,92 Q38,86 34,78 Q30,70 38,64 L42,52 Q36,46 34,38 Q32,30 30,35
+                                    "
+                                />
+                            </path>
+                        </svg>
                     </span>
+                    <span class="letter">t</span>
+                    <span class="letter">a</span>
+                    <span class="letter">g</span>
+                    <span class="letter">r</span>
+                    <span class="letter">a</span>
+                    <span class="letter">m</span>
                 </h1>
                 
                 <nav class="actions">
