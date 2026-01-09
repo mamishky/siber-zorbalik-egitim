@@ -154,24 +154,6 @@
             100% { transform: translateX(calc(-200vw)); }
         }
 
-        /* Emoji İconları */
-        .emoji-float {
-            position: fixed;
-            font-size: clamp(24px, 3vw, 40px);
-            opacity: 0.12;
-            pointer-events: none;
-            animation: float 20s ease-in-out infinite;
-        }
-
-        .emoji1 { left: 10%; top: 20%; animation-duration: 22s; }
-        .emoji2 { left: 85%; top: 30%; animation-duration: 18s; animation-delay: 2s; }
-        .emoji3 { left: 20%; top: 70%; animation-duration: 24s; animation-delay: 4s; }
-        .emoji4 { left: 75%; top: 60%; animation-duration: 20s; animation-delay: 1s; }
-        .emoji5 { left: 40%; top: 15%; animation-duration: 23s; animation-delay: 3s; }
-        .emoji6 { left: 60%; top: 80%; animation-duration: 19s; animation-delay: 5s; }
-        .emoji7 { left: 30%; top: 50%; animation-duration: 21s; animation-delay: 2s; }
-        .emoji8 { left: 70%; top: 40%; animation-duration: 25s; animation-delay: 4s; }
-
         /* Cyber welcome container */
         .cyber-welcome-container {
             position: relative;
@@ -231,12 +213,12 @@
         .specialS {
             position: relative;
             display: inline-block;
-            width: 0.95em;  /* Çok daha küçük */
-            height: 0.95em; /* Normal harf boyutu */
-            margin: 0;      /* Boşluk KALDIR */
+            width: 1em;      /* 0.95em → 1em (normal harf genişliği) */
+            height: 1em;     /* Normal harf yüksekliği */
+            margin: 0 0.05em; /* Normal harf arası boşluk (diğer harfler gibi) */
             padding: 0;
-            font-size: 1em; /* Diğerleriyle AYNI boyut */
-            vertical-align: -0.05em; /* Hafif aşağı çek */
+            font-size: 1em;  /* Diğer harflerle AYNI */
+            vertical-align: baseline;
             line-height: 1;
         }
 
@@ -260,6 +242,12 @@
 
         .shield-shape {
             animation: morph-cycle-shield 10s ease-in-out infinite;
+            width: 135%;     /* 100% → 135% (daha büyük, s'yi tam kaplamalı) */
+            height: 135%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: block;
         }
 
         /* "s" harfi animasyonu */
@@ -699,16 +687,6 @@
         <div class="message-slider msg7">Seni koruyan araçları kullan</div>
         <div class="message-slider msg8">İnternette güvendesin</div>
 
-        <!-- Emoji İconları -->
-        <span class="emoji-float emoji1">🛡️</span>
-        <span class="emoji-float emoji2">🔒</span>
-        <span class="emoji-float emoji3">👤</span>
-        <span class="emoji-float emoji4">⚠️</span>
-        <span class="emoji-float emoji5">📱</span>
-        <span class="emoji-float emoji6">💬</span>
-        <span class="emoji-float emoji7">🚫</span>
-        <span class="emoji-float emoji8">✅</span>
-
         <div class="cyber-welcome-container">
             <header class="cyber-brand">
                 <h1 class="logo" data-text="safestagram">
@@ -716,25 +694,57 @@
                         <span class="chunk">safe</span><span class="specialS">
     <span class="s-letter">s</span>
     <!-- Note: Each SVG needs a unique gradient ID because multiple instances exist on the same page -->
-    <svg class="shield-shape" viewBox="0 0 100 90">
+    <svg class="shield-shape" viewBox="0 0 100 100">
         <defs>
             <linearGradient id="goldGradient1" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#fcd34d"/>
                 <stop offset="100%" stop-color="#f59e0b"/>
             </linearGradient>
         </defs>
-        <path d="M50,18 L68,24 V48 Q68,62 59,70 L50,76 L41,70 Q32,62 32,48 V24 Z"
-              fill="url(#goldGradient1)"
-              stroke="#fbbf24"
-              stroke-width="2"
-              opacity="0.95"/>
-        <!-- Detail lines -->
-        <line x1="50" y1="26" x2="50" y2="70" 
-              stroke="rgba(245, 158, 11, 0.35)" 
-              stroke-width="1"/>
-        <line x1="38" y1="48" x2="62" y2="48" 
-              stroke="rgba(245, 158, 11, 0.25)" 
-              stroke-width="0.9"/>
+        
+        <!-- Morphing path -->
+        <path class="morphing-shape" 
+              fill="url(#goldGradient1)" 
+              stroke="#fbbf24" 
+              stroke-width="1.5"
+              opacity="0.95">
+            <animate attributeName="d" 
+                     dur="10s" 
+                     repeatCount="indefinite"
+                     calcMode="spline"
+                     keySplines="0.45 0.05 0.55 0.95; 0.45 0.05 0.55 0.95; 0.45 0.05 0.55 0.95; 0.45 0.05 0.55 0.95"
+                     keyTimes="0; 0.35; 0.65; 0.85; 1"
+                     values="
+                         M35,25 Q35,15 50,15 Q65,15 65,25 Q65,35 58,42 L50,58 Q55,63 60,68 Q65,78 50,85 Q35,78 35,68 Q35,58 45,55 L42,42 Q35,35 35,25;
+                         
+                         M50,12 L72,20 V52 Q72,72 61,82 L50,88 L39,82 Q28,72 28,52 V20 Z;
+                         
+                         M50,12 L72,20 V52 Q72,72 61,82 L50,88 L39,82 Q28,72 28,52 V20 Z;
+                         
+                         M35,25 Q35,15 50,15 Q65,15 65,25 Q65,35 58,42 L50,58 Q55,63 60,68 Q65,78 50,85 Q35,78 35,68 Q35,58 45,55 L42,42 Q35,35 35,25;
+                         
+                         M35,25 Q35,15 50,15 Q65,15 65,25 Q65,35 58,42 L50,58 Q55,63 60,68 Q65,78 50,85 Q35,78 35,68 Q35,58 45,55 L42,42 Q35,35 35,25
+                     "/>
+        </path>
+        
+        <!-- Kalkan detayları -->
+        <g class="shield-details">
+            <!-- Dikey çizgi -->
+            <line x1="50" y1="22" x2="50" y2="82" 
+                  stroke="rgba(245, 158, 11, 0.35)" 
+                  stroke-width="1.2"/>
+            
+            <!-- Yatay çizgi -->
+            <line x1="35" y1="52" x2="65" y2="52" 
+                  stroke="rgba(245, 158, 11, 0.25)" 
+                  stroke-width="1"/>
+            
+            <animate attributeName="opacity"
+                     dur="10s"
+                     repeatCount="indefinite"
+                     values="0; 0; 0.5; 0.5; 0; 0"
+                     keyTimes="0; 0.35; 0.5; 0.65; 0.85; 1"/>
+        </g>
     </svg>
 </span><span class="chunk">tagram</span>
                     </span>
@@ -866,16 +876,6 @@
         <div class="message-slider msg7">Seni koruyan araçları kullan</div>
         <div class="message-slider msg8">İnternette güvendesin</div>
 
-        <!-- Emoji İconları -->
-        <span class="emoji-float emoji1">🛡️</span>
-        <span class="emoji-float emoji2">🔒</span>
-        <span class="emoji-float emoji3">👤</span>
-        <span class="emoji-float emoji4">⚠️</span>
-        <span class="emoji-float emoji5">📱</span>
-        <span class="emoji-float emoji6">💬</span>
-        <span class="emoji-float emoji7">🚫</span>
-        <span class="emoji-float emoji8">✅</span>
-
         <div class="cyber-welcome-container">
             <!-- User Info Display -->
             <div class="user-info-display">
@@ -897,25 +897,57 @@
                     <span class="logoText">
                         <span class="chunk">safe</span><span class="specialS">
     <span class="s-letter">s</span>
-    <svg class="shield-shape" viewBox="0 0 100 90">
+    <svg class="shield-shape" viewBox="0 0 100 100">
         <defs>
             <linearGradient id="goldGradient2" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#fcd34d"/>
                 <stop offset="100%" stop-color="#f59e0b"/>
             </linearGradient>
         </defs>
-        <path d="M50,18 L68,24 V48 Q68,62 59,70 L50,76 L41,70 Q32,62 32,48 V24 Z"
-              fill="url(#goldGradient2)"
-              stroke="#fbbf24"
-              stroke-width="2"
-              opacity="0.95"/>
-        <!-- Detail lines -->
-        <line x1="50" y1="26" x2="50" y2="70" 
-              stroke="rgba(245, 158, 11, 0.35)" 
-              stroke-width="1"/>
-        <line x1="38" y1="48" x2="62" y2="48" 
-              stroke="rgba(245, 158, 11, 0.25)" 
-              stroke-width="0.9"/>
+        
+        <!-- Morphing path -->
+        <path class="morphing-shape" 
+              fill="url(#goldGradient2)" 
+              stroke="#fbbf24" 
+              stroke-width="1.5"
+              opacity="0.95">
+            <animate attributeName="d" 
+                     dur="10s" 
+                     repeatCount="indefinite"
+                     calcMode="spline"
+                     keySplines="0.45 0.05 0.55 0.95; 0.45 0.05 0.55 0.95; 0.45 0.05 0.55 0.95; 0.45 0.05 0.55 0.95"
+                     keyTimes="0; 0.35; 0.65; 0.85; 1"
+                     values="
+                         M35,25 Q35,15 50,15 Q65,15 65,25 Q65,35 58,42 L50,58 Q55,63 60,68 Q65,78 50,85 Q35,78 35,68 Q35,58 45,55 L42,42 Q35,35 35,25;
+                         
+                         M50,12 L72,20 V52 Q72,72 61,82 L50,88 L39,82 Q28,72 28,52 V20 Z;
+                         
+                         M50,12 L72,20 V52 Q72,72 61,82 L50,88 L39,82 Q28,72 28,52 V20 Z;
+                         
+                         M35,25 Q35,15 50,15 Q65,15 65,25 Q65,35 58,42 L50,58 Q55,63 60,68 Q65,78 50,85 Q35,78 35,68 Q35,58 45,55 L42,42 Q35,35 35,25;
+                         
+                         M35,25 Q35,15 50,15 Q65,15 65,25 Q65,35 58,42 L50,58 Q55,63 60,68 Q65,78 50,85 Q35,78 35,68 Q35,58 45,55 L42,42 Q35,35 35,25
+                     "/>
+        </path>
+        
+        <!-- Kalkan detayları -->
+        <g class="shield-details">
+            <!-- Dikey çizgi -->
+            <line x1="50" y1="22" x2="50" y2="82" 
+                  stroke="rgba(245, 158, 11, 0.35)" 
+                  stroke-width="1.2"/>
+            
+            <!-- Yatay çizgi -->
+            <line x1="35" y1="52" x2="65" y2="52" 
+                  stroke="rgba(245, 158, 11, 0.25)" 
+                  stroke-width="1"/>
+            
+            <animate attributeName="opacity"
+                     dur="10s"
+                     repeatCount="indefinite"
+                     values="0; 0; 0.5; 0.5; 0; 0"
+                     keyTimes="0; 0.35; 0.5; 0.65; 0.85; 1"/>
+        </g>
     </svg>
 </span><span class="chunk">tagram</span>
                     </span>
@@ -1009,16 +1041,6 @@
         <div class="message-slider msg7">Seni koruyan araçları kullan</div>
         <div class="message-slider msg8">İnternette güvendesin</div>
 
-        <!-- Emoji İconları -->
-        <span class="emoji-float emoji1">🛡️</span>
-        <span class="emoji-float emoji2">🔒</span>
-        <span class="emoji-float emoji3">👤</span>
-        <span class="emoji-float emoji4">⚠️</span>
-        <span class="emoji-float emoji5">📱</span>
-        <span class="emoji-float emoji6">💬</span>
-        <span class="emoji-float emoji7">🚫</span>
-        <span class="emoji-float emoji8">✅</span>
-
         <div class="cyber-welcome-container">
             <!-- User Info Display -->
             <div class="user-info-display">
@@ -1036,25 +1058,57 @@
                     <span class="logoText">
                         <span class="chunk">safe</span><span class="specialS">
     <span class="s-letter">s</span>
-    <svg class="shield-shape" viewBox="0 0 100 90">
+    <svg class="shield-shape" viewBox="0 0 100 100">
         <defs>
             <linearGradient id="goldGradient3" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#fcd34d"/>
                 <stop offset="100%" stop-color="#f59e0b"/>
             </linearGradient>
         </defs>
-        <path d="M50,18 L68,24 V48 Q68,62 59,70 L50,76 L41,70 Q32,62 32,48 V24 Z"
-              fill="url(#goldGradient3)"
-              stroke="#fbbf24"
-              stroke-width="2"
-              opacity="0.95"/>
-        <!-- Detail lines -->
-        <line x1="50" y1="26" x2="50" y2="70" 
-              stroke="rgba(245, 158, 11, 0.35)" 
-              stroke-width="1"/>
-        <line x1="38" y1="48" x2="62" y2="48" 
-              stroke="rgba(245, 158, 11, 0.25)" 
-              stroke-width="0.9"/>
+        
+        <!-- Morphing path -->
+        <path class="morphing-shape" 
+              fill="url(#goldGradient3)" 
+              stroke="#fbbf24" 
+              stroke-width="1.5"
+              opacity="0.95">
+            <animate attributeName="d" 
+                     dur="10s" 
+                     repeatCount="indefinite"
+                     calcMode="spline"
+                     keySplines="0.45 0.05 0.55 0.95; 0.45 0.05 0.55 0.95; 0.45 0.05 0.55 0.95; 0.45 0.05 0.55 0.95"
+                     keyTimes="0; 0.35; 0.65; 0.85; 1"
+                     values="
+                         M35,25 Q35,15 50,15 Q65,15 65,25 Q65,35 58,42 L50,58 Q55,63 60,68 Q65,78 50,85 Q35,78 35,68 Q35,58 45,55 L42,42 Q35,35 35,25;
+                         
+                         M50,12 L72,20 V52 Q72,72 61,82 L50,88 L39,82 Q28,72 28,52 V20 Z;
+                         
+                         M50,12 L72,20 V52 Q72,72 61,82 L50,88 L39,82 Q28,72 28,52 V20 Z;
+                         
+                         M35,25 Q35,15 50,15 Q65,15 65,25 Q65,35 58,42 L50,58 Q55,63 60,68 Q65,78 50,85 Q35,78 35,68 Q35,58 45,55 L42,42 Q35,35 35,25;
+                         
+                         M35,25 Q35,15 50,15 Q65,15 65,25 Q65,35 58,42 L50,58 Q55,63 60,68 Q65,78 50,85 Q35,78 35,68 Q35,58 45,55 L42,42 Q35,35 35,25
+                     "/>
+        </path>
+        
+        <!-- Kalkan detayları -->
+        <g class="shield-details">
+            <!-- Dikey çizgi -->
+            <line x1="50" y1="22" x2="50" y2="82" 
+                  stroke="rgba(245, 158, 11, 0.35)" 
+                  stroke-width="1.2"/>
+            
+            <!-- Yatay çizgi -->
+            <line x1="35" y1="52" x2="65" y2="52" 
+                  stroke="rgba(245, 158, 11, 0.25)" 
+                  stroke-width="1"/>
+            
+            <animate attributeName="opacity"
+                     dur="10s"
+                     repeatCount="indefinite"
+                     values="0; 0; 0.5; 0.5; 0; 0"
+                     keyTimes="0; 0.35; 0.5; 0.65; 0.85; 1"/>
+        </g>
     </svg>
 </span><span class="chunk">tagram</span>
                     </span>
