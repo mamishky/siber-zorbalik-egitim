@@ -185,9 +185,10 @@
             color: #eef2ff;
             margin: 0;
             position: relative;
-            display: inline-block;
+            display: inline-flex;
+            align-items: baseline;
             animation: breathe 6s ease-in-out infinite;
-            letter-spacing: -0.03em; /* Harfler YAKIN */
+            letter-spacing: -0.05em; /* Harfler ÇOK YAKIN */
         }
 
         @keyframes breathe {
@@ -203,25 +204,30 @@
 
         .logoText {
             position: relative;
-            display: inline-block;
+            display: inline-flex;
+            align-items: baseline;
         }
 
         .chunk {
             display: inline;
+        }
+        
+        .logo-title .letter {
+            margin: 0;
+            padding: 0;
         }
 
         /* Special S with morph animation - CSS-only Approach */
         .specialS {
             position: relative;
             display: inline-block;
-            width: 1em;      /* 0.95em → 1em (normal harf genişliği) */
-            height: 1em;     /* Normal harf yüksekliği */
-            margin: 0; /* Boşluk YOK */
+            width: 1em;      /* TAM 1em - diğer harfler gibi */
+            height: 1em;     /* TAM 1em */
+            margin: 0;
             padding: 0;
             font-size: 1em;  /* Diğer harflerle AYNI */
             vertical-align: baseline;
             line-height: 1;
-            z-index: 1; /* "s" harfi ÜSTTE */
         }
 
         .s-letter,
@@ -245,14 +251,9 @@
 
         .shield-shape {
             animation: morph-cycle-shield 10s ease-in-out infinite;
-            width: 140%;     /* Kalkan daha büyük */
-            height: 140%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            width: 100%;     /* TAM 1em genişlik */
+            height: 100%;    /* TAM 1em yükseklik */
             display: block;
-            z-index: -1; /* ARKADA! */
-            pointer-events: none;
         }
 
         /* "s" harfi animasyonu */
@@ -329,34 +330,21 @@
 
         /* Glow efekti için container animasyonu */
         .specialS {
-            animation: morphGlow 10s ease-in-out infinite, morphBlur 10s ease-in-out infinite;
+            animation: morphGlow 10s ease-in-out infinite;
         }
 
         @keyframes morphGlow {
-            0%, 100% { 
-                filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.2)); 
+            0%, 35%, 85%, 100% { 
+                filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.2));
             }
-            35%, 57.5% { 
-                filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.15)); 
-            }
-            50% { 
-                filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.35)); 
-            }
-        }
-
-        /* Morph sırasında hafif blur */
-        @keyframes morphBlur {
-            0%, 35%, 65%, 100% { 
-                filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.15)) blur(0px); 
-            }
-            40%, 50%, 80% { 
-                filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.25)) blur(1.5px); 
+            50%, 70% { 
+                filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.4));
             }
         }
 
         /* Glitch efekti - logo genelinde */
         .logo.is-glitch .specialS {
-            animation: microShake 220ms steps(2, end) 1, morphGlow 10s ease-in-out infinite, morphBlur 10s ease-in-out infinite;
+            animation: microShake 220ms steps(2, end) 1, morphGlow 10s ease-in-out infinite;
         }
 
         @keyframes microShake {
