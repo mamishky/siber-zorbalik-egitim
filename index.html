@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafeStagram - Güvenli Sosyal Medya Eğitimi</title>
+    <title>safestagram - Güvenli İnternet Eğitim Platformu</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Satisfy&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Poppins:wght@400;600;700&display=swap">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Righteous&display=swap">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Changa+One&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     
     <!-- Firebase SDK (compat version) -->
@@ -18,12 +17,12 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <style>
-        /* Cyber-Themed Welcome Screen Styles */
+        /* Professional Dark Blue Theme */
         #welcome-screen {
             position: relative;
             min-height: 100vh;
             overflow-x: hidden;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e293b 100%);
         }
 
         #welcome-screen::before {
@@ -31,10 +30,10 @@
             position: fixed;
             inset: 0;
             background: 
-                radial-gradient(circle at 15% 25%, rgba(124,58,237,.15), transparent 35%),
-                radial-gradient(circle at 85% 25%, rgba(34,211,238,.12), transparent 35%),
-                radial-gradient(circle at 15% 75%, rgba(236,72,153,.1), transparent 30%),
-                radial-gradient(circle at 85% 75%, rgba(168,85,247,.12), transparent 30%);
+                radial-gradient(circle at 15% 25%, rgba(61,82,184,.08), transparent 35%),
+                radial-gradient(circle at 85% 25%, rgba(44,62,135,.08), transparent 35%),
+                radial-gradient(circle at 15% 75%, rgba(30,42,95,.08), transparent 30%),
+                radial-gradient(circle at 85% 75%, rgba(61,82,184,.08), transparent 30%);
             pointer-events: none;
         }
 
@@ -181,15 +180,15 @@
             gap: 15px;
         }
 
-        /* Logo text */
+        /* Professional Wordmark Logo */
         .logo {
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Changa One', cursive;
             font-size: clamp(48px, 8vw, 120px);
-            color: #ffffff;
-            font-weight: 700;
-            letter-spacing: -0.02em;
+            color: #2c3e87;
+            font-weight: 400;
+            letter-spacing: -0.03em;
             line-height: 1;
-            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
             margin: 0 0 2rem 0;
             position: relative;
             display: inline-flex;
@@ -214,54 +213,89 @@
             animation: revealLetter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
         
-        .letter:nth-child(1) { animation-delay: 0s; }
-        .letter:nth-child(2) { animation-delay: 0.08s; }
-        .letter:nth-child(3) { animation-delay: 0.16s; }
-        .letter:nth-child(4) { animation-delay: 0.24s; }
-        .morph-letter { 
-            position: relative;
-            width: 1em;
-            height: 1em;
-            margin: 0;
-            vertical-align: baseline;
-            animation-delay: 0.32s;
-            animation: revealLetter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
-                       microBounce 0.4s ease-in-out 0.9s;
+        .word-part {
+            color: #2c3e87;
+            opacity: 0;
+            display: inline-block;
+            animation: fadeInLetter 0.6s ease-out forwards;
         }
-        .letter:nth-child(6) { animation-delay: 0.4s; }
-        .letter:nth-child(7) { animation-delay: 0.48s; }
-        .letter:nth-child(8) { animation-delay: 0.56s; }
-        .letter:nth-child(9) { animation-delay: 0.64s; }
-        .letter:nth-child(10) { animation-delay: 0.72s; }
-        .letter:nth-child(11) { animation-delay: 0.8s; }
-
-        @keyframes revealLetter {
+        
+        /* First part: "safe" */
+        .word-part:first-child {
+            animation-delay: 0.2s;
+        }
+        
+        /* Last part: "tagram" */
+        .word-part:last-child {
+            animation-delay: 0.9s;
+        }
+        
+        /* Custom Shield-S letterform */
+        .shield-s {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 0.85em;
+            height: 1em;
+            position: relative;
+            color: #3d52b8;
+            opacity: 0;
+            animation: fadeInS 0.8s ease-out 0.5s forwards,
+                       morphToShield 1.2s ease-in-out 1.3s forwards;
+        }
+        
+        .shield-s-svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .s-shape {
+            fill: currentColor;
+            transform-origin: center;
+        }
+        
+        @keyframes fadeInLetter {
             from {
                 opacity: 0;
-                transform: translateX(-20px) scale(0.8);
+                transform: translateY(10px);
             }
             to {
                 opacity: 1;
-                transform: translateX(0) scale(1);
+                transform: translateY(0);
             }
         }
         
-        @keyframes microBounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-3px); }
+        @keyframes fadeInS {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes morphToShield {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
         }
 
-        .morph-letter svg {
-            width: 100%;
-            height: 100%;
-            display: block;
-            overflow: visible;
+        /* Tagline */
+        .tagline {
+            margin-top: 2rem;
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: clamp(14px, 2vw, 18px);
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 400;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
         }
-
-        .morph-letter svg path {
-            filter: drop-shadow(0 2px 8px rgba(251, 191, 36, 0.3));
-        }
-
+        
         /* Actions/Subtitle */
         .actions {
             display: flex;
@@ -271,22 +305,10 @@
         }
 
         .action {
-            background: linear-gradient(
-                90deg,
-                #60a5fa,  /* blue */
-                #a78bfa,  /* purple */
-                #f472b6,  /* pink */
-                #fb923c,  /* orange */
-                #fbbf24,  /* yellow */
-                #60a5fa   /* back to blue */
-            );
-            background-size: 400% 100%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: gradientFlow 8s linear infinite;
-            border: 1px solid transparent;
-            font-family: "Righteous", sans-serif;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.9);
+            font-family: system-ui, -apple-system, sans-serif;
             font-size: clamp(11px, 1.3vw, 15px);
             padding: 8px 12px;
             cursor: pointer;
@@ -295,28 +317,10 @@
             font-weight: 600;
         }
 
-        @keyframes gradientFlow {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 100% 50%; }
-        }
-
         .action:hover {
-            background: linear-gradient(
-                90deg,
-                #3b82f6,
-                #8b5cf6,
-                #ec4899,
-                #f97316,
-                #f59e0b,
-                #3b82f6
-            );
-            background-size: 400% 100%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: gradientFlow 4s linear infinite; /* Faster animation on hover */
-            transform: translateY(-3px);
-            filter: drop-shadow(0 4px 8px rgba(251, 191, 36, 0.25));
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
         }
 
         .subtitle-dot {
@@ -457,8 +461,8 @@
             .cyber-brand { margin-bottom: 25px; gap: 15px; }
             .cyber-card { padding: 24px 20px; }
             .logo { 
-                font-size: clamp(32px, 10vw, 48px);
-                letter-spacing: -0.01em;
+                font-size: clamp(32px, 10vw, 56px);
+                letter-spacing: -0.02em;
             }
             .action { font-size: clamp(10px, 1.5vw, 13px); padding: 6px 10px; }
             .floating-icon { opacity: .08; font-size: 60px; }
@@ -469,7 +473,7 @@
         @media (min-width: 1200px) {
             .logo {
                 font-size: 120px;
-                letter-spacing: -0.03em;
+                letter-spacing: -0.04em;
             }
         }
     </style>
@@ -538,55 +542,69 @@
 
         <div class="cyber-welcome-container">
             <header class="cyber-brand">
-                <h1 class="logo">
-                    <span class="letter">s</span>
-                    <span class="letter">a</span>
-                    <span class="letter">f</span>
-                    <span class="letter">e</span>
-                    <span class="morph-letter">
-                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <h1 class="wordmark logo">
+                    <span class="word-part">safe</span><span class="shield-s">
+                        <svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg" class="shield-s-svg">
                             <defs>
-                                <linearGradient id="warmGold1" x1="0%" y1="0%" x2="0%" y2="100%">
-                                    <stop offset="0%" stop-color="#fbbf24"/>
-                                    <stop offset="100%" stop-color="#f59e0b"/>
-                                </linearGradient>
+                                <filter id="subtle-glow">
+                                    <feGaussianBlur stdDeviation="2" result="blur"/>
+                                    <feMerge>
+                                        <feMergeNode in="blur"/>
+                                        <feMergeNode in="SourceGraphic"/>
+                                    </feMerge>
+                                </filter>
                             </defs>
-                            <path fill="url(#warmGold1)" stroke="none" stroke-linejoin="round" stroke-linecap="round">
-                                <animate 
+                            
+                            <!-- Custom Shield-S Path -->
+                            <path 
+                                class="s-shape"
+                                filter="url(#subtle-glow)"
+                                d="
+                                    M 70,38
+                                    Q 72,25 58,18
+                                    Q 45,12 32,22
+                                    Q 26,28 26,38
+                                    Q 26,48 36,56
+                                    L 48,66
+                                    Q 42,74 42,84
+                                    Q 42,94 52,102
+                                    Q 62,108 72,100
+                                    Q 76,95 76,86
+                                    Q 76,76 66,68
+                                    L 54,58
+                                    Q 64,50 68,40
+                                    Z
+                                    
+                                    M 50,105
+                                    L 48,115
+                                    Q 49,128 50,130
+                                    Q 51,128 52,115
+                                    L 50,105
+                                    Z
+                                "
+                            >
+                                <!-- Subtle morph animation -->
+                                <animate
                                     attributeName="d"
-                                    dur="3s"
+                                    dur="4s"
                                     repeatCount="indefinite"
                                     calcMode="spline"
-                                    keySplines="0.42 0 0.58 1; 0.42 0 0.58 1; 0.42 0 0.58 1"
-                                    keyTimes="0; 0.4; 0.6; 1"
+                                    keySplines="0.4 0 0.2 1; 0.4 0 0.2 1"
+                                    keyTimes="0; 0.5; 1"
                                     values="
-                                        M30,35 Q28,25 40,22 Q52,20 58,25 Q62,30 60,38 Q58,46 52,52 L48,65 Q50,72 54,78 Q58,86 48,92 Q38,86 34,78 Q30,70 38,64 L42,52 Q36,46 34,38 Q32,30 30,35;
+                                        M 70,38 Q 72,25 58,18 Q 45,12 32,22 Q 26,28 26,38 Q 26,48 36,56 L 48,66 Q 42,74 42,84 Q 42,94 52,102 Q 62,108 72,100 Q 76,95 76,86 Q 76,76 66,68 L 54,58 Q 64,50 68,40 Z M 50,105 L 48,115 Q 49,128 50,130 Q 51,128 52,115 L 50,105 Z;
                                         
-                                        M40,15 L60,22 Q72,25 72,38 L72,58 Q72,75 60,85 L50,92 L40,85 Q28,75 28,58 L28,38 Q28,25 40,22 Z;
+                                        M 68,35 Q 70,22 56,16 Q 44,10 32,20 Q 26,26 26,36 Q 26,46 36,54 L 48,64 Q 42,72 42,82 Q 42,92 50,100 Q 58,106 68,100 Q 74,94 74,84 Q 74,74 64,66 L 54,56 Q 64,48 68,38 Z M 50,102 L 46,118 Q 48,132 50,135 Q 52,132 54,118 L 50,102 Z;
                                         
-                                        M40,15 L60,22 Q72,25 72,38 L72,58 Q72,75 60,85 L50,92 L40,85 Q28,75 28,58 L28,38 Q28,25 40,22 Z;
-                                        
-                                        M30,35 Q28,25 40,22 Q52,20 58,25 Q62,30 60,38 Q58,46 52,52 L48,65 Q50,72 54,78 Q58,86 48,92 Q38,86 34,78 Q30,70 38,64 L42,52 Q36,46 34,38 Q32,30 30,35
+                                        M 70,38 Q 72,25 58,18 Q 45,12 32,22 Q 26,28 26,38 Q 26,48 36,56 L 48,66 Q 42,74 42,84 Q 42,94 52,102 Q 62,108 72,100 Q 76,95 76,86 Q 76,76 66,68 L 54,58 Q 64,50 68,40 Z M 50,105 L 48,115 Q 49,128 50,130 Q 51,128 52,115 L 50,105 Z
                                     "
                                 />
                             </path>
                         </svg>
-                    </span>
-                    <span class="letter">t</span>
-                    <span class="letter">a</span>
-                    <span class="letter">g</span>
-                    <span class="letter">r</span>
-                    <span class="letter">a</span>
-                    <span class="letter">m</span>
+                    </span><span class="word-part">tagram</span>
                 </h1>
                 
-                <nav class="actions">
-                    <button type="button" class="action">Şikayet Et</button>
-                    <span class="dot">•</span>
-                    <button type="button" class="action">Engelle</button>
-                    <span class="dot">•</span>
-                    <button type="button" class="action">Bildir</button>
-                </nav>
+                <p class="tagline">Güvenli İnternet Eğitim Platformu</p>
             </header>
 
             <main class="cyber-card" id="auth-card">
@@ -723,55 +741,69 @@
             </div>
 
             <header class="cyber-brand">
-                <h1 class="logo">
-                    <span class="letter">s</span>
-                    <span class="letter">a</span>
-                    <span class="letter">f</span>
-                    <span class="letter">e</span>
-                    <span class="morph-letter">
-                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <h1 class="wordmark logo">
+                    <span class="word-part">safe</span><span class="shield-s">
+                        <svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg" class="shield-s-svg">
                             <defs>
-                                <linearGradient id="warmGold2" x1="0%" y1="0%" x2="0%" y2="100%">
-                                    <stop offset="0%" stop-color="#fbbf24"/>
-                                    <stop offset="100%" stop-color="#f59e0b"/>
-                                </linearGradient>
+                                <filter id="subtle-glow-2">
+                                    <feGaussianBlur stdDeviation="2" result="blur"/>
+                                    <feMerge>
+                                        <feMergeNode in="blur"/>
+                                        <feMergeNode in="SourceGraphic"/>
+                                    </feMerge>
+                                </filter>
                             </defs>
-                            <path fill="url(#warmGold2)" stroke="none" stroke-linejoin="round" stroke-linecap="round">
-                                <animate 
+                            
+                            <!-- Custom Shield-S Path -->
+                            <path 
+                                class="s-shape"
+                                filter="url(#subtle-glow-2)"
+                                d="
+                                    M 70,38
+                                    Q 72,25 58,18
+                                    Q 45,12 32,22
+                                    Q 26,28 26,38
+                                    Q 26,48 36,56
+                                    L 48,66
+                                    Q 42,74 42,84
+                                    Q 42,94 52,102
+                                    Q 62,108 72,100
+                                    Q 76,95 76,86
+                                    Q 76,76 66,68
+                                    L 54,58
+                                    Q 64,50 68,40
+                                    Z
+                                    
+                                    M 50,105
+                                    L 48,115
+                                    Q 49,128 50,130
+                                    Q 51,128 52,115
+                                    L 50,105
+                                    Z
+                                "
+                            >
+                                <!-- Subtle morph animation -->
+                                <animate
                                     attributeName="d"
-                                    dur="3s"
+                                    dur="4s"
                                     repeatCount="indefinite"
                                     calcMode="spline"
-                                    keySplines="0.42 0 0.58 1; 0.42 0 0.58 1; 0.42 0 0.58 1"
-                                    keyTimes="0; 0.4; 0.6; 1"
+                                    keySplines="0.4 0 0.2 1; 0.4 0 0.2 1"
+                                    keyTimes="0; 0.5; 1"
                                     values="
-                                        M30,35 Q28,25 40,22 Q52,20 58,25 Q62,30 60,38 Q58,46 52,52 L48,65 Q50,72 54,78 Q58,86 48,92 Q38,86 34,78 Q30,70 38,64 L42,52 Q36,46 34,38 Q32,30 30,35;
+                                        M 70,38 Q 72,25 58,18 Q 45,12 32,22 Q 26,28 26,38 Q 26,48 36,56 L 48,66 Q 42,74 42,84 Q 42,94 52,102 Q 62,108 72,100 Q 76,95 76,86 Q 76,76 66,68 L 54,58 Q 64,50 68,40 Z M 50,105 L 48,115 Q 49,128 50,130 Q 51,128 52,115 L 50,105 Z;
                                         
-                                        M40,15 L60,22 Q72,25 72,38 L72,58 Q72,75 60,85 L50,92 L40,85 Q28,75 28,58 L28,38 Q28,25 40,22 Z;
+                                        M 68,35 Q 70,22 56,16 Q 44,10 32,20 Q 26,26 26,36 Q 26,46 36,54 L 48,64 Q 42,72 42,82 Q 42,92 50,100 Q 58,106 68,100 Q 74,94 74,84 Q 74,74 64,66 L 54,56 Q 64,48 68,38 Z M 50,102 L 46,118 Q 48,132 50,135 Q 52,132 54,118 L 50,102 Z;
                                         
-                                        M40,15 L60,22 Q72,25 72,38 L72,58 Q72,75 60,85 L50,92 L40,85 Q28,75 28,58 L28,38 Q28,25 40,22 Z;
-                                        
-                                        M30,35 Q28,25 40,22 Q52,20 58,25 Q62,30 60,38 Q58,46 52,52 L48,65 Q50,72 54,78 Q58,86 48,92 Q38,86 34,78 Q30,70 38,64 L42,52 Q36,46 34,38 Q32,30 30,35
+                                        M 70,38 Q 72,25 58,18 Q 45,12 32,22 Q 26,28 26,38 Q 26,48 36,56 L 48,66 Q 42,74 42,84 Q 42,94 52,102 Q 62,108 72,100 Q 76,95 76,86 Q 76,76 66,68 L 54,58 Q 64,50 68,40 Z M 50,105 L 48,115 Q 49,128 50,130 Q 51,128 52,115 L 50,105 Z
                                     "
                                 />
                             </path>
                         </svg>
-                    </span>
-                    <span class="letter">t</span>
-                    <span class="letter">a</span>
-                    <span class="letter">g</span>
-                    <span class="letter">r</span>
-                    <span class="letter">a</span>
-                    <span class="letter">m</span>
+                    </span><span class="word-part">tagram</span>
                 </h1>
                 
-                <nav class="actions">
-                    <button type="button" class="action">Şikayet Et</button>
-                    <span class="dot">•</span>
-                    <button type="button" class="action">Engelle</button>
-                    <span class="dot">•</span>
-                    <button type="button" class="action">Bildir</button>
-                </nav>
+                <p class="tagline">Güvenli İnternet Eğitim Platformu</p>
             </header>
 
             <main class="cyber-card">
@@ -866,55 +898,69 @@
             </div>
             
             <header class="cyber-brand">
-                <h1 class="logo">
-                    <span class="letter">s</span>
-                    <span class="letter">a</span>
-                    <span class="letter">f</span>
-                    <span class="letter">e</span>
-                    <span class="morph-letter">
-                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <h1 class="wordmark logo">
+                    <span class="word-part">safe</span><span class="shield-s">
+                        <svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg" class="shield-s-svg">
                             <defs>
-                                <linearGradient id="warmGold3" x1="0%" y1="0%" x2="0%" y2="100%">
-                                    <stop offset="0%" stop-color="#fbbf24"/>
-                                    <stop offset="100%" stop-color="#f59e0b"/>
-                                </linearGradient>
+                                <filter id="subtle-glow-3">
+                                    <feGaussianBlur stdDeviation="2" result="blur"/>
+                                    <feMerge>
+                                        <feMergeNode in="blur"/>
+                                        <feMergeNode in="SourceGraphic"/>
+                                    </feMerge>
+                                </filter>
                             </defs>
-                            <path fill="url(#warmGold3)" stroke="none" stroke-linejoin="round" stroke-linecap="round">
-                                <animate 
+                            
+                            <!-- Custom Shield-S Path -->
+                            <path 
+                                class="s-shape"
+                                filter="url(#subtle-glow-3)"
+                                d="
+                                    M 70,38
+                                    Q 72,25 58,18
+                                    Q 45,12 32,22
+                                    Q 26,28 26,38
+                                    Q 26,48 36,56
+                                    L 48,66
+                                    Q 42,74 42,84
+                                    Q 42,94 52,102
+                                    Q 62,108 72,100
+                                    Q 76,95 76,86
+                                    Q 76,76 66,68
+                                    L 54,58
+                                    Q 64,50 68,40
+                                    Z
+                                    
+                                    M 50,105
+                                    L 48,115
+                                    Q 49,128 50,130
+                                    Q 51,128 52,115
+                                    L 50,105
+                                    Z
+                                "
+                            >
+                                <!-- Subtle morph animation -->
+                                <animate
                                     attributeName="d"
-                                    dur="3s"
+                                    dur="4s"
                                     repeatCount="indefinite"
                                     calcMode="spline"
-                                    keySplines="0.42 0 0.58 1; 0.42 0 0.58 1; 0.42 0 0.58 1"
-                                    keyTimes="0; 0.4; 0.6; 1"
+                                    keySplines="0.4 0 0.2 1; 0.4 0 0.2 1"
+                                    keyTimes="0; 0.5; 1"
                                     values="
-                                        M30,35 Q28,25 40,22 Q52,20 58,25 Q62,30 60,38 Q58,46 52,52 L48,65 Q50,72 54,78 Q58,86 48,92 Q38,86 34,78 Q30,70 38,64 L42,52 Q36,46 34,38 Q32,30 30,35;
+                                        M 70,38 Q 72,25 58,18 Q 45,12 32,22 Q 26,28 26,38 Q 26,48 36,56 L 48,66 Q 42,74 42,84 Q 42,94 52,102 Q 62,108 72,100 Q 76,95 76,86 Q 76,76 66,68 L 54,58 Q 64,50 68,40 Z M 50,105 L 48,115 Q 49,128 50,130 Q 51,128 52,115 L 50,105 Z;
                                         
-                                        M40,15 L60,22 Q72,25 72,38 L72,58 Q72,75 60,85 L50,92 L40,85 Q28,75 28,58 L28,38 Q28,25 40,22 Z;
+                                        M 68,35 Q 70,22 56,16 Q 44,10 32,20 Q 26,26 26,36 Q 26,46 36,54 L 48,64 Q 42,72 42,82 Q 42,92 50,100 Q 58,106 68,100 Q 74,94 74,84 Q 74,74 64,66 L 54,56 Q 64,48 68,38 Z M 50,102 L 46,118 Q 48,132 50,135 Q 52,132 54,118 L 50,102 Z;
                                         
-                                        M40,15 L60,22 Q72,25 72,38 L72,58 Q72,75 60,85 L50,92 L40,85 Q28,75 28,58 L28,38 Q28,25 40,22 Z;
-                                        
-                                        M30,35 Q28,25 40,22 Q52,20 58,25 Q62,30 60,38 Q58,46 52,52 L48,65 Q50,72 54,78 Q58,86 48,92 Q38,86 34,78 Q30,70 38,64 L42,52 Q36,46 34,38 Q32,30 30,35
+                                        M 70,38 Q 72,25 58,18 Q 45,12 32,22 Q 26,28 26,38 Q 26,48 36,56 L 48,66 Q 42,74 42,84 Q 42,94 52,102 Q 62,108 72,100 Q 76,95 76,86 Q 76,76 66,68 L 54,58 Q 64,50 68,40 Z M 50,105 L 48,115 Q 49,128 50,130 Q 51,128 52,115 L 50,105 Z
                                     "
                                 />
                             </path>
                         </svg>
-                    </span>
-                    <span class="letter">t</span>
-                    <span class="letter">a</span>
-                    <span class="letter">g</span>
-                    <span class="letter">r</span>
-                    <span class="letter">a</span>
-                    <span class="letter">m</span>
+                    </span><span class="word-part">tagram</span>
                 </h1>
                 
-                <nav class="actions">
-                    <button type="button" class="action">Şikayet Et</button>
-                    <span class="dot">•</span>
-                    <button type="button" class="action">Engelle</button>
-                    <span class="dot">•</span>
-                    <button type="button" class="action">Bildir</button>
-                </nav>
+                <p class="tagline">Güvenli İnternet Eğitim Platformu</p>
             </header>
 
             <main class="cyber-card">
