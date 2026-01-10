@@ -163,6 +163,7 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+            padding-top: 5rem;
             z-index: 10;
         }
 
@@ -184,41 +185,46 @@
             font-size: clamp(48px, 8vw, 120px);
             font-weight: 400;
             letter-spacing: -0.03em;
-            color: #fbbf24;
+            color: #ffffff;
             line-height: 1;
             margin: 0 0 2rem 0;
             padding: 0;
-            text-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
-            animation: subtleLightning 4s ease-in-out infinite;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+            position: relative;
+            opacity: 0;
+            animation: 
+                logoFadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards,
+                lightningFlicker 4s ease-in-out 1s infinite;
         }
         
-        /* Hafif yıldırım efekti */
-        @keyframes subtleLightning {
-            0%, 100% { 
-                text-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+        @keyframes logoFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
                 opacity: 1;
+                transform: translateY(0);
             }
-            48% { 
-                text-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
-                opacity: 1;
+        }
+        
+        /* Çok hafif yıldırım efekti */
+        @keyframes lightningFlicker {
+            0%, 100% {
+                text-shadow: 
+                    0 0 10px rgba(251, 191, 36, 0.3),
+                    0 0 20px rgba(251, 191, 36, 0.2);
             }
-            49% { 
-                text-shadow: 0 0 20px rgba(251, 191, 36, 0.8),
-                             0 0 30px rgba(251, 191, 36, 0.5);
-                opacity: 0.95;
+            5% {
+                text-shadow: 
+                    0 0 15px rgba(251, 191, 36, 0.5),
+                    0 0 30px rgba(251, 191, 36, 0.3),
+                    0 0 40px rgba(251, 191, 36, 0.2);
             }
-            50% { 
-                text-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
-                opacity: 1;
-            }
-            51% { 
-                text-shadow: 0 0 25px rgba(251, 191, 36, 0.9),
-                             0 0 40px rgba(251, 191, 36, 0.6);
-                opacity: 0.93;
-            }
-            52% { 
-                text-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
-                opacity: 1;
+            10% {
+                text-shadow: 
+                    0 0 10px rgba(251, 191, 36, 0.3),
+                    0 0 20px rgba(251, 191, 36, 0.2);
             }
         }
 
@@ -227,82 +233,40 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 1rem;
-            margin-top: 1.5rem;
+            gap: 1.5rem;
             font-family: 'Righteous', cursive;
-            font-size: clamp(14px, 2vw, 18px);
+            font-size: clamp(16px, 2.5vw, 22px);
             font-weight: 400;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.02em;
+            margin-top: 2rem;
         }
         
         .tagline .action {
-            position: relative;
+            display: inline-block;
             padding: 0.5rem 1rem;
-            background: rgba(0, 0, 0, 0.2);
             border-radius: 8px;
-            cursor: pointer;
             transition: all 0.3s ease;
+            cursor: pointer;
             opacity: 0;
-            transform: translateY(10px);
-        }
-        
-        /* Dash border akışı */
-        .tagline .action::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            border-radius: 10px;
-            border: 2px dashed currentColor;
-            opacity: 0.6;
-            animation: dashFlow 20s linear infinite;
-            pointer-events: none;
-        }
-        
-        @keyframes dashFlow {
-            to {
-                stroke-dashoffset: -100;
-                transform: rotate(360deg);
-            }
         }
         
         /* Renkler */
         .action-report {
             color: #f87171;
+            animation: taglineFadeIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1s forwards;
         }
         
         .action-block {
             color: #fb923c;
+            animation: taglineFadeIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1.3s forwards;
         }
         
-        .action-notify {
+        .action-inform {
             color: #60a5fa;
+            animation: taglineFadeIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1.6s forwards;
         }
         
-        /* Hover parlama */
-        .tagline .action:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px currentColor,
-                        0 0 40px currentColor;
-            filter: brightness(1.2);
-        }
-        
-        .tagline .action:hover::before {
-            opacity: 1;
-            animation-duration: 10s;
-        }
-        
-        /* Separator - kısa çizgi */
-        .tagline .separator {
-            color: rgba(255, 255, 255, 0.2);
-            font-weight: 300;
-            font-size: 0.8em;
-        }
-        
-        /* Pop-in animasyonları */
-        @keyframes popIn {
+        @keyframes taglineFadeIn {
             from {
                 opacity: 0;
                 transform: translateY(10px);
@@ -313,16 +277,42 @@
             }
         }
         
-        .action-report {
-            animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s forwards;
+        /* Hover - Hafif parlama */
+        .action-report:hover {
+            box-shadow: 
+                0 0 20px rgba(248, 113, 113, 0.4),
+                0 0 40px rgba(248, 113, 113, 0.2);
+            transform: translateY(-2px);
         }
         
-        .action-block {
-            animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.8s forwards;
+        .action-block:hover {
+            box-shadow: 
+                0 0 20px rgba(251, 146, 60, 0.4),
+                0 0 40px rgba(251, 146, 60, 0.2);
+            transform: translateY(-2px);
         }
         
-        .action-notify {
-            animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1.1s forwards;
+        .action-inform:hover {
+            box-shadow: 
+                0 0 20px rgba(96, 165, 250, 0.4),
+                0 0 40px rgba(96, 165, 250, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* Ayırıcı dash */
+        .tagline .separator {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.8em;
+            user-select: none;
+            opacity: 0;
+        }
+        
+        .tagline .separator:nth-child(2) {
+            animation: taglineFadeIn 0.3s ease-out 1.2s forwards;
+        }
+        
+        .tagline .separator:nth-child(4) {
+            animation: taglineFadeIn 0.3s ease-out 1.5s forwards;
         }
         
         /* Cyber form card */
@@ -445,14 +435,18 @@
 
         /* Responsive */
         @media (max-width: 768px) {
+            .cyber-welcome-container {
+                padding-top: 3rem;
+            }
+            
             .wordmark {
                 font-size: clamp(32px, 10vw, 48px);
+                margin-bottom: 1.5rem;
             }
             
             .tagline {
-                font-size: 12px;
-                gap: 0.5rem;
-                flex-wrap: wrap;
+                font-size: clamp(12px, 3vw, 16px);
+                gap: 1rem;
             }
             
             .tagline .action {
@@ -529,10 +523,10 @@
                 
                 <div class="tagline">
                     <span class="action action-report">şikayet et</span>
-                    <span class="separator">-</span>
+                    <span class="separator">—</span>
                     <span class="action action-block">engelle</span>
-                    <span class="separator">-</span>
-                    <span class="action action-notify">bildir</span>
+                    <span class="separator">—</span>
+                    <span class="action action-inform">bildir</span>
                 </div>
             </header>
 
@@ -674,10 +668,10 @@
                 
                 <div class="tagline">
                     <span class="action action-report">şikayet et</span>
-                    <span class="separator">-</span>
+                    <span class="separator">—</span>
                     <span class="action action-block">engelle</span>
-                    <span class="separator">-</span>
-                    <span class="action action-notify">bildir</span>
+                    <span class="separator">—</span>
+                    <span class="action action-inform">bildir</span>
                 </div>
             </header>
 
@@ -777,10 +771,10 @@
                 
                 <div class="tagline">
                     <span class="action action-report">şikayet et</span>
-                    <span class="separator">-</span>
+                    <span class="separator">—</span>
                     <span class="action action-block">engelle</span>
-                    <span class="separator">-</span>
-                    <span class="action action-notify">bildir</span>
+                    <span class="separator">—</span>
+                    <span class="action action-inform">bildir</span>
                 </div>
             </header>
 
