@@ -1190,13 +1190,21 @@ function sendMessage() {
                 sendMessage();
             }, 2000);
         } else {
-            // Son güvenli mesaj - metin cevabı bekleniyor
+            // Son güvenli mesaj - metin cevabı bekleniyor ve butonlar gösteriliyor
             document.getElementById('dm-input-container').style.display = 'flex';
-            document.getElementById('action-buttons').style.display = 'none';
+            document.getElementById('action-buttons').style.display = 'flex';
+            
+            // Güvenli mesajlar için butonları sıfırla
+            currentSession.reportClicked = false;
+            currentSession.blockClicked = false;
+            document.getElementById('report-btn').disabled = false;
+            document.getElementById('block-btn').disabled = false;
+            document.getElementById('report-btn').classList.remove('blink');
+            document.getElementById('block-btn').classList.remove('blink');
         }
     } else {
-        // Siber zorbalık mesajı - aksiyon butonları
-        document.getElementById('dm-input-container').style.display = 'none';
+        // Siber zorbalık mesajı - aksiyon butonları ve input birlikte gösteriliyor
+        document.getElementById('dm-input-container').style.display = 'flex';
         document.getElementById('action-buttons').style.display = 'flex';
         
         // Butonları sıfırla
@@ -1257,9 +1265,18 @@ function sendConversationMessage() {
     
     // Check if we need to wait for user reply
     if (turnData.waitForReply) {
-        // Show input for user to reply
+        // Show input for user to reply and action buttons
         document.getElementById('dm-input-container').style.display = 'flex';
+        document.getElementById('action-buttons').style.display = 'flex';
         document.getElementById('dm-input').focus();
+        
+        // Güvenli mesajlar için butonları sıfırla
+        currentSession.reportClicked = false;
+        currentSession.blockClicked = false;
+        document.getElementById('report-btn').disabled = false;
+        document.getElementById('block-btn').disabled = false;
+        document.getElementById('report-btn').classList.remove('blink');
+        document.getElementById('block-btn').classList.remove('blink');
     } else {
         // If it's the last message and doesn't wait for reply, end conversation
         if (turnData.endsConversation) {
