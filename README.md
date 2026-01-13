@@ -1,4 +1,4 @@
-# Safestagram - Siber Zorbalık Farkındalık Eğitim Uygulaması
+# Safetagram - Siber Zorbalık Farkındalık Eğitim Uygulaması
 
 ## 📌 Proje Açıklaması
 
