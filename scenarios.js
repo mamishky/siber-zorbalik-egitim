@@ -583,7 +583,7 @@ const COMPLAINT_REASONS = [
 // 100 POST - Lise Düzeyi Türkiye Gündemi İçerikleri
 const POSTS_100 = [
     // OKUL VE EĞİTİM (15 post)
-    { username: "lise_hayati", avatar: "lisehayati", image: "https://picsum.photos/seed/school1/600/600", caption: "Sınav haftası bitti sonunda! 🎉📚 #okul", likes: 342, type: "image" },
+    { username: "lise_hayati", avatar: "lisehayati", image: "assets/lise_hayati.png", caption: "Sınav haftası bitti sonunda! 🎉📚 #okul", likes: 342, type: "image" },
     { username: "matematik_aski", avatar: "matematikaski", image: "https://picsum.photos/seed/school2/600/600", caption: "Matematik sınavından 95 aldım! 💪🔥", likes: 567, type: "image" },
     { username: "edebiyat_sevgisi", avatar: "edebiyatsevgisi", image: "https://picsum.photos/seed/school3/600/600", caption: "Sabahattin Ali'nin kitabını bitirdim, harika! 📖✨", likes: 289, type: "image" },
     { username: "kimya_deneyi", avatar: "kimyadeneyi", image: "https://picsum.photos/seed/school4/600/600", caption: "Labaratuvar dersi çok eğlenceli geçti 🧪🔬", likes: 412, type: "image" },
