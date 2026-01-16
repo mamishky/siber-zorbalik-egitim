@@ -583,7 +583,7 @@ const COMPLAINT_REASONS = [
 // 100 POST - Lise Düzeyi Türkiye Gündemi İçerikleri
 const POSTS_100 = [
     // OKUL VE EĞİTİM (15 post)
-    { username: "lise_hayati", avatar: "lisehayati", image: "assets/lise_hayati.png", caption: "Sınav haftası bitti sonunda! 🎉📚 #okul", likes: 342, type: "image" },
+    { username: "lise_hayati", avatar: "lisehayati", videoEmbedUrl: "https://player.cloudinary.com/embed/?cloud_name=dcfhch5tq&public_id=IMG_3267_qreror&autoplay=true&muted=true", caption: "Sınav haftası bitti sonunda! 🎉📚 #okul", likes: 342, type: "video" },
     { username: "matematik_aski", avatar: "matematikaski", image: "https://picsum.photos/seed/school2/600/600", caption: "Matematik sınavından 95 aldım! 💪🔥", likes: 567, type: "image" },
     { username: "edebiyat_sevgisi", avatar: "edebiyatsevgisi", image: "https://picsum.photos/seed/school3/600/600", caption: "Sabahattin Ali'nin kitabını bitirdim, harika! 📖✨", likes: 289, type: "image" },
     { username: "kimya_deneyi", avatar: "kimyadeneyi", image: "https://picsum.photos/seed/school4/600/600", caption: "Labaratuvar dersi çok eğlenceli geçti 🧪🔬", likes: 412, type: "image" },
@@ -600,7 +600,7 @@ const POSTS_100 = [
     { username: "cografya_rehberi", avatar: "cografyarehberi", image: "https://picsum.photos/seed/school15/600/600", caption: "Türkiye haritası çalışması yaptık 🗺️🇹🇷", likes: 334, type: "image" },
     
     // TÜRK FUTBOLU VE SPOR (20 post)
-    { username: "galatasaray", avatar: "galatasaray", image: "https://picsum.photos/seed/gs1/600/600", caption: "Şampiyonluk yolunda! 🦁🔴🟡 #cimbom", likes: 18750, type: "image" },
+    { username: "galatasaray", avatar: "galatasaray", videoEmbedUrl: "https://player.cloudinary.com/embed/?cloud_name=dcfhch5tq&public_id=IMG_3267_qreror&autoplay=true&muted=true", caption: "Şampiyonluk yolunda! 🦁🔴🟡 #cimbom", likes: 18750, type: "video" },
     { username: "fenerbahce", avatar: "fenerbahce", image: "https://picsum.photos/seed/fb1/600/600", caption: "Kadıköy'de muhteşem gece! ⚽💛💙 #fener", likes: 15420, type: "image" },
     { username: "besiktas", avatar: "besiktas", image: "https://picsum.photos/seed/bjk1/600/600", caption: "Kartal uçuyor! 🦅⚫⚪ #besiktas", likes: 12890, type: "image" },
     { username: "trabzonspor", avatar: "trabzonspor", image: "https://picsum.photos/seed/ts1/600/600", caption: "61'in gücü! ⚡🔴🔵 #trabzon", likes: 9870, type: "image" },
@@ -622,7 +622,7 @@ const POSTS_100 = [
     { username: "kros_kosusu", avatar: "kroskosusu", image: "https://picsum.photos/seed/cross1/600/600", caption: "Kros yarışına katıldım, çok eğlenceliydi! 🏃‍♂️🌲", likes: 1098, type: "image" },
     
     // MÜZİK VE TÜRK SANATÇILAR (15 post)
-    { username: "reynmen", avatar: "reynmen", image: "https://picsum.photos/seed/rey1/600/600", caption: "Yeni şarkı çok yakında! 🎤🔥 #reynmen", likes: 45600, type: "image" },
+    { username: "reynmen", avatar: "reynmen", videoEmbedUrl: "https://player.cloudinary.com/embed/?cloud_name=dcfhch5tq&public_id=IMG_3267_qreror&autoplay=true&muted=true", caption: "Yeni şarkı çok yakında! 🎤🔥 #reynmen", likes: 45600, type: "video" },
     { username: "aleyna.tilki", avatar: "aleynatilki", image: "https://picsum.photos/seed/aleyna1/600/600", caption: "Konser enerjisi 🎵✨ #aleyna", likes: 38900, type: "image" },
     { username: "ezhel", avatar: "ezhel", image: "https://picsum.photos/seed/ezhel1/600/600", caption: "Yeni albüm yolda! 🎧💿", likes: 52300, type: "image" },
     { username: "mabel_matiz", avatar: "mabelmatiz", image: "https://picsum.photos/seed/mabel1/600/600", caption: "Konser öncesi hazırlıklar 🎹🎶", likes: 31200, type: "image" },

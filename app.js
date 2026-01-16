@@ -538,16 +538,15 @@ function generateFeed() {
         let mediaContent = '';
         if (post.type === 'video') {
             mediaContent = `
-                <div class="post-video" data-post="${index}">
-                    <video 
-                        src="${post.video}" 
-                        autoplay 
-                        loop 
-                        muted 
-                        playsinline
-                        class="post-video-element"
-                        style="width: 100%; height: 100%; object-fit: cover;"
-                    ></video>
+                <div class="post-video" data-post="${index}" style="width: 100%; overflow: hidden; position: relative;">
+                    <iframe
+                        src="${post.videoEmbedUrl}"
+                        width="100%"
+                        style="aspect-ratio: 1 / 1; border: none; display: block;"
+                        allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                        allowfullscreen
+                        frameborder="0">
+                    </iframe>
                 </div>
             `;
         } else {
