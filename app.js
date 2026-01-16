@@ -595,13 +595,16 @@ function generateFeed() {
             this.classList.toggle('far');
             
             const likesElement = document.querySelector(`.post-likes[data-post="${postIndex}"]`);
-            let likes = POSTS[postIndex].likes;
+            
+            // Orijinal veriyi güncelle ki bir sonraki tıklamada doğru sayıdan devam etsin
             if (this.classList.contains('liked')) {
-                likes++;
+                POSTS[postIndex].likes += 1; // Dizideki değeri 1 artır
             } else {
-                likes--;
+                POSTS[postIndex].likes -= 1; // Dizideki değeri 1 azalt
             }
-            likesElement.textContent = `${formatNumber(likes)} beğeni`;
+            
+            // Güncel değeri ekrana yazdır
+            likesElement.textContent = `${formatNumber(POSTS[postIndex].likes)} beğeni`;
         });
     });
     
@@ -1096,7 +1099,33 @@ function openSpecificDM(scenario) {
         // Old messages format - cyberbullying
         setTimeout(() => {
             sendMessage();
+            
+            // Mesaj siber zorbalıksa butonları görünür kıl
+            const message = scenario.messages[0];
+            if (message && message.type === 'cyberbullying') {
+                setTimeout(() => {
+                    document.getElementById('action-buttons').style.display = 'flex';
+                    document.getElementById('dm-input-container').style.display = 'flex';
+                }, 500);
+            }
         }, 1000);
+    }
+}
+
+// Yardımcı fonksiyon: Süreci ilerlet ve 10sn sayacını kur
+function scheduleNextMessage() {
+    currentSession.currentMessageIndex++;
+    if (currentSession.currentMessageIndex >= 10 || currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
+        // Tüm mesajlar tamamlandı - 2 saniye sonra özet ekranı
+        setTimeout(() => {
+            showSummary();
+        }, 2000);
+    } else {
+        // 10 saniye sonra sonraki mesajı gönder
+        clearTimeout(currentSession.messageTimeout);
+        currentSession.messageTimeout = setTimeout(() => {
+            sendNextMessageNotification();
+        }, 10000);
     }
 }
 
@@ -1122,23 +1151,12 @@ document.getElementById('back-to-inbox').addEventListener('click', () => {
         }
     }
     
-    // İndeksi artır ve inbox'a dön
-    currentSession.currentMessageIndex++;
     showScreen('inbox-screen');
     renderInboxList();
     
-    // Check if we've completed all 10 messages
-    if (currentSession.currentMessageIndex >= 10 || currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
-        // Tüm mesajlar tamamlandı - 2 saniye sonra özet ekranı
-        setTimeout(() => {
-            showSummary();
-        }, 2000);
-    } else {
-        // 10 saniye sonra sonraki mesajı gönder
-        clearTimeout(currentSession.messageTimeout); // Önceki zamanlayıcıyı temizle
-        currentSession.messageTimeout = setTimeout(() => {
-            sendNextMessageNotification();
-        }, 10000); // 10 saniye bekle
+    // Eğer bu bir "Güvenli" mesajdıysa ve bittiyse (aksiyon gerektirmiyorsa) süreci ilerlet
+    if (scenario && scenario.conversation && currentSession.conversationIndex >= scenario.conversation.length) {
+        scheduleNextMessage();
     }
 });
 
@@ -1334,11 +1352,11 @@ document.getElementById('dm-send').addEventListener('click', () => {
     
     currentSession.stats.correct++;
     
-    // Input alanını gizle
-    document.getElementById('dm-input-container').style.display = 'none';
-    
     // Check if conversation continues
     if (scenario.conversation) {
+        // Input alanını gizle
+        document.getElementById('dm-input-container').style.display = 'none';
+        
         // Turn-based conversation - advance to next turn
         currentSession.conversationIndex++;
         
@@ -1358,13 +1376,13 @@ document.getElementById('dm-send').addEventListener('click', () => {
             }, 3000);
         }
     } else {
-        // Old format - save and return to feed automatically
-        saveConversationState(scenario.sender, allMessages, 'completed');
+        // Siber zorbalık mesajı - kullanıcı cevap verdi ama hala engelleme yapmalı
+        // Input alanını gizle ama action-buttons'ı GÖSTER
+        document.getElementById('dm-input-container').style.display = 'none';
+        document.getElementById('action-buttons').style.display = 'flex';
         
-        // Otomatik olarak 3 saniye sonra feed'e dön
-        setTimeout(() => {
-            returnToFeed();
-        }, 3000);
+        // NOT: Kullanıcı şikayet + engelle yapana kadar feed'e dönmemeli
+        // returnToFeed() çağrısı KALDIRILDI - engelleme sonrası thank-you modal'dan dönecek
     }
 });
 
@@ -1382,22 +1400,7 @@ function returnToFeed() {
     
     // Sadece DM ekranından geliyorsak mesaj indeksini artır
     if (currentScreen && currentScreen.id === 'dm-screen') {
-        // Mesaj indeksini artır
-        currentSession.currentMessageIndex++;
-        
-        // Check if we've completed all 10 messages
-        if (currentSession.currentMessageIndex >= 10 || currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
-            // Tüm mesajlar tamamlandı - 2 saniye sonra özet ekranı
-            setTimeout(() => {
-                showSummary();
-            }, 2000);
-        } else {
-            // 10 saniye sonra sonraki mesajı gönder
-            clearTimeout(currentSession.messageTimeout); // Önceki zamanlayıcıyı temizle
-            currentSession.messageTimeout = setTimeout(() => {
-                sendNextMessageNotification();
-            }, 10000); // 10 saniye bekle
-        }
+        scheduleNextMessage();
     }
 }
 
@@ -1405,23 +1408,9 @@ function returnToFeed() {
 document.getElementById('close-thank-you-modal').addEventListener('click', () => {
     document.getElementById('thank-you-modal').style.display = 'none';
     
-    // Return to feed after closing thank you modal
-    currentSession.currentMessageIndex++;
+    // Feed'e dön ve sonraki mesajı planla
     showScreen('main-app');
-    
-    // Check if we've completed all 10 messages
-    if (currentSession.currentMessageIndex >= 10 || currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
-        // Tüm mesajlar tamamlandı - 2 saniye sonra özet ekranı
-        setTimeout(() => {
-            showSummary();
-        }, 2000);
-    } else {
-        // 10 saniye sonra sonraki mesajı gönder
-        clearTimeout(currentSession.messageTimeout); // Önceki zamanlayıcıyı temizle
-        currentSession.messageTimeout = setTimeout(() => {
-            sendNextMessageNotification();
-        }, 10000); // 10 saniye bekle
-    }
+    scheduleNextMessage();
 });
 
 // Şikayet et butonu
@@ -2138,9 +2127,19 @@ function generateReels() {
         const likeBtn = reelDiv.querySelector('.like-reel');
         likeBtn.addEventListener('click', function() {
             const icon = this.querySelector('i');
+            const span = this.querySelector('span'); // Beğeni sayısının olduğu yer
+            
             icon.classList.toggle('far');
             icon.classList.toggle('fas');
             this.classList.toggle('liked');
+            
+            // Reels verisini de o anlık güncelle
+            if (this.classList.contains('liked')) {
+                reel.likes += 1;
+            } else {
+                reel.likes -= 1;
+            }
+            span.textContent = formatNumber(reel.likes);
         });
     });
 }
