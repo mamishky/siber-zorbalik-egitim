@@ -1473,11 +1473,14 @@ document.getElementById('dm-send').addEventListener('click', async () => {
     currentSession.stats.correct++;
     
     // Mevcut mesajın tipini kontrol et - güvenli mesaj mı siber zorbalık mı?
+    // Safe messages use conversation array, cyberbullying messages use messages array
     const currentMessage = scenario.messages ? scenario.messages[currentSession.messageIndex] : null;
-    const isSafeMessage = !currentMessage || currentMessage.type === 'safe' || scenario.conversation !== undefined;
+    const isSafeMessage = scenario.conversation !== undefined || 
+                          (currentMessage && currentMessage.type !== 'cyberbullying') ||
+                          !currentMessage;
     
     // Check if conversation continues or it's a safe message
-    if (isSafeMessage || scenario.conversation) {
+    if (isSafeMessage) {
         // Güvenli mesajlar için input her zaman aktif olmalı
         // Input'u gizleme - kullanıcı mesaj yazabilmeli
         // Input her zaman görünür ve aktif olmalı
