@@ -9,8 +9,8 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // Rate limiting için basit in-memory store (serverless'ta sınırlı koruma)
 const rateLimitStore = new Map();
-const RATE_LIMIT_WINDOW = 10 * 60 * 1000; // 10 dakika
-const RATE_LIMIT_MAX_REQUESTS = 30; // 10 dakikada max 30 istek
+const RATE_LIMIT_WINDOW = 5 * 60 * 1000; // 5 dakika
+const RATE_LIMIT_MAX_REQUESTS = 15; // 5 dakikada max 15 istek
 
 /**
  * Rate limit kontrolü (IP bazlı)
@@ -23,6 +23,8 @@ function checkRateLimit(ip) {
   const recentRequests = userRequests.filter(time => now - time < RATE_LIMIT_WINDOW);
   
   if (recentRequests.length >= RATE_LIMIT_MAX_REQUESTS) {
+    // Suspicious activity logging
+    console.warn(`Rate limit exceeded for IP: ${ip} - ${recentRequests.length} requests in window`);
     return false;
   }
   
@@ -40,13 +42,15 @@ function getCorsHeaders(origin) {
     'http://localhost:8000',
     'http://127.0.0.1:3000',
     'http://127.0.0.1:8000',
+    'https://siber-zorbalik-egitim.vercel.app',
+    'https://mamishky.github.io'
   ];
   
-  // Production'da tüm originlere izin (veya spesifik domain ekle)
-  const isAllowed = allowedOrigins.includes(origin) || process.env.NODE_ENV === 'production';
+  // Sadece izin verilen originlere izin ver
+  const isAllowed = allowedOrigins.some(allowed => origin?.startsWith(allowed));
   
   return {
-    'Access-Control-Allow-Origin': isAllowed ? (origin || '*') : allowedOrigins[0],
+    'Access-Control-Allow-Origin': isAllowed ? origin : allowedOrigins[0],
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Max-Age': '86400',
@@ -93,8 +97,40 @@ function validateInput(body) {
     errors.push('locale "tr" veya "en" olmalı');
   }
   
+  // XSS koruması - HTML tag kontrolü
+  const htmlTagPattern = /<[^>]*>/g;
+  if (body.userMessage && htmlTagPattern.test(body.userMessage)) {
+    errors.push('userMessage HTML tag içeremez');
+  }
+  
+  // Tehlikeli pattern kontrolü
+  const dangerousPatterns = [
+    /javascript:/i,
+    /on\w+\s*=/i,
+    /<script/i,
+    /data:/i
+  ];
+  
+  for (const pattern of dangerousPatterns) {
+    if (body.userMessage && pattern.test(body.userMessage)) {
+      errors.push('userMessage güvenlik kontrolünden geçemedi');
+      break;
+    }
+  }
+  
   return errors;
 }
+
+/**
+ * Security headers
+ */
+const securityHeaders = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'X-XSS-Protection': '1; mode=block',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Content-Security-Policy': "default-src 'none'"
+};
 
 /**
  * Prompt oluştur
@@ -155,14 +191,14 @@ module.exports = async (req, res) => {
   
   // CORS preflight
   if (req.method === 'OPTIONS') {
-    res.writeHead(200, corsHeaders);
+    res.writeHead(200, { ...corsHeaders, ...securityHeaders });
     res.end();
     return;
   }
   
   // Sadece POST kabul et
   if (req.method !== 'POST') {
-    res.writeHead(405, { ...corsHeaders, 'Content-Type': 'application/json' });
+    res.writeHead(405, { ...corsHeaders, ...securityHeaders, 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: false, error: 'Method Not Allowed' }));
     return;
   }
@@ -175,10 +211,10 @@ module.exports = async (req, res) => {
                      'unknown';
     
     if (!checkRateLimit(clientIp)) {
-      res.writeHead(429, { ...corsHeaders, 'Content-Type': 'application/json' });
+      res.writeHead(429, { ...corsHeaders, ...securityHeaders, 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ 
         ok: false, 
-        error: 'Çok fazla istek. Lütfen 10 dakika sonra tekrar deneyin.' 
+        error: 'Çok fazla istek. Lütfen 5 dakika sonra tekrar deneyin.' 
       }));
       return;
     }
@@ -187,7 +223,7 @@ module.exports = async (req, res) => {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       console.error('GEMINI_API_KEY tanımlı değil!');
-      res.writeHead(500, { ...corsHeaders, 'Content-Type': 'application/json' });
+      res.writeHead(500, { ...corsHeaders, ...securityHeaders, 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ 
         ok: false, 
         error: 'Sunucu yapılandırma hatası' 
@@ -204,15 +240,23 @@ module.exports = async (req, res) => {
         body = req.body;
       }
     } catch (e) {
-      res.writeHead(400, { ...corsHeaders, 'Content-Type': 'application/json' });
+      res.writeHead(400, { ...corsHeaders, ...securityHeaders, 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ ok: false, error: 'Geçersiz JSON' }));
+      return;
+    }
+    
+    // Body size kontrolü
+    const MAX_BODY_SIZE = 10 * 1024; // 10KB
+    if (JSON.stringify(body).length > MAX_BODY_SIZE) {
+      res.writeHead(413, { ...corsHeaders, ...securityHeaders, 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, error: 'İstek boyutu çok büyük' }));
       return;
     }
     
     // Input validasyonu
     const validationErrors = validateInput(body);
     if (validationErrors.length > 0) {
-      res.writeHead(400, { ...corsHeaders, 'Content-Type': 'application/json' });
+      res.writeHead(400, { ...corsHeaders, ...securityHeaders, 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ 
         ok: false, 
         error: 'Validation hatası',
@@ -238,7 +282,8 @@ module.exports = async (req, res) => {
     
     // Başarılı yanıt
     res.writeHead(200, { 
-      ...corsHeaders, 
+      ...corsHeaders,
+      ...securityHeaders,
       'Content-Type': 'application/json',
       'Cache-Control': 'no-store'
     });
@@ -251,7 +296,7 @@ module.exports = async (req, res) => {
     console.error('AI generation error:', error);
     
     // Hata yanıtı (stack trace gönderme!)
-    res.writeHead(500, { ...corsHeaders, 'Content-Type': 'application/json' });
+    res.writeHead(500, { ...corsHeaders, ...securityHeaders, 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ 
       ok: false, 
       error: 'AI mesaj oluşturma hatası. Lütfen tekrar deneyin.' 
