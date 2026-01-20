@@ -2197,21 +2197,25 @@ function showSummary() {
 }
 
 // Bitir butonu
-document.getElementById('finish-session').addEventListener('click', () => {
+document.getElementById('finish-session').addEventListener('click', async () => {
     // Oturum bitiş zamanını kaydet (Madde 15)
     if (currentSession.startTime && currentSession.sessionId) {
         currentSession.endTime = new Date();
         currentSession.totalDurationSec = Math.floor((currentSession.endTime - currentSession.startTime) / 1000);
         
-        // Firebase'e kaydet
+        // Firebase'e kaydet (async/await ile)
         try {
-            await db.collection('users').doc(currentUser.uid)
-                .collection('sessions').doc(currentSession.sessionId)
-                .update({
-                    endedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    totalDurationSec: currentSession.totalDurationSec,
-                    status: 'completed'
-                });
+            if (currentUser && currentUser.uid) {
+                await db.collection('users').doc(currentUser.uid)
+                    .collection('sessions').doc(currentSession.sessionId)
+                    .update({
+                        endedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        totalDurationSec: currentSession.totalDurationSec,
+                        status: 'completed'
+                    });
+            } else {
+                console.warn('Oturum bitişi kaydedilirken currentUser bulunamadı.');
+            }
         } catch (error) {
             console.error('Oturum bitiş zamanı kaydedilemedi:', error);
         }
