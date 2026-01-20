@@ -2297,12 +2297,64 @@ async function loadAdminData() {
         const sessionsSnapshot = await db.collection('users').doc(currentUser.uid)
             .collection('sessions').get();
         
+        // Öğrenci listesini doldur (benzersiz öğrenciler)
+        const participantsSet = new Set();
+        const participantsData = [];
+        
+        sessionsSnapshot.forEach(doc => {
+            const data = doc.data();
+            const participantKey = `${data.participantName}_${data.participantAge}`;
+            if (!participantsSet.has(participantKey)) {
+                participantsSet.add(participantKey);
+                participantsData.push({
+                    name: data.participantName || 'Bilinmiyor',
+                    age: data.participantAge || '-',
+                    key: participantKey
+                });
+            }
+        });
+        
+        // Öğrenci dropdown'ını doldur
+        const participantFilter = document.getElementById('filter-participant');
+        if (participantFilter && participantsData.length > 0) {
+            // Mevcut seçimi koru
+            const currentSelection = participantFilter.value;
+            
+            // Dropdown'ı temizle ve yeniden doldur
+            participantFilter.innerHTML = '<option value="">Tüm Öğrenciler</option>';
+            participantsData.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.key;
+                option.textContent = `${p.name} (${p.age} yaş)`;
+                participantFilter.appendChild(option);
+            });
+            
+            // Önceki seçimi geri yükle
+            if (currentSelection) {
+                participantFilter.value = currentSelection;
+            }
+        }
+        
+        // Filtreleri al
+        const selectedParticipant = document.getElementById('filter-participant').value;
+        const selectedSessionType = document.getElementById('filter-session').value;
+        
         const allSkillsData = [];
         const allSessionData = [];
         
         for (const sessionDoc of sessionsSnapshot.docs) {
             const sessionData = sessionDoc.data();
             const sessionId = sessionDoc.id;
+            
+            // Filtre uygula - önce öğrenci, sonra oturum türü
+            const participantKey = `${sessionData.participantName}_${sessionData.participantAge}`;
+            if (selectedParticipant && participantKey !== selectedParticipant) {
+                continue; // Bu öğrenci seçili değil, atla
+            }
+            
+            if (selectedSessionType && sessionData.sessionType !== selectedSessionType) {
+                continue; // Bu oturum türü seçili değil, atla
+            }
             
             // Beceri analizi verisi oluştur (Madde 13, 14)
             const skillsRecord = {
@@ -2473,8 +2525,12 @@ function displaySessionRecords(data) {
 }
 
 // Filtreleme - Firebase'den çek
+document.getElementById('filter-participant').addEventListener('change', () => {
+    loadAdminData(); // Öğrenci değiştiğinde yeniden yükle
+});
+
 document.getElementById('filter-session').addEventListener('change', () => {
-    loadAdminData(); // Firebase'den yeniden yükle
+    loadAdminData(); // Oturum türü değiştiğinde yeniden yükle
 });
 
 // Beceri Analizi CSV İndir (Madde 14)
