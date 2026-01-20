@@ -1258,11 +1258,16 @@ function openConversationFromInbox(index) {
 document.getElementById('inbox-back-to-feed').addEventListener('click', () => {
     showScreen('main-app');
     
-    // Eğer zamanlayıcı yoksa ve hala mesaj gönderilmemişse, zamanlayıcıyı başlat
-    if (!currentSession.messageTimeout && currentSession.currentMessageIndex < currentSession.messageQueue.length && currentSession.pendingMessages === 0) {
-        currentSession.messageTimeout = setTimeout(() => {
-            sendNextMessageNotification();
-        }, 10000); // 10 saniye bekle
+    // Ana sayfaya dönüldü - eğer mesaj tamamlanmışsa sonraki mesajı planla (Madde 4)
+    console.log('📱 Inbox\'tan ana sayfaya dönüldü');
+    
+    // Eğer pending mesaj yoksa ve henüz tüm mesajlar gönderilmemişse, zamanlayıcı başlat
+    if (currentSession.pendingMessages === 0 && 
+        currentSession.currentMessageIndex > 0 && 
+        currentSession.currentMessageIndex < currentSession.messageQueue.length) {
+        // Son mesaj tamamlandı, 10 saniye sonra sonrakini gönder
+        console.log('⏱️ 10 saniye sonra sonraki mesaj gelecek...');
+        scheduleNextMessage();
     }
 });
 
@@ -1359,7 +1364,7 @@ function scheduleNextMessage() {
 
 // Geri butonları
 document.getElementById('back-to-inbox').addEventListener('click', () => {
-    // Inbox'a dön - mesaj tamamlandığında çağrılır
+    // DM'den direk ana sayfaya dön (Madde 4 - kullanıcı manuel olarak dönmeli)
     const messagesContainer = document.getElementById('dm-messages');
     const scenario = currentSession.currentScenario;
     
@@ -1385,11 +1390,12 @@ document.getElementById('back-to-inbox').addEventListener('click', () => {
         }
     }
     
-    showScreen('inbox-screen');
-    renderInboxList();
+    // DİREK ANA SAYFAYA DÖN (inbox'a değil)
+    showScreen('main-app');
     
-    // Mesaj tamamlandı - geri ana sayfaya dönüldükten sonra 10 saniye bekle
-    // Burada scheduleNextMessage çağrılmıyor, returnToFeed'den çağrılacak
+    // 10 saniye sonra sonraki mesajı gönder (Madde 4)
+    console.log('📱 Ana sayfaya dönüldü, 10 saniye sonra sonraki mesaj gelecek...');
+    scheduleNextMessage();
 });
 
 // Mesaj gönder
