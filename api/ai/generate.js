@@ -47,7 +47,16 @@ function getCorsHeaders(origin) {
   ];
   
   // Sadece izin verilen originlere izin ver
-  const isAllowed = allowedOrigins.some(allowed => origin?.startsWith(allowed));
+  // Exact match veya allowed domain'in subdomain'i olup olmadığını kontrol et
+  const isAllowed = allowedOrigins.some(allowed => {
+    if (origin === allowed) return true;
+    // Subdomain kontrolü - origin allowed ile başlamalı VE hemen sonra / veya : gelmelidir
+    if (origin?.startsWith(allowed)) {
+      const charAfter = origin[allowed.length];
+      return charAfter === '/' || charAfter === ':' || charAfter === undefined;
+    }
+    return false;
+  });
   
   return {
     'Access-Control-Allow-Origin': isAllowed ? origin : allowedOrigins[0],
@@ -106,9 +115,12 @@ function validateInput(body) {
   // Tehlikeli pattern kontrolü
   const dangerousPatterns = [
     /javascript:/i,
-    /on\w+\s*=/i,
+    /on[a-z]+\s*=/i,  // Event handlers: onclick, onerror, etc.
     /<script/i,
-    /data:/i
+    /<iframe/i,
+    /<object/i,
+    /<embed/i,
+    /data:text\/html/i
   ];
   
   for (const pattern of dangerousPatterns) {
@@ -231,6 +243,15 @@ module.exports = async (req, res) => {
       return;
     }
     
+    // Body size kontrolü - Content-Length header'ı kontrol et
+    const MAX_BODY_SIZE = 10 * 1024; // 10KB
+    const contentLength = parseInt(req.headers['content-length'] || '0', 10);
+    if (contentLength > MAX_BODY_SIZE) {
+      res.writeHead(413, { ...corsHeaders, ...securityHeaders, 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, error: 'İstek boyutu çok büyük' }));
+      return;
+    }
+    
     // Body'yi parse et
     let body;
     try {
@@ -242,14 +263,6 @@ module.exports = async (req, res) => {
     } catch (e) {
       res.writeHead(400, { ...corsHeaders, ...securityHeaders, 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ ok: false, error: 'Geçersiz JSON' }));
-      return;
-    }
-    
-    // Body size kontrolü
-    const MAX_BODY_SIZE = 10 * 1024; // 10KB
-    if (JSON.stringify(body).length > MAX_BODY_SIZE) {
-      res.writeHead(413, { ...corsHeaders, ...securityHeaders, 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ ok: false, error: 'İstek boyutu çok büyük' }));
       return;
     }
     
