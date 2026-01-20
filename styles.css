@@ -2137,51 +2137,51 @@ select.form-control {
     }
 }
 
-/* Beni Hatırla Checkbox - Modern Oval Tasarım */
+/* Beni Hatırla Checkbox - Küçük Oval Onay Kutusu */
 .remember-me-container {
-  margin-top: 12px !important;
-  margin-bottom: 18px;
+  margin-top: 8px !important;
+  margin-bottom: 16px;
   padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
 }
 
 .remember-me-label {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   cursor: pointer;
   border: none !important;
   padding: 0 !important;
   background: transparent !important;
   user-select: none;
-  width: 100%;
-  justify-content: flex-start;
 }
 
-/* Özel Checkbox Tasarımı - Oval */
+/* Küçük Oval Checkbox */
 .remember-me-checkbox {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  width: 22px;
-  height: 22px;
-  min-width: 22px;
-  min-height: 22px;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
   cursor: pointer;
   margin: 0;
   flex-shrink: 0;
-  border: 2px solid #cbd5e1;
-  border-radius: 6px;
+  border: 2px solid #94a3b8;
+  border-radius: 5px;
   background: white;
   position: relative;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
   outline: none;
 }
 
 .remember-me-checkbox:hover {
   border-color: #7c3aed;
-  background: #f5f3ff;
 }
 
+/* Tıklandığında - Mor arka plan + Beyaz tik */
 .remember-me-checkbox:checked {
   background: #7c3aed;
   border-color: #7c3aed;
@@ -2194,25 +2194,24 @@ select.form-control {
   left: 50%;
   transform: translate(-50%, -50%);
   color: white;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: bold;
   line-height: 1;
 }
 
 .remember-me-checkbox:focus {
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
 }
 
 .remember-me-text {
   font-weight: 500;
-  font-size: 15px;
-  color: #334155;
-  line-height: 1.4;
-  flex: 1;
+  font-size: 14px;
+  color: #1e293b;
+  line-height: 1.5;
   user-select: none;
 }
 
-/* Hover efekti */
+/* Hover - yazı rengi değişsin */
 .remember-me-label:hover .remember-me-text {
   color: #7c3aed;
 }
@@ -2220,21 +2219,21 @@ select.form-control {
 /* Mobil uyumluluk */
 @media (max-width: 600px) {
   .remember-me-checkbox {
-    width: 20px;
-    height: 20px;
-    min-width: 20px;
-    min-height: 20px;
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    min-height: 18px;
   }
   
   .remember-me-checkbox:checked::after {
-    font-size: 12px;
+    font-size: 11px;
   }
   
   .remember-me-text {
-    font-size: 14px;
+    font-size: 13px;
   }
   
   .remember-me-label {
-    gap: 10px;
+    gap: 8px;
   }
 }
