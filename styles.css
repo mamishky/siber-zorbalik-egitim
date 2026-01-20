@@ -2141,7 +2141,9 @@ select.form-control {
     cursor: pointer;
     accent-color: #7c3aed;
     flex-shrink: 0;
+    display: inline-block;
     vertical-align: middle;
+    align-self: center;
 }
 
 .checkbox-label span {
