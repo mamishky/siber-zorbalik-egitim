@@ -1472,8 +1472,12 @@ document.getElementById('dm-send').addEventListener('click', async () => {
     saveMessageData('safe', 'reply', reactionTime, false, true);
     currentSession.stats.correct++;
     
-    // Check if conversation continues
-    if (scenario.conversation) {
+    // Mevcut mesajın tipini kontrol et - güvenli mesaj mı siber zorbalık mı?
+    const currentMessage = scenario.messages ? scenario.messages[currentSession.messageIndex] : null;
+    const isSafeMessage = !currentMessage || currentMessage.type === 'safe' || scenario.conversation !== undefined;
+    
+    // Check if conversation continues or it's a safe message
+    if (isSafeMessage || scenario.conversation) {
         // Güvenli mesajlar için input her zaman aktif olmalı
         // Input'u gizleme - kullanıcı mesaj yazabilmeli
         // Input her zaman görünür ve aktif olmalı
@@ -1546,18 +1550,55 @@ document.getElementById('dm-send').addEventListener('click', async () => {
                 }, 1500);
             }, 1000);
         } else {
-            // Eski statik conversation akışı
-            currentSession.conversationIndex++;
-            
-            if (currentSession.conversationIndex < scenario.conversation.length) {
-                setTimeout(() => {
-                    sendConversationMessage();
-                }, 1500);
+            // AI kapalı - fallback cevap üret
+            if (scenario.conversation && currentSession.conversationIndex < scenario.conversation.length) {
+                // Eski statik conversation akışı
+                currentSession.conversationIndex++;
+                
+                if (currentSession.conversationIndex < scenario.conversation.length) {
+                    setTimeout(() => {
+                        sendConversationMessage();
+                    }, 1500);
+                } else {
+                    // Sohbet bitti ama kullanıcı manuel olarak geri tuşuna basmalı
+                    // Otomatik returnToFeed çağrılmayacak
+                    saveConversationState(scenario.sender, allMessages, 'completed');
+                    // NOT: Kullanıcı geri tuşuna basacak
+                }
             } else {
-                // Sohbet bitti ama kullanıcı manuel olarak geri tuşuna basmalı
-                // Otomatik returnToFeed çağrılmayacak
-                saveConversationState(scenario.sender, allMessages, 'completed');
-                // NOT: Kullanıcı geri tuşuna basacak
+                // Conversation yoksa veya bittiyse, fallback cevap ver
+                const fallbackResponse = getFallbackResponse(text);
+                
+                setTimeout(() => {
+                    const responseDiv = document.createElement('div');
+                    responseDiv.className = 'message';
+                    
+                    const responseTime = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+                    
+                    responseDiv.innerHTML = `
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}" alt="Avatar" class="message-avatar">
+                        <div>
+                            <div class="message-content">${fallbackResponse}</div>
+                            <div class="message-time">${responseTime}</div>
+                        </div>
+                    `;
+                    
+                    messagesContainer.appendChild(responseDiv);
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    
+                    // Conversation state'i güncelle
+                    const updatedMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
+                        text: msg.querySelector('.message-content').textContent,
+                        sender: msg.classList.contains('sent') ? 'user' : scenario.sender,
+                        time: msg.querySelector('.message-time').textContent
+                    }));
+                    saveConversationState(scenario.sender, updatedMessages, 'in-progress');
+                    
+                    // Input'u tekrar aktif et
+                    input.disabled = false;
+                    document.getElementById('dm-send').disabled = false;
+                    input.focus();
+                }, 1000);
             }
         }
     } else {
