@@ -1,0 +1,32 @@
+{
+  "name": "siber-zorbalik-egitim",
+  "version": "1.0.0",
+  "description": "Siber Zorbalık Eğitim Simülasyonu - Instagram benzeri platform",
+  "main": "server.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "node server.js",
+    "start:express": "node server.js",
+    "start:vercel": "vercel dev",
+    "build": "echo 'Static site - no build needed'",
+    "test:backend": "curl -X POST http://localhost:3000/api/ai/generate -H 'Content-Type: application/json' -d '{\"scenarioId\":\"test\",\"userMessage\":\"Merhaba\",\"conversation\":[],\"locale\":\"tr\"}'"
+  },
+  "keywords": [
+    "cyberbullying",
+    "education",
+    "simulation",
+    "gemini-ai"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
