@@ -2116,14 +2116,14 @@ select.form-control {
 .checkbox-label {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     cursor: pointer;
-    padding: 14px 16px;
+    padding: 14px 18px;
     border: 2px solid #e2e6ea;
     border-radius: 10px;
     transition: all 0.2s;
     background: white;
-    min-height: 52px;
+    min-height: 54px;
 }
 
 .checkbox-label:hover {
@@ -2132,16 +2132,26 @@ select.form-control {
 }
 
 .checkbox-label input[type="radio"] {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    min-height: 22px;
+    margin: 0;
+    padding: 0;
     cursor: pointer;
     accent-color: #7c3aed;
+    flex-shrink: 0;
+    vertical-align: middle;
 }
 
 .checkbox-label span {
     font-weight: 600;
     font-size: 15px;
     color: #0f172a;
+    line-height: 1.4;
+    flex: 1;
+    display: flex;
+    align-items: center;
 }
 
 .checkbox-label input[type="radio"]:checked + span {
