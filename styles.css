@@ -2137,103 +2137,84 @@ select.form-control {
     }
 }
 
-/* Beni Hatırla Checkbox - Küçük Oval Onay Kutusu */
-.remember-me-container {
-  margin-top: 8px !important;
-  margin-bottom: 16px;
+/* Beni Hatırla - Basit ve Temiz Tasarım */
+.cyber-field.remember-me-container {
+  margin-top: 10px !important;
+  margin-bottom: 16px !important;
   padding: 0 !important;
   border: none !important;
-  background: transparent !important;
+  background: none !important;
 }
 
 .remember-me-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  cursor: pointer !important;
   border: none !important;
   padding: 0 !important;
-  background: transparent !important;
+  background: none !important;
   user-select: none;
+  width: auto !important;
 }
 
-/* Küçük Oval Checkbox */
-.remember-me-checkbox {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  width: 20px;
-  height: 20px;
-  min-width: 20px;
-  min-height: 20px;
-  cursor: pointer;
-  margin: 0;
+/* Özel Oval Checkbox - Tıklanmadığında boş, tıklandığında mor + tik */
+input.remember-me-checkbox {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
+  cursor: pointer !important;
+  margin: 0 !important;
+  padding: 0 !important;
   flex-shrink: 0;
-  border: 2px solid #94a3b8;
-  border-radius: 5px;
-  background: white;
+  border: 2.5px solid #94a3b8 !important;
+  border-radius: 6px !important;
+  background-color: #ffffff !important;
   position: relative;
-  transition: all 0.25s ease;
-  outline: none;
+  transition: all 0.2s ease;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-.remember-me-checkbox:hover {
-  border-color: #7c3aed;
+input.remember-me-checkbox:hover {
+  border-color: #7c3aed !important;
 }
 
-/* Tıklandığında - Mor arka plan + Beyaz tik */
-.remember-me-checkbox:checked {
-  background: #7c3aed;
-  border-color: #7c3aed;
+/* Tıklandığında: Mor arka plan + Beyaz ✓ */
+input.remember-me-checkbox:checked {
+  background-color: #7c3aed !important;
+  border-color: #7c3aed !important;
 }
 
-.remember-me-checkbox:checked::after {
-  content: '✓';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: white;
-  font-size: 13px;
-  font-weight: bold;
-  line-height: 1;
+input.remember-me-checkbox:checked::after {
+  content: '✓' !important;
+  display: block !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+  font-weight: bold !important;
+  line-height: 1 !important;
 }
 
-.remember-me-checkbox:focus {
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+input.remember-me-checkbox:focus {
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15) !important;
+  outline: none !important;
 }
 
 .remember-me-text {
-  font-weight: 500;
-  font-size: 14px;
-  color: #1e293b;
-  line-height: 1.5;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  color: #1e293b !important;
   user-select: none;
 }
 
-/* Hover - yazı rengi değişsin */
 .remember-me-label:hover .remember-me-text {
-  color: #7c3aed;
-}
-
-/* Mobil uyumluluk */
-@media (max-width: 600px) {
-  .remember-me-checkbox {
-    width: 18px;
-    height: 18px;
-    min-width: 18px;
-    min-height: 18px;
-  }
-  
-  .remember-me-checkbox:checked::after {
-    font-size: 11px;
-  }
-  
-  .remember-me-text {
-    font-size: 13px;
-  }
-  
-  .remember-me-label {
-    gap: 8px;
-  }
+  color: #7c3aed !important;
 }
