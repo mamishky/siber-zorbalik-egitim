@@ -10,9 +10,23 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+try {
+    firebase.initializeApp(firebaseConfig);
+    console.log('✅ Firebase initialized successfully');
+} catch (error) {
+    console.error('❌ Firebase initialization error:', error);
+    alert('Firebase başlatılamadı. Lütfen sayfayı yenileyin.');
+}
+
 const auth = firebase.auth();
 const db = firebase.firestore();
+
+// Firebase bağlantı kontrolü
+if (auth && db) {
+    console.log('✅ Firebase Auth and Firestore ready');
+} else {
+    console.error('❌ Firebase Auth or Firestore not initialized');
+}
 
 // Predefined message functions
 function generateBullyingMessage(bullyingType) {
@@ -104,25 +118,39 @@ function showNotification(title, message, type = 'success') {
 
 // Auth State Observer
 auth.onAuthStateChanged(async (user) => {
+    console.log('Auth state changed:', user ? user.uid : 'No user');
+    
     if (user) {
         currentUser = user;
-        // Get user data from Firestore
-        const userDoc = await db.collection('users').doc(user.uid).get();
-        if (userDoc.exists) {
-            const userData = userDoc.data();
-            currentUser.displayName = `${userData.firstName} ${userData.lastName}`;
-            currentUser.firstName = userData.firstName;
-            currentUser.lastName = userData.lastName;
-            currentUser.email = userData.email;
-        }
+        console.log('User logged in:', user.email);
         
-        // Show panel screen if on auth screen
-        if (document.getElementById('auth-screen').classList.contains('active')) {
-            showScreen('panel-screen');
-            updatePanelUserInfo();
+        try {
+            // Get user data from Firestore
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (userDoc.exists) {
+                const userData = userDoc.data();
+                currentUser.displayName = `${userData.firstName} ${userData.lastName}`;
+                currentUser.firstName = userData.firstName;
+                currentUser.lastName = userData.lastName;
+                currentUser.email = userData.email;
+                console.log('User data loaded:', currentUser.displayName);
+            } else {
+                console.warn('User document not found in Firestore');
+            }
+            
+            // Show panel screen if on auth screen
+            if (document.getElementById('auth-screen').classList.contains('active')) {
+                console.log('Switching to panel screen');
+                showScreen('panel-screen');
+                updatePanelUserInfo();
+            }
+        } catch (error) {
+            console.error('Error loading user data:', error);
+            showNotification('Uyarı', 'Kullanıcı bilgileri yüklenemedi.', 'warning');
         }
     } else {
         currentUser = null;
+        console.log('User logged out');
         // Show auth screen if not on it
         if (!document.getElementById('auth-screen').classList.contains('active')) {
             showScreen('auth-screen');
@@ -239,22 +267,49 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     }
 });
 
-// Login Form Handler - BENİ HATIRLA EKLENDİ (Madde 10)
+// Login Form Handler - BENİ HATIRLA EKLENDİ + GELİŞTİRİLMİŞ ERROR HANDLING
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const email = document.getElementById('login-email').value.trim();
-    const password = document.getElementById('login-password').value;
-    const rememberMe = document.getElementById('remember-me').checked;
+    const emailInput = document.getElementById('login-email');
+    const passwordInput = document.getElementById('login-password');
+    const rememberMeCheckbox = document.getElementById('remember-me');
+    
+    if (!emailInput || !passwordInput) {
+        showNotification('Hata', 'Form elementleri bulunamadı.', 'error');
+        return;
+    }
+    
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    const rememberMe = rememberMeCheckbox ? rememberMeCheckbox.checked : false;
+    
+    // Basit doğrulama
+    if (!email || !password) {
+        showNotification('Uyarı', 'Lütfen e-posta ve şifrenizi girin.', 'warning');
+        return;
+    }
+    
+    if (!auth) {
+        showNotification('Hata', 'Firebase Auth yüklenmedi. Sayfayı yenileyin.', 'error');
+        console.error('Firebase auth is not initialized');
+        return;
+    }
     
     try {
+        console.log('Login attempt:', email, 'Remember:', rememberMe);
+        
         // Firebase Auth persistence ayarla
         const persistence = rememberMe ? 
             firebase.auth.Auth.Persistence.LOCAL : 
             firebase.auth.Auth.Persistence.SESSION;
         
         await auth.setPersistence(persistence);
-        await auth.signInWithEmailAndPassword(email, password);
+        console.log('Persistence set to:', persistence);
+        
+        // Giriş yap
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        console.log('Login successful:', userCredential.user.uid);
         
         // Remember me tercihini sakla
         if (rememberMe) {
@@ -266,20 +321,48 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         }
         
         showNotification('Başarılı!', 'Giriş yapıldı. Hoş geldiniz!', 'success');
-        document.getElementById('loginForm').reset();
-    } catch (error) {
-        console.error('Login error:', error);
-        let errorMessage = 'Giriş yapılırken bir hata oluştu.';
         
-        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-            errorMessage = 'E-posta veya şifrenizi yanlış girdiniz.';
-        } else if (error.code === 'auth/invalid-email') {
-            errorMessage = 'Geçersiz e-posta adresi.';
-        } else if (error.code === 'auth/user-disabled') {
-            errorMessage = 'Bu hesap devre dışı bırakılmış.';
+        // Form resetleme - remember me checkbox'ı koru
+        emailInput.value = '';
+        passwordInput.value = '';
+        if (rememberMeCheckbox && !rememberMe) {
+            rememberMeCheckbox.checked = false;
         }
         
-        showNotification('Hata', errorMessage, 'error');
+    } catch (error) {
+        console.error('Login error:', error);
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+        
+        let errorMessage = 'Giriş yapılırken bir hata oluştu.';
+        
+        switch(error.code) {
+            case 'auth/user-not-found':
+                errorMessage = 'Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı. Lütfen üye olun.';
+                break;
+            case 'auth/wrong-password':
+                errorMessage = 'Şifreniz yanlış. Lütfen tekrar deneyin.';
+                break;
+            case 'auth/invalid-email':
+                errorMessage = 'Geçersiz e-posta adresi formatı.';
+                break;
+            case 'auth/user-disabled':
+                errorMessage = 'Bu hesap devre dışı bırakılmış. Yönetici ile iletişime geçin.';
+                break;
+            case 'auth/too-many-requests':
+                errorMessage = 'Çok fazla başarısız giriş denemesi. Lütfen daha sonra tekrar deneyin.';
+                break;
+            case 'auth/network-request-failed':
+                errorMessage = 'İnternet bağlantınızı kontrol edin ve tekrar deneyin.';
+                break;
+            case 'auth/invalid-credential':
+                errorMessage = 'E-posta veya şifre hatalı. Lütfen kontrol edip tekrar deneyin.';
+                break;
+            default:
+                errorMessage = `Giriş hatası: ${error.message}`;
+        }
+        
+        showNotification('Giriş Başarısız', errorMessage, 'error');
     }
 });
 
