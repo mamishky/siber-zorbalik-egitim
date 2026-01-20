@@ -324,10 +324,17 @@ document.getElementById('sessionForm').addEventListener('submit', async (e) => {
     const age = document.getElementById('participant-age').value;
     const sessionType = document.getElementById('session-type').value;
     const hintEnabled = document.getElementById('hint-use').checked;
+    const aiEnabled = document.getElementById('ai-enabled').checked;
     
     if (!name || !age || !sessionType) {
         showNotification('Hata', 'Lütfen tüm alanları doldurun!', 'error');
         return;
+    }
+    
+    // AI ayarlarını kaydet (backend üzerinden)
+    currentSession.aiEnabled = aiEnabled;
+    if (aiEnabled) {
+        showNotification('AI Aktif', 'Yapay zeka ile dinamik sohbet aktif! 🤖 (Gemini AI)', 'success');
     }
     
     // Generate a unique session ID
@@ -341,6 +348,16 @@ document.getElementById('sessionForm').addEventListener('submit', async (e) => {
     currentSession.startTime = new Date();
     currentSession.userId = currentUser.uid;
     currentSession.hintEnabled = hintEnabled;
+    
+    // Her oturumda mesaj geçmişini temizle - Instagram benzeri deneyim
+    // Yeni oturum = temiz başlangıç
+    const normalizedName = name.toLowerCase().trim();
+    const allUsers = localStorage.getItem('safestagram_users');
+    let usersData = allUsers ? JSON.parse(allUsers) : {};
+    if (usersData[normalizedName]) {
+        usersData[normalizedName].conversations = {}; // Tüm mesaj geçmişini temizle
+        localStorage.setItem('safestagram_users', JSON.stringify(usersData));
+    }
     
     // Create session in Firestore
     try {
@@ -409,7 +426,9 @@ document.getElementById('sessionForm').addEventListener('submit', async (e) => {
     renderStories();
     
     // İlk mesaj için 10 saniye bekle
+    // İlk mesaj için indeks 0'dan başlıyor, zamanlayıcı tetiklendiğinde 1'e artırılacak
     currentSession.messageTimeout = setTimeout(() => {
+        currentSession.currentMessageIndex++;
         sendNextMessageNotification();
     }, 10000);
 });
@@ -882,19 +901,8 @@ function sendNextMessageNotification() {
     avatar.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}`;
     sender.textContent = scenario.sender;
     
-    // Get preview text
-    let previewText = '';
-    if (scenario.conversation && scenario.conversation.length > 0) {
-        previewText = scenario.conversation[0].incoming;
-    } else if (scenario.messages && scenario.messages.length > 0) {
-        previewText = scenario.messages[0].text;
-    }
-    
-    // Truncate if too long
-    if (previewText.length > 50) {
-        previewText = previewText.substring(0, 50) + '...';
-    }
-    preview.textContent = previewText;
+    // Get preview text - sadece "Yeni mesaj" göster, içeriği gösterme
+    preview.textContent = 'Yeni mesaj';
     
     // Show toast
     toast.style.display = 'flex';
@@ -937,11 +945,12 @@ function renderInboxList() {
     // Load message history for this participant
     const messageHistory = loadMessageHistory(currentSession.participantName);
     
-    // Her mesaj için bir inbox item oluştur - but only show up to current index
+    // Instagram benzeri: Sadece gelmiş mesajları göster (geçmiş + şu anki)
+    // Gelecek mesajlar gözükmeyecek - gerçek Instagram deneyimi
     currentSession.messageQueue.forEach((scenario, index) => {
-        // Only show messages up to current index (messages that have been sent)
+        // Sadece gelmiş mesajları göster - Instagram'da gelecek mesajlar görünmez
         if (index > currentSession.currentMessageIndex) {
-            return; // Skip future messages
+            return; // Gelecek mesajları atla
         }
         
         const isUnread = index === currentSession.currentMessageIndex && currentSession.pendingMessages > 0;
@@ -959,37 +968,46 @@ function renderInboxList() {
         let previewText = '';
         if (isBlocked) {
             previewText = '🔴 ENGELLENDİ';
-        } else if (scenario.conversation && scenario.conversation.length > 0) {
-            // New conversation format
-            previewText = scenario.conversation[0].incoming || '';
-            // Uzun mesajları kısalt
-            if (previewText.length > 40) {
-                previewText = previewText.substring(0, 40) + '...';
+        } else if (isPast) {
+            // Geçmiş mesajlar için - mesaj geçmişinden ilk mesajı al
+            const senderHistory = messageHistory[scenario.sender];
+            if (senderHistory && senderHistory.messages && senderHistory.messages.length > 0) {
+                // Mesaj geçmişinden ilk mesajı göster
+                const firstMessage = senderHistory.messages[0];
+                previewText = firstMessage.text || '';
+                if (previewText.length > 40) {
+                    previewText = previewText.substring(0, 40) + '...';
+                }
+            } else {
+                // Mesaj geçmişi yoksa varsayılan göster
+                previewText = 'Mesajlaşma başladı';
             }
-        } else if (scenario.messages && scenario.messages.length > 0) {
-            // Old messages format
-            previewText = scenario.messages[0].text || '';
-            // Uzun mesajları kısalt
-            if (previewText.length > 40) {
-                previewText = previewText.substring(0, 40) + '...';
-            }
+        } else if (isUnread) {
+            // Yeni gelen mesaj için - içeriği gösterme, sadece "Yeni mesaj" göster
+            previewText = 'Yeni mesaj';
+        } else {
+            // Gelecek mesajlar için
+            previewText = '';
         }
+        
+        // Zaman metni - Instagram benzeri
+        const timeText = isUnread ? 'Şimdi' : 'Okundu';
         
         item.innerHTML = `
             <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}" alt="${scenario.sender}">
             <div class="inbox-item-content">
                 <div class="inbox-item-header">
                     <span class="inbox-sender">${scenario.sender}${isBlocked ? ' <span class="blocked-label">🔴 ENGELLENDİ</span>' : ''}</span>
-                    <span class="inbox-time">Şimdi</span>
+                    <span class="inbox-time">${timeText}</span>
                 </div>
                 <div class="inbox-message-preview ${isBlocked ? 'blocked-preview' : ''}">
                     ${isUnread && !isBlocked ? '<span class="unread-dot"></span>' : ''}
-                    ${previewText}
+                    ${previewText || 'Mesajlaşma başladı'}
                 </div>
             </div>
         `;
         
-        // Tıklama eventi
+        // Tıklama eventi - Instagram benzeri
         item.addEventListener('click', () => {
             if (isBlocked) {
                 alert('Bu kullanıcı engellenmiştir.');
@@ -1051,44 +1069,11 @@ function openSpecificDM(scenario) {
     document.getElementById('dm-input-container').style.display = 'none';
     document.getElementById('action-buttons').style.display = 'none';
     
-    // Load conversation history from localStorage
-    const messageHistory = loadMessageHistory(currentSession.participantName);
-    const senderHistory = messageHistory[scenario.sender];
+    // Her oturumda mesaj geçmişi sıfırlanacak - Instagram benzeri deneyim
+    // Geçmiş mesajlar gösterilmeyecek, her oturum temiz başlayacak
+    // NOT: Geçmiş mesaj kontrolü tamamen kaldırıldı - her oturum sıfırdan başlıyor
     
-    if (senderHistory && senderHistory.messages && senderHistory.messages.length > 0) {
-        // Display previous messages
-        const messagesContainer = document.getElementById('dm-messages');
-        senderHistory.messages.forEach(msg => {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${msg.sender === 'user' ? 'sent' : ''}`;
-            
-            const avatarSrc = msg.sender === 'user' 
-                ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=user1'
-                : `https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}`;
-            
-            messageDiv.innerHTML = `
-                <img src="${avatarSrc}" alt="Avatar" class="message-avatar">
-                <div>
-                    <div class="message-content">${msg.text}</div>
-                    <div class="message-time">${msg.time}</div>
-                </div>
-            `;
-            
-            messagesContainer.appendChild(messageDiv);
-        });
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        
-        // If conversation was blocked, show blocked status
-        if (senderHistory.status === 'blocked') {
-            return; // Don't send new messages if blocked
-        }
-        
-        // If conversation is complete, don't send new messages
-        if (senderHistory.status === 'completed') {
-            return;
-        }
-    }
-    
+    // Her zaman yeni mesaj akışı başlat - geçmiş mesaj kontrolü yok
     // Check if it's a conversation or messages format
     if (scenario.conversation) {
         // New conversation format - turn-based
@@ -1104,29 +1089,44 @@ function openSpecificDM(scenario) {
             const message = scenario.messages[0];
             if (message && message.type === 'cyberbullying') {
                 setTimeout(() => {
-                    document.getElementById('action-buttons').style.display = 'flex';
-                    document.getElementById('dm-input-container').style.display = 'flex';
-                }, 500);
+                    const actionButtons = document.getElementById('action-buttons');
+                    const inputContainer = document.getElementById('dm-input-container');
+                    if (actionButtons) {
+                        actionButtons.style.display = 'flex';
+                    }
+                    if (inputContainer) {
+                        inputContainer.style.display = 'flex';
+                    }
+                }, 1500); // Mesaj gösterildikten sonra butonları göster
             }
         }, 1000);
     }
 }
 
-// Yardımcı fonksiyon: Süreci ilerlet ve 10sn sayacını kur
+// Yardımcı fonksiyon: Mesaj tamamlandı, sonraki mesaj için zamanlayıcıyı kur
 function scheduleNextMessage() {
-    currentSession.currentMessageIndex++;
+    // Önceki zamanlayıcıyı temizle
+    if (currentSession.messageTimeout) {
+        clearTimeout(currentSession.messageTimeout);
+        currentSession.messageTimeout = null;
+    }
+    
+    // Mesaj indeksini kontrol et - eğer henüz artırılmadıysa artır
+    // Bu fonksiyon sadece mesaj tamamlandığında çağrılmalı
     if (currentSession.currentMessageIndex >= 10 || currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
         // Tüm mesajlar tamamlandı - 2 saniye sonra özet ekranı
         setTimeout(() => {
             showSummary();
         }, 2000);
-    } else {
-        // 10 saniye sonra sonraki mesajı gönder
-        clearTimeout(currentSession.messageTimeout);
-        currentSession.messageTimeout = setTimeout(() => {
-            sendNextMessageNotification();
-        }, 10000);
+        return;
     }
+    
+    // 10 saniye sonra sonraki mesajı gönder
+    currentSession.messageTimeout = setTimeout(() => {
+        // Mesaj indeksini burada artır (zamanlayıcı tetiklendiğinde)
+        currentSession.currentMessageIndex++;
+        sendNextMessageNotification();
+    }, 10000);
 }
 
 // Geri butonları
@@ -1143,21 +1143,25 @@ document.getElementById('back-to-inbox').addEventListener('click', () => {
             time: msg.querySelector('.message-time').textContent
         }));
         
-        // Save as completed if not blocked
+        // Mesaj durumunu kontrol et - eğer kullanıcı cevap vermişse "completed", yoksa "in-progress"
         const messageHistory = loadMessageHistory(currentSession.participantName);
         const senderHistory = messageHistory[scenario.sender];
+        
+        // Kullanıcının cevap verip vermediğini kontrol et
+        const hasUserReply = allMessages.some(msg => msg.sender === 'user');
+        
         if (!senderHistory || senderHistory.status !== 'blocked') {
-            saveConversationState(scenario.sender, allMessages, 'completed');
+            // Eğer kullanıcı cevap vermişse "completed", yoksa "in-progress" olarak kaydet
+            const status = hasUserReply ? 'completed' : 'in-progress';
+            saveConversationState(scenario.sender, allMessages, status);
         }
     }
     
     showScreen('inbox-screen');
     renderInboxList();
     
-    // Eğer bu bir "Güvenli" mesajdıysa ve bittiyse (aksiyon gerektirmiyorsa) süreci ilerlet
-    if (scenario && scenario.conversation && currentSession.conversationIndex >= scenario.conversation.length) {
-        scheduleNextMessage();
-    }
+    // Mesaj tamamlandı - geri ana sayfaya dönüldükten sonra 10 saniye bekle
+    // Burada scheduleNextMessage çağrılmıyor, returnToFeed'den çağrılacak
 });
 
 // Mesaj gönder
@@ -1207,31 +1211,54 @@ function sendMessage() {
                 sendMessage();
             }, 2000);
         } else {
-            // Son güvenli mesaj - metin cevabı bekleniyor ve butonlar gösteriliyor
+            // Son güvenli mesaj - metin cevabı bekleniyor - BUTONLAR GÖSTERİLİYOR
             document.getElementById('dm-input-container').style.display = 'flex';
-            document.getElementById('action-buttons').style.display = 'flex';
+            document.getElementById('action-buttons').style.display = 'flex'; // Güvenli mesajlarda da butonlar GÖSTERİLİYOR
             
-            // Güvenli mesajlar için butonları sıfırla
-            currentSession.reportClicked = false;
-            currentSession.blockClicked = false;
-            document.getElementById('report-btn').disabled = false;
-            document.getElementById('block-btn').disabled = false;
-            document.getElementById('report-btn').classList.remove('blink');
-            document.getElementById('block-btn').classList.remove('blink');
+            // Input'a focus
+            const dmInput = document.getElementById('dm-input');
+            if (dmInput) {
+                dmInput.focus();
+            }
+            
+            // Butonları aktif tut
+            const reportBtn = document.getElementById('report-btn');
+            const blockBtn = document.getElementById('block-btn');
+            if (reportBtn) {
+                reportBtn.disabled = false;
+                reportBtn.classList.remove('blink');
+            }
+            if (blockBtn) {
+                blockBtn.disabled = false;
+                blockBtn.classList.remove('blink');
+            }
         }
     } else {
         // Siber zorbalık mesajı - aksiyon butonları ve input birlikte gösteriliyor
-        document.getElementById('dm-input-container').style.display = 'flex';
-        document.getElementById('action-buttons').style.display = 'flex';
+        const inputContainer = document.getElementById('dm-input-container');
+        const actionButtons = document.getElementById('action-buttons');
+        
+        if (inputContainer) {
+            inputContainer.style.display = 'flex';
+        }
+        if (actionButtons) {
+            actionButtons.style.display = 'flex';
+        }
         
         // Butonları sıfırla
         currentSession.reportClicked = false;
         currentSession.blockClicked = false;
         currentSession.selectedComplaintReason = null;
-        document.getElementById('report-btn').disabled = false;
-        document.getElementById('block-btn').disabled = false;
-        document.getElementById('report-btn').classList.remove('blink');
-        document.getElementById('block-btn').classList.remove('blink');
+        const reportBtn = document.getElementById('report-btn');
+        const blockBtn = document.getElementById('block-btn');
+        if (reportBtn) {
+            reportBtn.disabled = false;
+            reportBtn.classList.remove('blink');
+        }
+        if (blockBtn) {
+            blockBtn.disabled = false;
+            blockBtn.classList.remove('blink');
+        }
         
         // 5 saniye sonra ipucu göster (sadece buton yanıp sönsün, metin YOK)
         // Check if hints are enabled before setting timeout
@@ -1240,6 +1267,20 @@ function sendMessage() {
                 showHint();
             }, 5000);
         }
+    }
+}
+
+// YARDIMCI FONKSİYON: Siber zorbalık mesajına cevap veren kullanıcı için aksiyon butonlarını güncelle
+function showSafeModeForCyberbullying() {
+    // Siber zorbalık mesajına cevap verildi, şimdi input'u gizle ve sadece butonları göster
+    const inputContainer = document.getElementById('dm-input-container');
+    const actionButtons = document.getElementById('action-buttons');
+    
+    if (inputContainer) {
+        inputContainer.style.display = 'none';
+    }
+    if (actionButtons) {
+        actionButtons.style.display = 'flex';
     }
 }
 
@@ -1282,18 +1323,34 @@ function sendConversationMessage() {
     
     // Check if we need to wait for user reply
     if (turnData.waitForReply) {
-        // Show input for user to reply and action buttons
-        document.getElementById('dm-input-container').style.display = 'flex';
-        document.getElementById('action-buttons').style.display = 'flex';
-        document.getElementById('dm-input').focus();
+        // Show input for user to reply - action butonları GÖSTERİLİYOR
+        const inputContainer = document.getElementById('dm-input-container');
+        const actionButtons = document.getElementById('action-buttons');
+        const dmInput = document.getElementById('dm-input');
         
-        // Güvenli mesajlar için butonları sıfırla
-        currentSession.reportClicked = false;
-        currentSession.blockClicked = false;
-        document.getElementById('report-btn').disabled = false;
-        document.getElementById('block-btn').disabled = false;
-        document.getElementById('report-btn').classList.remove('blink');
-        document.getElementById('block-btn').classList.remove('blink');
+        if (inputContainer) {
+            inputContainer.style.display = 'flex';
+        }
+        // Action butonlarını göster
+        if (actionButtons) {
+            actionButtons.style.display = 'flex';
+        }
+        
+        // Butonları aktif tut
+        const reportBtn = document.getElementById('report-btn');
+        const blockBtn = document.getElementById('block-btn');
+        if (reportBtn) {
+            reportBtn.disabled = false;
+            reportBtn.classList.remove('blink');
+        }
+        if (blockBtn) {
+            blockBtn.disabled = false;
+            blockBtn.classList.remove('blink');
+        }
+        
+        if (dmInput) {
+            dmInput.focus();
+        }
     } else {
         // If it's the last message and doesn't wait for reply, end conversation
         if (turnData.endsConversation) {
@@ -1309,8 +1366,67 @@ function sendConversationMessage() {
     }
 }
 
+// ============================================
+// YAPAY ZEKA ENTEGRASYONU (BACKEND ÜZERİNDEN)
+// ============================================
+
+/**
+ * AI ile mesaj oluştur (backend endpoint'i üzerinden)
+ * API key güvenli bir şekilde backend'de tutuluyor
+ */
+async function generateAIMessage(userMessage, conversationHistory, scenario) {
+    try {
+        // Backend endpoint'ine istek gönder
+        const response = await fetch('/api/ai/generate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                scenarioId: scenario.sender || 'default',
+                userMessage: userMessage,
+                conversation: conversationHistory,
+                scenarioSender: scenario.sender,
+                participantAge: currentSession.participantAge || 15,
+                locale: 'tr'
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Backend AI hatası:', errorData);
+            throw new Error(errorData.error || 'AI servisi yanıt vermedi');
+        }
+
+        const data = await response.json();
+        
+        if (!data.ok || !data.message) {
+            throw new Error('Geçersiz AI yanıtı');
+        }
+
+        return data.message;
+    } catch (error) {
+        console.error('AI mesaj oluşturma hatası:', error);
+        // Hata durumunda fallback kullan
+        return getFallbackResponse(userMessage);
+    }
+}
+
+// Fallback: AI çalışmazsa basit cevaplar
+function getFallbackResponse(userMessage) {
+    const responses = [
+        "Harika! Devam edelim 🎉",
+        "Evet, haklısın! 👍",
+        "Çok güzel bir fikir! ✨",
+        "Aynen öyle! 😊",
+        "Süper! 🚀",
+        "Tamam, anladım! 👌"
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+}
+
 // Güvenli mesaja cevap gönder
-document.getElementById('dm-send').addEventListener('click', () => {
+document.getElementById('dm-send').addEventListener('click', async () => {
     const input = document.getElementById('dm-input');
     const text = input.value.trim();
     
@@ -1320,6 +1436,9 @@ document.getElementById('dm-send').addEventListener('click', () => {
     currentSession.skills.replying = true;
     
     const messagesContainer = document.getElementById('dm-messages');
+    const scenario = currentSession.currentScenario;
+    
+    // Kullanıcı mesajını ekle
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message sent';
     
@@ -1337,49 +1456,117 @@ document.getElementById('dm-send').addEventListener('click', () => {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
     input.value = '';
     
-    // Save conversation state after user reply
-    const scenario = currentSession.currentScenario;
+    // Input'u devre dışı bırak (AI cevap beklenirken)
+    input.disabled = true;
+    document.getElementById('dm-send').disabled = true;
+    
+    // Conversation history'yi topla
     const allMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
         text: msg.querySelector('.message-content').textContent,
         sender: msg.classList.contains('sent') ? 'user' : scenario.sender,
         time: msg.querySelector('.message-time').textContent
     }));
-    saveConversationState(scenario.sender, allMessages, 'in-progress');
     
     // Veri kaydet
     const reactionTime = (Date.now() - currentSession.currentMessageStartTime) / 1000;
     saveMessageData('safe', 'reply', reactionTime, false, true);
-    
     currentSession.stats.correct++;
     
     // Check if conversation continues
     if (scenario.conversation) {
-        // Input alanını gizle
-        document.getElementById('dm-input-container').style.display = 'none';
+        // Güvenli mesajlar için input her zaman aktif olmalı
+        // Input'u gizleme - kullanıcı mesaj yazabilmeli
+        // Input her zaman görünür ve aktif olmalı
+        const inputContainer = document.getElementById('dm-input-container');
+        const dmInput = document.getElementById('dm-input');
+        const dmSendBtn = document.getElementById('dm-send');
         
-        // Turn-based conversation - advance to next turn
-        currentSession.conversationIndex++;
+        if (inputContainer) {
+            inputContainer.style.display = 'flex';
+        }
+        if (dmInput) {
+            dmInput.disabled = false; // Her zaman aktif
+        }
+        if (dmSendBtn) {
+            dmSendBtn.disabled = false; // Her zaman aktif
+        }
         
-        if (currentSession.conversationIndex < scenario.conversation.length) {
-            // Continue conversation after 1-2 seconds
-            setTimeout(() => {
-                sendConversationMessage();
-            }, 1500);
-        } else {
-            // Conversation ended - save state and show back button hint
-            saveConversationState(scenario.sender, allMessages, 'completed');
+        // Eğer AI entegrasyonu aktifse, dinamik mesaj oluştur
+        if (currentSession.aiEnabled) {
+            // AI ile yeni mesaj oluştur
+            const aiResponse = await generateAIMessage(text, allMessages, scenario);
             
-            // Sohbet bitti - kullanıcı geri tuşuna basmalı
-            // Otomatik olarak 3 saniye sonra feed'e dön
+            // AI cevabını göster
             setTimeout(() => {
-                returnToFeed();
-            }, 3000);
+                const aiMessageDiv = document.createElement('div');
+                aiMessageDiv.className = 'message';
+                
+                const aiTime = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+                
+                aiMessageDiv.innerHTML = `
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}" alt="Avatar" class="message-avatar">
+                    <div>
+                        <div class="message-content">${aiResponse}</div>
+                        <div class="message-time">${aiTime}</div>
+                    </div>
+                `;
+                
+                messagesContainer.appendChild(aiMessageDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                // Conversation state'i güncelle
+                const updatedMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
+                    text: msg.querySelector('.message-content').textContent,
+                    sender: msg.classList.contains('sent') ? 'user' : scenario.sender,
+                    time: msg.querySelector('.message-time').textContent
+                }));
+                saveConversationState(scenario.sender, updatedMessages, 'in-progress');
+                
+                // Kullanıcı geri tuşuna basana kadar sohbet devam etmeli
+                // Input'u tekrar göster - kullanıcı istediği kadar mesajlaşabilir
+                setTimeout(() => {
+                    document.getElementById('dm-input-container').style.display = 'flex';
+                    // Action butonlarını göster
+                    document.getElementById('action-buttons').style.display = 'flex';
+                    input.disabled = false;
+                    document.getElementById('dm-send').disabled = false;
+                    input.focus();
+                    
+                    // Butonları aktif tut
+                    const reportBtn = document.getElementById('report-btn');
+                    const blockBtn = document.getElementById('block-btn');
+                    if (reportBtn) {
+                        reportBtn.disabled = false;
+                        reportBtn.classList.remove('blink');
+                    }
+                    if (blockBtn) {
+                        blockBtn.disabled = false;
+                        blockBtn.classList.remove('blink');
+                    }
+                }, 1500);
+            }, 1000);
+        } else {
+            // Eski statik conversation akışı
+            currentSession.conversationIndex++;
+            
+            if (currentSession.conversationIndex < scenario.conversation.length) {
+                setTimeout(() => {
+                    sendConversationMessage();
+                }, 1500);
+            } else {
+                // Sohbet bitti ama kullanıcı manuel olarak geri tuşuna basmalı
+                // Otomatik returnToFeed çağrılmayacak
+                saveConversationState(scenario.sender, allMessages, 'completed');
+                // NOT: Kullanıcı geri tuşuna basacak
+            }
         }
     } else {
-        // Siber zorbalık mesajı - kullanıcı cevap verdi ama hala engelleme yapmalı
+        // Siber zorbalık mesajı - kullanıcı cevap verdi
+        // Cevabı kaydet ve butonları göster
+        saveConversationState(scenario.sender, allMessages, 'in-progress');
+        
         // Input alanını gizle ama action-buttons'ı GÖSTER
-        document.getElementById('dm-input-container').style.display = 'none';
-        document.getElementById('action-buttons').style.display = 'flex';
+        showSafeModeForCyberbullying();
         
         // NOT: Kullanıcı şikayet + engelle yapana kadar feed'e dönmemeli
         // returnToFeed() çağrısı KALDIRILDI - engelleme sonrası thank-you modal'dan dönecek
@@ -1396,11 +1583,47 @@ document.getElementById('dm-input').addEventListener('keypress', (e) => {
 // Ana sayfaya dön (home icon click)
 function returnToFeed() {
     const currentScreen = document.querySelector('.screen.active');
-    showScreen('main-app');
+    const scenario = currentSession.currentScenario;
     
-    // Sadece DM ekranından geliyorsak mesaj indeksini artır
+    // DM ekranından geliyorsak mesajı tamamlandı olarak işaretle
     if (currentScreen && currentScreen.id === 'dm-screen') {
-        scheduleNextMessage();
+        // Conversation state'i kaydet
+        const messagesContainer = document.getElementById('dm-messages');
+        if (scenario && messagesContainer) {
+            const allMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
+                text: msg.querySelector('.message-content').textContent,
+                sender: msg.classList.contains('sent') ? 'user' : scenario.sender,
+                time: msg.querySelector('.message-time').textContent
+            }));
+            
+            // Kullanıcının cevap verip vermediğini kontrol et
+            const hasUserReply = allMessages.some(msg => msg.sender === 'user');
+            
+            // Save as completed if not blocked and user has replied
+            const messageHistory = loadMessageHistory(currentSession.participantName);
+            const senderHistory = messageHistory[scenario.sender];
+            if (!senderHistory || senderHistory.status !== 'blocked') {
+                // Eğer kullanıcı cevap vermişse "completed", yoksa "in-progress"
+                const status = hasUserReply ? 'completed' : 'in-progress';
+                saveConversationState(scenario.sender, allMessages, status);
+            }
+            
+            // Ana sayfaya dön
+            showScreen('main-app');
+            
+            // Sadece kullanıcı cevap vermişse sonraki mesajı planla
+            if (hasUserReply) {
+                // Mesaj tamamlandı - 10 saniye sonra sonraki mesajı gönder
+                scheduleNextMessage();
+            }
+            // Eğer kullanıcı cevap vermemişse zamanlayıcı kurma, mesaj "in-progress" olarak kalacak
+        } else {
+            // Inbox'tan veya başka bir yerden geliyorsak sadece ekranı değiştir
+            showScreen('main-app');
+        }
+    } else {
+        // Inbox'tan veya başka bir yerden geliyorsak sadece ekranı değiştir
+        showScreen('main-app');
     }
 }
 
@@ -1408,8 +1631,13 @@ function returnToFeed() {
 document.getElementById('close-thank-you-modal').addEventListener('click', () => {
     document.getElementById('thank-you-modal').style.display = 'none';
     
-    // Feed'e dön ve sonraki mesajı planla
-    showScreen('main-app');
+    // Modal'ı kapat ama FEED'E DÖNME - kullanıcı kendisi geri butonuna basacak
+    // NOT: showScreen('main-app') KALDIRILDI - kullanıcı manuel olarak dönmeli
+    
+    // Mesaj tamamlandı - zamanlayıcıyı kur (indeks scheduleNextMessage içinde artırılacak)
+    // Ama önce mevcut mesajın indeksini artır çünkü engelleme tamamlandı
+    // NOT: scheduleNextMessage içinde indeks artırılıyor, burada artırmaya gerek yok
+    // Sadece zamanlayıcıyı kur
     scheduleNextMessage();
 });
 
