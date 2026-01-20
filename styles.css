@@ -2137,35 +2137,104 @@ select.form-control {
     }
 }
 
-/* Beni Hatırla Checkbox Hizalama - FIX */
+/* Beni Hatırla Checkbox - Modern Oval Tasarım */
 .remember-me-container {
-  margin-top: 10px !important;
-  margin-bottom: 15px;
+  margin-top: 12px !important;
+  margin-bottom: 18px;
+  padding: 0 !important;
 }
 
 .remember-me-label {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   cursor: pointer;
   border: none !important;
   padding: 0 !important;
   background: transparent !important;
   user-select: none;
+  width: 100%;
+  justify-content: flex-start;
 }
 
+/* Özel Checkbox Tasarımı - Oval */
 .remember-me-checkbox {
-  width: 18px;
-  height: 18px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  min-height: 22px;
   cursor: pointer;
   margin: 0;
   flex-shrink: 0;
-  accent-color: #7c3aed;
+  border: 2px solid #cbd5e1;
+  border-radius: 6px;
+  background: white;
+  position: relative;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.remember-me-checkbox:hover {
+  border-color: #7c3aed;
+  background: #f5f3ff;
+}
+
+.remember-me-checkbox:checked {
+  background: #7c3aed;
+  border-color: #7c3aed;
+}
+
+.remember-me-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.remember-me-checkbox:focus {
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
 .remember-me-text {
   font-weight: 500;
-  font-size: 14px;
-  color: #2d3748;
-  line-height: 1;
+  font-size: 15px;
+  color: #334155;
+  line-height: 1.4;
+  flex: 1;
+  user-select: none;
+}
+
+/* Hover efekti */
+.remember-me-label:hover .remember-me-text {
+  color: #7c3aed;
+}
+
+/* Mobil uyumluluk */
+@media (max-width: 600px) {
+  .remember-me-checkbox {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+  }
+  
+  .remember-me-checkbox:checked::after {
+    font-size: 12px;
+  }
+  
+  .remember-me-text {
+    font-size: 14px;
+  }
+  
+  .remember-me-label {
+    gap: 10px;
+  }
 }
