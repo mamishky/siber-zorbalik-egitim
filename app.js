@@ -719,7 +719,8 @@ function playNotificationSound() {
 // Feed için gönderi verileri
 // Not: Eğitim senaryosunda şu anda ana akış için post kullanılmıyor.
 // Bu nedenle feed boş bırakıldı.
-const POSTS = [];
+// Feed için gönderi verileri - scenarios.js'den POSTS_100 kullan
+const POSTS = (typeof window !== 'undefined' && window.POSTS_100) ? window.POSTS_100 : (typeof POSTS_100 !== 'undefined' ? POSTS_100 : []);
 
 // Ekran geçişleri
 function showScreen(screenId) {
@@ -889,9 +890,23 @@ let storyState = {
     progressTimeout: null
 };
 
-// Story üretimi boş bırakıldı (story gösterilmeyecek)
+// Story üretimi - 100 gerçek ünlü/influencer story
 function generateStories() {
     storyState.stories = [];
+    
+    // STORY_USERS dizisini kullanarak 100 story oluştur
+    const storyUsers = (typeof window !== 'undefined' && window.STORY_USERS) ? window.STORY_USERS : (typeof STORY_USERS !== 'undefined' ? STORY_USERS : []);
+    
+    if (storyUsers.length > 0) {
+        for (let i = 0; i < 100; i++) {
+            const username = storyUsers[i % storyUsers.length];
+            storyState.stories.push({
+                username: username + (i > storyUsers.length - 1 ? Math.floor(i / storyUsers.length) : ''),
+                avatar: username,
+                watched: false
+            });
+        }
+    }
 }
 
 // Initialize stories on load
@@ -1959,7 +1974,8 @@ function showComplaintReasonDialog() {
     
     // Nedenleri oluştur
     reasonsContainer.innerHTML = '';
-    COMPLAINT_REASONS.forEach(reason => {
+    const complaintReasons = (typeof window !== 'undefined' && window.COMPLAINT_REASONS) ? window.COMPLAINT_REASONS : (typeof COMPLAINT_REASONS !== 'undefined' ? COMPLAINT_REASONS : []);
+    complaintReasons.forEach(reason => {
         const optionDiv = document.createElement('div');
         optionDiv.className = 'complaint-reason-option';
         optionDiv.dataset.reason = reason.id;
