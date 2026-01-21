@@ -414,16 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('✅ Tüm event listenerlar başlatıldı');
 });
 
-// Panel Logout
-document.getElementById('panel-logout').addEventListener('click', async () => {
-    try {
-        await auth.signOut();
-        showNotification('Başarılı', 'Çıkış yapıldı.', 'success');
-    } catch (error) {
-        console.error('Logout error:', error);
-        showNotification('Hata', 'Çıkış yapılırken bir hata oluştu.', 'error');
-    }
-});
+// Panel Logout - DOMContentLoaded içinde tanımlanacak (initPanelButtons içinde)
 
 // Panel Buttons - DOMContentLoaded içinde tanımlanacak
 function initPanelButtons() {
@@ -466,6 +457,20 @@ function initPanelButtons() {
     const adminLogoutBtn = document.getElementById('admin-logout');
     if (adminLogoutBtn) {
         adminLogoutBtn.addEventListener('click', async () => {
+            try {
+                await auth.signOut();
+                showNotification('Başarılı', 'Çıkış yapıldı.', 'success');
+            } catch (error) {
+                console.error('Logout error:', error);
+                showNotification('Hata', 'Çıkış yapılırken bir hata oluştu.', 'error');
+            }
+        });
+    }
+    
+    // Panel Logout
+    const panelLogoutBtn = document.getElementById('panel-logout');
+    if (panelLogoutBtn) {
+        panelLogoutBtn.addEventListener('click', async () => {
             try {
                 await auth.signOut();
                 showNotification('Başarılı', 'Çıkış yapıldı.', 'success');
