@@ -618,6 +618,9 @@ function initSessionFormHandler() {
     const cyberbullyingQueue = [];
     const safeQueue = [];
     
+    // Get bullying types from scenarios.js
+    const BULLYING_TYPES = window.BULLYING_TYPES || ['sozel', 'dislama', 'tehdit', 'iftira', 'kimlik'];
+    
     // Iterate through all 5 bullying types
     BULLYING_TYPES.forEach(bullyingType => {
         const allScenarios = SCENARIOS[scenarioType] ? SCENARIOS[scenarioType][bullyingType] : SCENARIOS['baslama'][bullyingType];

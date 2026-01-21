@@ -1,5 +1,8 @@
 // Senaryo ve mesaj yapılandırmaları
 
+// Siber zorbalık türleri (5 tür - Madde 4)
+const BULLYING_TYPES = ['sozel', 'dislama', 'tehdit', 'iftira', 'kimlik'];
+
 // Siber zorbalık türleri ve şikayet sebepleri
 const COMPLAINT_REASONS = [
     { id: 'sozel', label: 'Sözel/Psikolojik Saldırı' },
@@ -117,6 +120,7 @@ const STORY_USERS = [
 
 // Global scope'a atama (script tag ile yüklendiğinde erişilebilir olması için)
 if (typeof window !== 'undefined') {
+    window.BULLYING_TYPES = BULLYING_TYPES;
     window.COMPLAINT_REASONS = COMPLAINT_REASONS;
     window.POSTS_100 = POSTS_100;
     window.STORY_USERS = STORY_USERS;
