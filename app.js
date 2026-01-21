@@ -407,6 +407,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Session Form Handler'ı başlat
     initSessionFormHandler();
+    
+    // Panel butonlarını başlat
+    initPanelButtons();
+    
+    console.log('✅ Tüm event listenerlar başlatıldı');
 });
 
 // Panel Logout
@@ -420,38 +425,56 @@ document.getElementById('panel-logout').addEventListener('click', async () => {
     }
 });
 
-// Panel Buttons
-document.getElementById('app-entry-btn').addEventListener('click', () => {
-    showScreen('app-entry-screen');
-    updatePanelUserInfo(); // Update user name display
-});
-
-document.getElementById('academic-panel-btn').addEventListener('click', () => {
-    showScreen('admin-panel');
-    loadAdminData();
-});
-
-document.getElementById('back-to-panel').addEventListener('click', () => {
-    showScreen('panel-screen');
-});
-
-// Admin Back Button
-document.getElementById('admin-back-btn').addEventListener('click', () => {
-    showScreen('panel-screen');
-});
-
-// Admin Logout
-const adminLogoutBtn = document.getElementById('admin-logout');
-if (adminLogoutBtn) {
-    adminLogoutBtn.addEventListener('click', async () => {
-        try {
-            await auth.signOut();
-            showNotification('Başarılı', 'Çıkış yapıldı.', 'success');
-        } catch (error) {
-            console.error('Logout error:', error);
-            showNotification('Hata', 'Çıkış yapılırken bir hata oluştu.', 'error');
-        }
-    });
+// Panel Buttons - DOMContentLoaded içinde tanımlanacak
+function initPanelButtons() {
+    // App Entry Button
+    const appEntryBtn = document.getElementById('app-entry-btn');
+    if (appEntryBtn) {
+        appEntryBtn.addEventListener('click', () => {
+            console.log('🚀 Uygulamaya Giriş butonuna tıklandı');
+            showScreen('app-entry-screen');
+            updatePanelUserInfo();
+        });
+    }
+    
+    // Academic Panel Button
+    const academicPanelBtn = document.getElementById('academic-panel-btn');
+    if (academicPanelBtn) {
+        academicPanelBtn.addEventListener('click', () => {
+            showScreen('admin-panel');
+            loadAdminData();
+        });
+    }
+    
+    // Back to Panel Button
+    const backToPanelBtn = document.getElementById('back-to-panel');
+    if (backToPanelBtn) {
+        backToPanelBtn.addEventListener('click', () => {
+            showScreen('panel-screen');
+        });
+    }
+    
+    // Admin Back Button
+    const adminBackBtn = document.getElementById('admin-back-btn');
+    if (adminBackBtn) {
+        adminBackBtn.addEventListener('click', () => {
+            showScreen('panel-screen');
+        });
+    }
+    
+    // Admin Logout
+    const adminLogoutBtn = document.getElementById('admin-logout');
+    if (adminLogoutBtn) {
+        adminLogoutBtn.addEventListener('click', async () => {
+            try {
+                await auth.signOut();
+                showNotification('Başarılı', 'Çıkış yapıldı.', 'success');
+            } catch (error) {
+                console.error('Logout error:', error);
+                showNotification('Hata', 'Çıkış yapılırken bir hata oluştu.', 'error');
+            }
+        });
+    }
 }
 
 // Session Form Handler (App Entry) - DOMContentLoaded içinde tanımlanacak
