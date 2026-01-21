@@ -460,17 +460,24 @@ if (adminLogoutBtn) {
 function initSessionFormHandler() {
     const sessionForm = document.getElementById('sessionForm');
     if (!sessionForm) {
-        console.error('sessionForm bulunamadı!');
+        console.error('❌ sessionForm bulunamadı!');
         return;
     }
     
+    console.log('✅ sessionForm event listener eklendi');
+    
     sessionForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        console.log('📝 Session form submit edildi');
+        console.log('👤 currentUser:', currentUser ? currentUser.email : 'null');
         
         if (!currentUser) {
+            console.error('❌ currentUser null, giriş yapılmamış');
             showNotification('Hata', 'Lütfen önce giriş yapın.', 'error');
             return;
         }
+        
+        console.log('✅ currentUser var, form işleniyor');
         
         const name = document.getElementById('participant-name').value.trim();
         const age = document.getElementById('participant-age').value;
