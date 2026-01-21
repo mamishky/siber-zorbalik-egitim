@@ -716,8 +716,10 @@ function playNotificationSound() {
     }
 }
 
-// Feed için gönderi verileri - scenarios.js'den POSTS_100 kullan
-const POSTS = POSTS_100;
+// Feed için gönderi verileri
+// Not: Eğitim senaryosunda şu anda ana akış için post kullanılmıyor.
+// Bu nedenle feed boş bırakıldı.
+const POSTS = [];
 
 // Ekran geçişleri
 function showScreen(screenId) {
@@ -879,7 +881,7 @@ const TURKISH_USERNAMES = [
     'ege.akar', 'duygu.koc', 'burak.aydin', 'simge.yurt', 'doruk.ozer'
 ];
 
-// Story state management - 100 stories
+// Story state management - hikayeler devre dışı (boş liste)
 let storyState = {
     currentStoryIndex: 0,
     stories: [],
@@ -887,18 +889,9 @@ let storyState = {
     progressTimeout: null
 };
 
-// Generate 100 stories
+// Story üretimi boş bırakıldı (story gösterilmeyecek)
 function generateStories() {
     storyState.stories = [];
-    for (let i = 0; i < 100; i++) {
-        const username = TURKISH_USERNAMES[i % TURKISH_USERNAMES.length];
-        const seed = `${username}${i}`;
-        storyState.stories.push({
-            username: username + (i > TURKISH_USERNAMES.length - 1 ? Math.floor(i / TURKISH_USERNAMES.length) : ''),
-            avatar: seed,
-            watched: false
-        });
-    }
 }
 
 // Initialize stories on load
@@ -2812,16 +2805,8 @@ function generateReels() {
     const reelsScroll = document.getElementById('reels-scroll');
     if (reelsScroll.children.length > 0) return; // Zaten oluşturulmuş
     
-    const reelsData = [
-        { username: "spor.klipler", avatar: "sporklipler", image: "https://picsum.photos/seed/sports1/600/1067", caption: "Harika gol! ⚽🔥", likes: 1234 },
-        { username: "komik.anlar", avatar: "komikanlar", image: "https://picsum.photos/seed/funny1/600/1067", caption: "Çok komik ya 😂😂", likes: 2341 },
-        { username: "dans.videolari", avatar: "dansvideolari", image: "https://picsum.photos/seed/dance1/600/1067", caption: "Bu dans hareketi çok güzel 💃", likes: 3456 },
-        { username: "oyun.dunyasi", avatar: "oyundunyasi", image: "https://picsum.photos/seed/game1/600/1067", caption: "En iyi oyun anları! 🎮", likes: 4567 },
-        { username: "muzik.cover", avatar: "muzikcover", image: "https://picsum.photos/seed/music1/600/1067", caption: "Bu şarkıyı cover yaptım 🎵", likes: 5678 },
-        { username: "skate.tricks", avatar: "skatetricks", image: "https://picsum.photos/seed/skate1/600/1067", caption: "Yeni trick öğrendim! 🛹", likes: 3421 },
-        { username: "sanat.dunyasi", avatar: "sanatdunyasi", image: "https://picsum.photos/seed/art1/600/1067", caption: "Bu resmi çizdim 🎨", likes: 2987 },
-        { username: "yemek.tarifleri", avatar: "yemektarifleri", image: "https://picsum.photos/seed/food1/600/1067", caption: "Kolay pasta tarifi! 🍰", likes: 5432 }
-    ];
+    // Reels içeriği eğitim senaryosunda kullanılmadığı için boş bırakıldı
+    const reelsData = [];
     
     reelsData.forEach(reel => {
         const reelDiv = document.createElement('div');
