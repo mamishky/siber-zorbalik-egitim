@@ -201,173 +201,175 @@ async function updatePanelUserInfo() {
     if (adminEmail) adminEmail.textContent = email;
 }
 
-// Auth form toggles
+// Auth form toggles ve form handlers
 document.addEventListener('DOMContentLoaded', () => {
     const showSignupBtn = document.getElementById('show-signup');
     const showLoginBtn = document.getElementById('show-login');
     const loginForm = document.getElementById('loginForm');
     const signupForm = document.getElementById('signupForm');
     
-    if (showSignupBtn) {
+    if (showSignupBtn && loginForm && signupForm) {
         showSignupBtn.addEventListener('click', () => {
             loginForm.style.display = 'none';
             signupForm.style.display = 'block';
         });
     }
     
-    if (showLoginBtn) {
+    if (showLoginBtn && loginForm && signupForm) {
         showLoginBtn.addEventListener('click', () => {
             signupForm.style.display = 'none';
             loginForm.style.display = 'block';
         });
     }
-});
-
-// Signup Form Handler
-document.getElementById('signupForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
     
-    const firstName = document.getElementById('signup-firstname').value.trim();
-    const lastName = document.getElementById('signup-lastname').value.trim();
-    const email = document.getElementById('signup-email').value.trim();
-    const password = document.getElementById('signup-password').value;
-    
-    try {
-        // Create user with email and password
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        const user = userCredential.user;
-        
-        // Save user data to Firestore
-        await db.collection('users').doc(user.uid).set({
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    // Signup Form Handler
+    if (signupForm) {
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const firstName = document.getElementById('signup-firstname').value.trim();
+            const lastName = document.getElementById('signup-lastname').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value;
+            
+            try {
+                // Create user with email and password
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                // Save user data to Firestore
+                await db.collection('users').doc(user.uid).set({
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Show success notification
+                showNotification('Başarılı!', 'Üyeliğiniz onaylandı! Hoş geldiniz.', 'success');
+                
+                // Clear form
+                document.getElementById('signupForm').reset();
+                
+            } catch (error) {
+                console.error('Signup error:', error);
+                let errorMessage = 'Kayıt sırasında bir hata oluştu.';
+                
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = 'Bu e-posta adresi zaten kullanılıyor.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Geçersiz e-posta adresi.';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = 'Şifre çok zayıf. En az 6 karakter olmalı.';
+                }
+                
+                showNotification('Hata', errorMessage, 'error');
+            }
         });
-        
-        // Show success notification
-        showNotification('Başarılı!', 'Üyeliğiniz onaylandı! Hoş geldiniz.', 'success');
-        
-        // Clear form
-        document.getElementById('signupForm').reset();
-        
-    } catch (error) {
-        console.error('Signup error:', error);
-        let errorMessage = 'Kayıt sırasında bir hata oluştu.';
-        
-        if (error.code === 'auth/email-already-in-use') {
-            errorMessage = 'Bu e-posta adresi zaten kullanılıyor.';
-        } else if (error.code === 'auth/invalid-email') {
-            errorMessage = 'Geçersiz e-posta adresi.';
-        } else if (error.code === 'auth/weak-password') {
-            errorMessage = 'Şifre çok zayıf. En az 6 karakter olmalı.';
-        }
-        
-        showNotification('Hata', errorMessage, 'error');
-    }
-});
-
-// Login Form Handler - BENİ HATIRLA EKLENDİ + GELİŞTİRİLMİŞ ERROR HANDLING
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const emailInput = document.getElementById('login-email');
-    const passwordInput = document.getElementById('login-password');
-    const rememberMeCheckbox = document.getElementById('remember-me');
-    
-    if (!emailInput || !passwordInput) {
-        showNotification('Hata', 'Form elementleri bulunamadı.', 'error');
-        return;
     }
     
-    const email = emailInput.value.trim();
-    const password = passwordInput.value;
-    const rememberMe = rememberMeCheckbox ? rememberMeCheckbox.checked : false;
-    
-    // Basit doğrulama
-    if (!email || !password) {
-        showNotification('Uyarı', 'Lütfen e-posta ve şifrenizi girin.', 'warning');
-        return;
+    // Login Form Handler - BENİ HATIRLA EKLENDİ + GELİŞTİRİLMİŞ ERROR HANDLING
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const emailInput = document.getElementById('login-email');
+            const passwordInput = document.getElementById('login-password');
+            const rememberMeCheckbox = document.getElementById('remember-me');
+            
+            if (!emailInput || !passwordInput) {
+                showNotification('Hata', 'Form elementleri bulunamadı.', 'error');
+                return;
+            }
+            
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            const rememberMe = rememberMeCheckbox ? rememberMeCheckbox.checked : false;
+            
+            // Basit doğrulama
+            if (!email || !password) {
+                showNotification('Uyarı', 'Lütfen e-posta ve şifrenizi girin.', 'warning');
+                return;
+            }
+            
+            if (!auth) {
+                showNotification('Hata', 'Firebase Auth yüklenmedi. Sayfayı yenileyin.', 'error');
+                console.error('Firebase auth is not initialized');
+                return;
+            }
+            
+            try {
+                console.log('Login attempt:', email, 'Remember:', rememberMe);
+                
+                // Firebase Auth persistence ayarla
+                const persistence = rememberMe ? 
+                    firebase.auth.Auth.Persistence.LOCAL : 
+                    firebase.auth.Auth.Persistence.SESSION;
+                
+                await auth.setPersistence(persistence);
+                console.log('Persistence set to:', persistence);
+                
+                // Giriş yap
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                console.log('Login successful:', userCredential.user.uid);
+                
+                // Remember me tercihini sakla
+                if (rememberMe) {
+                    localStorage.setItem('safetagram_remember', 'true');
+                    localStorage.setItem('safetagram_email', email);
+                } else {
+                    localStorage.removeItem('safetagram_remember');
+                    localStorage.removeItem('safetagram_email');
+                }
+                
+                showNotification('Başarılı!', 'Giriş yapıldı. Hoş geldiniz!', 'success');
+                
+                // Form resetleme - remember me checkbox'ı koru
+                emailInput.value = '';
+                passwordInput.value = '';
+                if (rememberMeCheckbox && !rememberMe) {
+                    rememberMeCheckbox.checked = false;
+                }
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                console.error('Error code:', error.code);
+                console.error('Error message:', error.message);
+                
+                let errorMessage = 'Giriş yapılırken bir hata oluştu.';
+                
+                switch(error.code) {
+                    case 'auth/user-not-found':
+                        errorMessage = 'Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı. Lütfen üye olun.';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = 'Şifreniz yanlış. Lütfen tekrar deneyin.';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'Geçersiz e-posta adresi formatı.';
+                        break;
+                    case 'auth/user-disabled':
+                        errorMessage = 'Bu hesap devre dışı bırakılmış. Yönetici ile iletişime geçin.';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = 'Çok fazla başarısız giriş denemesi. Lütfen daha sonra tekrar deneyin.';
+                        break;
+                    case 'auth/network-request-failed':
+                        errorMessage = 'İnternet bağlantınızı kontrol edin ve tekrar deneyin.';
+                        break;
+                    case 'auth/invalid-credential':
+                        errorMessage = 'E-posta veya şifre hatalı. Lütfen kontrol edip tekrar deneyin.';
+                        break;
+                    default:
+                        errorMessage = `Giriş hatası: ${error.message}`;
+                }
+                
+                showNotification('Giriş Başarısız', errorMessage, 'error');
+            }
+        });
     }
     
-    if (!auth) {
-        showNotification('Hata', 'Firebase Auth yüklenmedi. Sayfayı yenileyin.', 'error');
-        console.error('Firebase auth is not initialized');
-        return;
-    }
-    
-    try {
-        console.log('Login attempt:', email, 'Remember:', rememberMe);
-        
-        // Firebase Auth persistence ayarla
-        const persistence = rememberMe ? 
-            firebase.auth.Auth.Persistence.LOCAL : 
-            firebase.auth.Auth.Persistence.SESSION;
-        
-        await auth.setPersistence(persistence);
-        console.log('Persistence set to:', persistence);
-        
-        // Giriş yap
-        const userCredential = await auth.signInWithEmailAndPassword(email, password);
-        console.log('Login successful:', userCredential.user.uid);
-        
-        // Remember me tercihini sakla
-        if (rememberMe) {
-            localStorage.setItem('safetagram_remember', 'true');
-            localStorage.setItem('safetagram_email', email);
-        } else {
-            localStorage.removeItem('safetagram_remember');
-            localStorage.removeItem('safetagram_email');
-        }
-        
-        showNotification('Başarılı!', 'Giriş yapıldı. Hoş geldiniz!', 'success');
-        
-        // Form resetleme - remember me checkbox'ı koru
-        emailInput.value = '';
-        passwordInput.value = '';
-        if (rememberMeCheckbox && !rememberMe) {
-            rememberMeCheckbox.checked = false;
-        }
-        
-    } catch (error) {
-        console.error('Login error:', error);
-        console.error('Error code:', error.code);
-        console.error('Error message:', error.message);
-        
-        let errorMessage = 'Giriş yapılırken bir hata oluştu.';
-        
-        switch(error.code) {
-            case 'auth/user-not-found':
-                errorMessage = 'Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı. Lütfen üye olun.';
-                break;
-            case 'auth/wrong-password':
-                errorMessage = 'Şifreniz yanlış. Lütfen tekrar deneyin.';
-                break;
-            case 'auth/invalid-email':
-                errorMessage = 'Geçersiz e-posta adresi formatı.';
-                break;
-            case 'auth/user-disabled':
-                errorMessage = 'Bu hesap devre dışı bırakılmış. Yönetici ile iletişime geçin.';
-                break;
-            case 'auth/too-many-requests':
-                errorMessage = 'Çok fazla başarısız giriş denemesi. Lütfen daha sonra tekrar deneyin.';
-                break;
-            case 'auth/network-request-failed':
-                errorMessage = 'İnternet bağlantınızı kontrol edin ve tekrar deneyin.';
-                break;
-            case 'auth/invalid-credential':
-                errorMessage = 'E-posta veya şifre hatalı. Lütfen kontrol edip tekrar deneyin.';
-                break;
-            default:
-                errorMessage = `Giriş hatası: ${error.message}`;
-        }
-        
-        showNotification('Giriş Başarısız', errorMessage, 'error');
-    }
-});
-
-// Sayfa yüklendiğinde "Beni Hatırla" durumunu kontrol et (Madde 10)
-document.addEventListener('DOMContentLoaded', () => {
+    // Sayfa yüklendiğinde "Beni Hatırla" durumunu kontrol et (Madde 10)
     const rememberMe = localStorage.getItem('safetagram_remember');
     const savedEmail = localStorage.getItem('safetagram_email');
     
