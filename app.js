@@ -384,6 +384,29 @@ document.addEventListener('DOMContentLoaded', () => {
             rememberCheckbox.checked = true;
         }
     }
+    
+    // Yaş input validasyonu - değerin otomatik düşmesini önle
+    const ageInput = document.getElementById('participant-age');
+    if (ageInput) {
+        ageInput.addEventListener('input', (e) => {
+            let value = parseInt(e.target.value);
+            if (value < 1) {
+                e.target.value = 1;
+            } else if (value > 120) {
+                e.target.value = 120;
+            }
+        });
+        
+        // Sayfa değiştirme/refresh durumunda değeri koru
+        ageInput.addEventListener('blur', (e) => {
+            if (!e.target.value || e.target.value < 1) {
+                e.target.value = '';
+            }
+        });
+    }
+    
+    // Session Form Handler'ı başlat
+    initSessionFormHandler();
 });
 
 // Panel Logout
@@ -431,26 +454,42 @@ if (adminLogoutBtn) {
     });
 }
 
-// Session Form Handler (App Entry)
-document.getElementById('sessionForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    if (!currentUser) {
-        showNotification('Hata', 'Lütfen önce giriş yapın.', 'error');
+// Session Form Handler (App Entry) - DOMContentLoaded içinde tanımlanacak
+// Bu fonksiyon aşağıda DOMContentLoaded event listener içinde bağlanacak
+
+function initSessionFormHandler() {
+    const sessionForm = document.getElementById('sessionForm');
+    if (!sessionForm) {
+        console.error('sessionForm bulunamadı!');
         return;
     }
     
-    const name = document.getElementById('participant-name').value.trim();
-    const age = document.getElementById('participant-age').value;
-    const sessionType = document.getElementById('session-type').value;
-    const hintEnabled = document.getElementById('hint-use').checked;
-    
-    if (!name || !age || !sessionType) {
-        showNotification('Hata', 'Lütfen tüm alanları doldurun!', 'error');
-        return;
-    }
-    
-    // AI her zaman aktif (Madde 1 & 2 - uyarı yok)
+    sessionForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        if (!currentUser) {
+            showNotification('Hata', 'Lütfen önce giriş yapın.', 'error');
+            return;
+        }
+        
+        const name = document.getElementById('participant-name').value.trim();
+        const age = document.getElementById('participant-age').value;
+        const sessionType = document.getElementById('session-type').value;
+        const hintEnabled = document.getElementById('hint-use').checked;
+        
+        if (!name || !age || !sessionType) {
+            showNotification('Hata', 'Lütfen tüm alanları doldurun!', 'error');
+            return;
+        }
+        
+        // Yaş validasyonu
+        const ageNum = parseInt(age);
+        if (isNaN(ageNum) || ageNum < 1 || ageNum > 120) {
+            showNotification('Hata', 'Lütfen geçerli bir yaş girin (1-120).', 'error');
+            return;
+        }
+        
+        // AI her zaman aktif (Madde 1 & 2 - uyarı yok)
     
     // Oturum başlangıcında TÜM STATE'i SIFIRLA (Madde 6)
     // Zamanlayıcıları temizle
@@ -601,17 +640,18 @@ document.getElementById('sessionForm').addEventListener('submit', async (e) => {
     generateFeed();
     renderStories();
     
-    // İlk mesaj HEMEN gönder (Madde 4)
-    // Kullanıcı ana sayfaya geldiğinde ilk mesaj gelir
-    // Sonraki mesajlar 10 saniye aralıklarla gelecek
-    setTimeout(() => {
-        if (currentSession.messageQueue.length > 0) {
-            currentSession.messageQueue[0]._deliveredAt = new Date();
-            currentSession.messageQueue[0]._status = 'delivered';
-            sendNextMessageNotification();
-        }
-    }, 1000); // 1 saniye sonra ilk mesaj
-});
+        // İlk mesaj HEMEN gönder (Madde 4)
+        // Kullanıcı ana sayfaya geldiğinde ilk mesaj gelir
+        // Sonraki mesajlar 10 saniye aralıklarla gelecek
+        setTimeout(() => {
+            if (currentSession.messageQueue.length > 0) {
+                currentSession.messageQueue[0]._deliveredAt = new Date();
+                currentSession.messageQueue[0]._status = 'delivered';
+                sendNextMessageNotification();
+            }
+        }, 1000); // 1 saniye sonra ilk mesaj
+    });
+}
 
 // Global değişkenler - YENİ YAPI (Madde 6)
 let currentSession = {
