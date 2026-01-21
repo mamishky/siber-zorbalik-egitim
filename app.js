@@ -2782,7 +2782,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         returnToFeed();
                         break;
                     case 'reels':
-                        showReels();
+                        // Reels devre dışı bırakıldı
                         break;
                     case 'search':
                     case 'likes':

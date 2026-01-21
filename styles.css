@@ -662,6 +662,11 @@ select.form-control {
     color: #0095f6;
 }
 
+/* Reels butonu devre dışı */
+.bottom-nav i[data-nav="reels"] {
+    display: none;
+}
+
 /* Direkt Mesaj Ekranı */
 .dm-header {
     display: flex;
