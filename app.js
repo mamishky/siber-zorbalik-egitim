@@ -121,8 +121,20 @@ auth.onAuthStateChanged(async (user) => {
     console.log('Auth state changed:', user ? user.uid : 'No user');
     
     if (user) {
+        // "Beni Hatırla" kontrolü - Sadece işaretliyse otomatik giriş yap
+        const rememberMe = localStorage.getItem('safetagram_remember');
+        
+        if (rememberMe !== 'true') {
+            // "Beni Hatırla" işaretli değilse oturumu kapat
+            console.log('⚠️ "Beni Hatırla" işaretli değil, oturum kapatılıyor...');
+            await auth.signOut();
+            currentUser = null;
+            showScreen('auth-screen');
+            return;
+        }
+        
         currentUser = user;
-        console.log('User logged in:', user.email);
+        console.log('✅ User logged in (Remember me aktif):', user.email);
         
         try {
             // Get user data from Firestore
@@ -372,6 +384,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // Sayfa yüklendiğinde "Beni Hatırla" durumunu kontrol et (Madde 10)
     const rememberMe = localStorage.getItem('safetagram_remember');
     const savedEmail = localStorage.getItem('safetagram_email');
+    
+    // Güvenlik: Sayfa yüklendiğinde, eğer kullanıcı giriş yapmışsa ama "Beni Hatırla" işaretli değilse, oturumu kapat
+    // Bu kontrol, onAuthStateChanged'den önce çalışmalı
+    setTimeout(async () => {
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+            const currentRememberMe = localStorage.getItem('safetagram_remember');
+            if (currentRememberMe !== 'true') {
+                // "Beni Hatırla" işaretli değilse oturumu kapat
+                console.log('⚠️ "Beni Hatırla" işaretli değil, oturum kapatılıyor...');
+                await auth.signOut();
+                showNotification('Bilgi', 'Oturum kapatıldı. "Beni Hatırla" işaretlemediğiniz için oturumunuz kaydedilmedi.', 'info');
+            }
+        }
+    }, 500); // onAuthStateChanged'den sonra çalışsın
     
     if (rememberMe === 'true' && savedEmail) {
         const emailInput = document.getElementById('login-email');
