@@ -512,7 +512,10 @@ function initSessionFormHandler() {
         const sessionType = document.getElementById('session-type').value;
         const hintEnabled = document.getElementById('hint-use').checked;
         
+        console.log('📋 Form değerleri:', { name, age, sessionType, hintEnabled });
+        
         if (!name || !age || !sessionType) {
+            console.error('❌ Form alanları eksik');
             showNotification('Hata', 'Lütfen tüm alanları doldurun!', 'error');
             return;
         }
@@ -520,24 +523,29 @@ function initSessionFormHandler() {
         // Yaş validasyonu
         const ageNum = parseInt(age);
         if (isNaN(ageNum) || ageNum < 1 || ageNum > 120) {
+            console.error('❌ Yaş geçersiz:', age);
             showNotification('Hata', 'Lütfen geçerli bir yaş girin (1-120).', 'error');
             return;
         }
         
+        console.log('✅ Form validasyonu başarılı');
+        
         // AI her zaman aktif (Madde 1 & 2 - uyarı yok)
-    
-    // Oturum başlangıcında TÜM STATE'i SIFIRLA (Madde 6)
-    // Zamanlayıcıları temizle
-    if (currentSession.messageTimeout) {
-        clearTimeout(currentSession.messageTimeout);
-    }
-    if (currentSession.hintTimeout) {
-        clearTimeout(currentSession.hintTimeout);
-    }
-    
-    // Generate a unique session ID
-    const sessionId = `S${Date.now()}`;
-    currentSession = {
+        
+        // Oturum başlangıcında TÜM STATE'i SIFIRLA (Madde 6)
+        // Zamanlayıcıları temizle
+        if (currentSession.messageTimeout) {
+            clearTimeout(currentSession.messageTimeout);
+        }
+        if (currentSession.hintTimeout) {
+            clearTimeout(currentSession.hintTimeout);
+        }
+        
+        console.log('🔄 State sıfırlanıyor...');
+        
+        // Generate a unique session ID
+        const sessionId = `S${Date.now()}`;
+        currentSession = {
         sessionId: sessionId,
         participantId: `P${Date.now()}`,
         participantName: name,
@@ -577,43 +585,50 @@ function initSessionFormHandler() {
         messageQueue: [],
         currentMessageIndex: 0,
         selectedComplaintReason: null,
-        conversationHistory: {}
-    };
-    
-    // localStorage ve sessionStorage'i temizle (Madde 6)
-    // Her yeni oturumda geçmiş mesajlar ASLA sızmasın
-    localStorage.removeItem('safestagram_users');
-    sessionStorage.removeItem('safestagram_session');
-    
-    // Create session in Firestore
-    try {
-        await db.collection('users').doc(currentUser.uid)
-            .collection('sessions').doc(sessionId).set({
-                participantName: name,
-                participantAge: parseInt(age),
-                sessionType: sessionType,
-                hintEnabled: hintEnabled,
-                startedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                status: 'active'
-            });
-    } catch (error) {
-        console.error('Error creating session:', error);
-        showNotification('Hata', 'Oturum oluşturulamadı.', 'error');
-        return;
-    }
-    
-    // Navigasyon becerisini başlangıçta true yap
-    currentSession.skills.navigation = true;
-    
-    // Prepare message queue - TAM 10 MESAJ (Madde 4)
-    // 5 güvenli + 5 zorbalık (her türden 1)
-    currentSession.messageQueue = [];
-    
-    // Map session type to scenarios (handle new session types)
-    let scenarioType = sessionType;
-    if (sessionType === 'genelleme-on' || sessionType === 'genelleme-son') {
-        scenarioType = 'baslama'; // Use baslama scenarios for genelleme tests
-    }
+            conversationHistory: {}
+        };
+        
+        console.log('✅ currentSession oluşturuldu:', sessionId);
+        
+        // localStorage ve sessionStorage'i temizle (Madde 6)
+        // Her yeni oturumda geçmiş mesajlar ASLA sızmasın
+        localStorage.removeItem('safestagram_users');
+        sessionStorage.removeItem('safestagram_session');
+        
+        console.log('💾 Firebase oturum oluşturuluyor...');
+        
+        // Create session in Firestore
+        try {
+            await db.collection('users').doc(currentUser.uid)
+                .collection('sessions').doc(sessionId).set({
+                    participantName: name,
+                    participantAge: parseInt(age),
+                    sessionType: sessionType,
+                    hintEnabled: hintEnabled,
+                    startedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: 'active'
+                });
+            console.log('✅ Firebase oturum oluşturuldu');
+        } catch (error) {
+            console.error('❌ Firebase oturum hatası:', error);
+            showNotification('Hata', 'Oturum oluşturulamadı.', 'error');
+            return;
+        }
+        
+        // Navigasyon becerisini başlangıçta true yap
+        currentSession.skills.navigation = true;
+        
+        // Prepare message queue - TAM 10 MESAJ (Madde 4)
+        // 5 güvenli + 5 zorbalık (her türden 1)
+        currentSession.messageQueue = [];
+        
+        console.log('📨 Mesaj kuyruğu hazırlanıyor...');
+        
+        // Map session type to scenarios (handle new session types)
+        let scenarioType = sessionType;
+        if (sessionType === 'genelleme-on' || sessionType === 'genelleme-son') {
+            scenarioType = 'baslama'; // Use baslama scenarios for genelleme tests
+        }
     
     const cyberbullyingQueue = [];
     const safeQueue = [];
@@ -670,22 +685,29 @@ function initSessionFormHandler() {
         // İlk güvenli mesajı başa al
         const firstSafe = currentSession.messageQueue.splice(firstSafeIndex, 1)[0];
         currentSession.messageQueue.unshift(firstSafe);
-    }
-    
-    currentSession.currentMessageIndex = 0;
-    
-    showScreen('main-app');
-    generateFeed();
-    renderStories();
-    
+        }
+        
+        currentSession.currentMessageIndex = 0;
+        
+        console.log('📋 Mesaj kuyruğu hazır:', currentSession.messageQueue.length, 'mesaj');
+        console.log('🎯 Simülasyona geçiliyor...');
+        
+        showScreen('main-app');
+        generateFeed();
+        renderStories();
+        
+        console.log('✅ Ana ekran gösteriliyor');
+        
         // İlk mesaj HEMEN gönder (Madde 4)
         // Kullanıcı ana sayfaya geldiğinde ilk mesaj gelir
         // Sonraki mesajlar 10 saniye aralıklarla gelecek
         setTimeout(() => {
+            console.log('⏰ İlk mesaj gönderiliyor...');
             if (currentSession.messageQueue.length > 0) {
                 currentSession.messageQueue[0]._deliveredAt = new Date();
                 currentSession.messageQueue[0]._status = 'delivered';
                 sendNextMessageNotification();
+                console.log('✅ İlk mesaj gönderildi');
             }
         }, 1000); // 1 saniye sonra ilk mesaj
     });
