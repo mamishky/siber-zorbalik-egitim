@@ -16,18 +16,17 @@ const COMPLAINT_REASONS = [
 // 70 Fotoğraf + 30 Video
 const POSTS_100 = [
     // OYUNLAR & GAMING (Video: 1-10, Fotoğraf: 11-30)
-    { username: "elraenn", avatar: "elraenn", videoEmbedUrl: "https://www.youtube.com/embed/78kPb6mpIbY?autoplay=1&mute=1", caption: "", likes: 125000, type: "video" }, // GTA 6 ilk fragman analizi
-    { username: "pqueen", avatar: "pqueen", videoEmbedUrl: "https://www.youtube.com/embed/rqc848E_ldc?autoplay=1&mute=1&start=5", caption: "", likes: 98000, type: "video" }, // The Witcher 4 beklentiler
-    { username: "jahrein", avatar: "jahrein", image: "https://picsum.photos/seed/gaming1/600/600", caption: "", likes: 87000, type: "image" }, // En iyi açık dünya oyunları
-    { username: "unlost", avatar: "unlost", videoEmbedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1", caption: "", likes: 76000, type: "video" }, // Elden Ring boss tier list
-    { username: "kendine_muzisyen", avatar: "kendinemuzisyen", image: "https://picsum.photos/seed/gaming2/600/600", caption: "", likes: 65000, type: "image" }, // PS5 vs Xbox
-    { username: "wtcn", avatar: "wtcn", videoEmbedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1", caption: "", likes: 54000, type: "video" }, // Cyberpunk 2077
-    { username: "pinky", avatar: "pinky", image: "https://picsum.photos/seed/gaming3/600/600", caption: "", likes: 43000, type: "image" }, // Red Dead Redemption 2
-    { username: "irmak_tuzun", avatar: "irmaktuzun", videoEmbedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1", caption: "", likes: 32000, type: "video" }, // FIFA 24
-    { username: "xqc", avatar: "xqc", image: "https://picsum.photos/seed/gaming4/600/600", caption: "", likes: 210000, type: "image" }, // Call of Duty
-    { username: "pokimane", avatar: "pokimane", videoEmbedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1", caption: "", likes: 180000, type: "video" }, // Assassin's Creed
-    { username: "ninja", avatar: "ninja", image: "https://picsum.photos/seed/gaming5/600/600", caption: "", likes: 150000, type: "image" }, // Brawl Stars tier list
-    { username: "valkyrae", avatar: "valkyrae", image: "https://picsum.photos/seed/gaming6/600/600", caption: "", likes: 120000, type: "image" }, // Clash Royale
+    { username: "elraenn", avatar: "elraenn", videoEmbedUrl: "https://player.cloudinary.com/embed/?cloud_name=dcfhch5tq&public_id=elraeen_1_ui7yb6", caption: "kadın erkek farkı :)))", likes: 125000, type: "video" }, 
+    { username: "pqueen", avatar: "pqueen", videoEmbedUrl: "https://player.cloudinary.com/embed/?cloud_name=dcfhch5tq&public_id=pqueen_1_eld6eg", caption: "yemekten sonra babayı görünce", likes: 98000, type: "video" }, 
+    { username: "kadıköy_boğası", avatar: "kadıköy_boğası", videoEmbedUrl: "https://player.cloudinary.com/embed/?cloud_name=dcfhch5tq&public_id=kadikoybogasi_1_yr6guv", caption: "herkesin bilgisayarı odasında olur demiş", likes: 87000, type: "video" }, 
+    { username: "kedikolik", avatar: "kedikolik", videoEmbedUrl: "https://player.cloudinary.com/embed/?cloud_name=dcfhch5tq&public_id=cat_1_rwflbp", caption: "meraklı kediler", likes: 76000, type: "video" },
+    { username: "kendine_muzisyen", avatar: "kendinemuzisyen", videoEmbedUrl: "https://player.cloudinary.com/embed/?cloud_name=dcfhch5tq&public_id=kendinemu%CC%88zisyen_1_jhp09g", caption: "ödemeyeceeeek", likes: 65000, type: "video" }, 
+    { username: "köpekgiller", avatar: "köpekgiller", videoEmbedUrl: "https://player.cloudinary.com/embed/?cloud_name=dcfhch5tq&public_id=dog_1_l47b5f", caption: "fail köpekler", likes: 54000, type: "video" }, 
+    { username: "gamingtv", avatar: "gamingtv", image: "https://res.cloudinary.com/dcfhch5tq/image/upload/v1769107138/gta6_a3peuf.jpg", caption: "GTA 6 2027 yılına ertelenebilir", likes: 43000, type: "image" }, 
+    { username: "oyundelisi", avatar: "oyundelisi", image: "https://res.cloudinary.com/dcfhch5tq/image/upload/v1769107139/sonicmario_xytcjv.jpg", caption: "Eski SEGA yapımcısı Ryoichi Hasegawa, Mario & Sonic at the Olympic Games için hazırlanan görsellerde Sonic’in ayağının Mario’nun önünde konumlandırılması nedeniyle Nintendo’nun müdahalede bulunduğunu açıkladı. 🤔", likes: 32000, type: "image" },
+    { username: "taklacı", avatar: "taklacı", videoEmbedUrl: "https://player.cloudinary.com/embed/?cloud_name=dcfhch5tq&public_id=gu%CC%88vercinadam_uzptts", caption: "o kadar çok kaydırdın ki orijinaline denk geldin", likes: 210000, type: "image" },
+    { username: "demarke", avatar: "demarke", image: "https://res.cloudinary.com/dcfhch5tq/image/upload/v1769107139/fenerbahc%CC%A7e_1_gy0vjc.jpg", caption: "Kadıköy'de her yer kırmızı-beyaz! 🇹🇷", likes: 150000, type: "image" },
+    { username: "hanimisigutti", avatar: "hanimisigutti", videoEmbedUrl: "https://player.cloudinary.com/embed/?cloud_name=dcfhch5tq&public_id=hanimisiguttimontisi_h3cesd", caption: "hanimişiguttimontişi ballışı da ballışı", likes: 120000, type: "video" },
     { username: "hasanabi", avatar: "hasanabi", videoEmbedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1", caption: "", likes: 110000, type: "video" }, // PUBG Mobile
     { username: "ludwig", avatar: "ludwig", image: "https://picsum.photos/seed/gaming7/600/600", caption: "", likes: 95000, type: "image" }, // Mobile Legends
     { username: "mizkif", avatar: "mizkif", videoEmbedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1", caption: "", likes: 85000, type: "video" }, // Among Us
