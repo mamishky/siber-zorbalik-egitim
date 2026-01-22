@@ -585,8 +585,22 @@ function initSessionFormHandler() {
         messageQueue: [],
         currentMessageIndex: 0,
         selectedComplaintReason: null,
-            conversationHistory: {}
-        };
+        conversationHistory: {},
+        // Inbox mesajları (Madde 5)
+        deliveredMessages: [],
+        // Mesaj bazlı sonuçlar (Madde 16)
+        perMessageResults: [],
+        // Beceri basamakları kayıtları (Madde 13, 14)
+        skillSteps: {
+            navigation: false,
+            reading: false,
+            replying: false,
+            reporting: false,
+            complaintType: false,
+            blocking: false,
+            informAdult: false
+        }
+    };
         
         console.log('✅ currentSession oluşturuldu:', sessionId);
         
@@ -636,9 +650,12 @@ function initSessionFormHandler() {
     // Get bullying types from scenarios.js
     const BULLYING_TYPES = window.BULLYING_TYPES || ['sozel', 'dislama', 'tehdit', 'iftira', 'kimlik'];
     
+    // Get SCENARIOS from window (scenarios.js'den yüklenir)
+    const SCENARIOS = window.SCENARIOS || {};
+    
     // Iterate through all 5 bullying types
     BULLYING_TYPES.forEach(bullyingType => {
-        const allScenarios = SCENARIOS[scenarioType] ? SCENARIOS[scenarioType][bullyingType] : SCENARIOS['baslama'][bullyingType];
+        const allScenarios = SCENARIOS[scenarioType] ? SCENARIOS[scenarioType][bullyingType] : (SCENARIOS['baslama'] ? SCENARIOS['baslama'][bullyingType] : []);
         
         // Separate cyberbullying and safe messages
         const cyberbullyingMessages = allScenarios.filter(s => 
@@ -1188,10 +1205,34 @@ function sendNextMessageNotification() {
     // Get current message info for notification
     const scenario = currentSession.messageQueue[currentSession.currentMessageIndex];
     
-    // Mesajı delivered olarak işaretle
+    // Mesajı delivered olarak işaretle ve deliveredMessages'a ekle (Madde 5)
     if (scenario) {
         scenario._deliveredAt = new Date();
         scenario._status = 'delivered';
+        
+        // deliveredMessages'a ekle (inbox'ta görünsün)
+        if (!currentSession.deliveredMessages) {
+            currentSession.deliveredMessages = [];
+        }
+        
+        // Mesaj önizlemesi için ilk mesajı al
+        let previewText = 'Yeni mesaj';
+        if (scenario.messages && scenario.messages.length > 0) {
+            previewText = scenario.messages[0].text || 'Yeni mesaj';
+        } else if (scenario.conversation && scenario.conversation.length > 0) {
+            previewText = scenario.conversation[0].text || 'Yeni mesaj';
+        }
+        
+        currentSession.deliveredMessages.push({
+            sender: scenario.sender,
+            avatar: scenario.avatar || scenario.sender,
+            previewText: previewText,
+            createdAt: new Date(),
+            deliveredAt: new Date(),
+            status: 'delivered',
+            readAt: null,
+            scenario: scenario
+        });
     }
     
     const toast = document.getElementById('dm-notification-toast');
@@ -1241,93 +1282,86 @@ function showInbox() {
     renderInboxList();
 }
 
-// Inbox listesini oluştur
+// Zaman etiketi formatla (Madde 5) - "Şimdi" / "X dk önce"
+function formatRelativeTime(timestamp) {
+    if (!timestamp) return 'Şimdi';
+    
+    const messageTime = timestamp instanceof Date ? timestamp : new Date(timestamp);
+    const now = new Date();
+    const diffMs = now - messageTime;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    
+    if (diffMins < 1) {
+        return 'Şimdi';
+    } else if (diffMins < 60) {
+        return `${diffMins} dk önce`;
+    } else if (diffHours < 24) {
+        return `${diffHours} sa önce`;
+    } else {
+        return `${diffDays} gün önce`;
+    }
+}
+
+// Inbox listesini oluştur (Madde 5 - deliveredMessages kullan)
 function renderInboxList() {
     const inboxList = document.getElementById('inbox-list');
+    if (!inboxList) return;
+    
     inboxList.innerHTML = '';
     
-    // Load message history for this participant
+    // Load message history for this participant (blocked status için)
     const messageHistory = loadMessageHistory(currentSession.participantName);
     
-    // Instagram benzeri: Sadece gelmiş mesajları göster (geçmiş + şu anki)
+    // Instagram benzeri: Sadece GELMİŞ mesajları göster (deliveredMessages)
     // Gelecek mesajlar gözükmeyecek - gerçek Instagram deneyimi
-    currentSession.messageQueue.forEach((scenario, index) => {
-        // Sadece gelmiş mesajları göster - Instagram'da gelecek mesajlar görünmez
-        if (index > currentSession.currentMessageIndex) {
-            return; // Gelecek mesajları atla
-        }
-        
-        const isUnread = index === currentSession.currentMessageIndex && currentSession.pendingMessages > 0;
-        const isPast = index < currentSession.currentMessageIndex;
+    if (!currentSession.deliveredMessages || currentSession.deliveredMessages.length === 0) {
+        inboxList.innerHTML = '<div class="empty-inbox">Henüz mesaj yok</div>';
+        return;
+    }
+    
+    currentSession.deliveredMessages.forEach((deliveredMsg, index) => {
+        const isUnread = deliveredMsg.status === 'delivered' && !deliveredMsg.readAt;
+        const isPast = deliveredMsg.status === 'read' || deliveredMsg.readAt;
         
         // Check if this sender is blocked
-        const senderHistory = messageHistory[scenario.sender];
+        const senderHistory = messageHistory[deliveredMsg.sender];
         const isBlocked = senderHistory && senderHistory.status === 'blocked';
         
         const item = document.createElement('div');
         item.className = `inbox-item ${isUnread ? 'unread' : ''} ${isBlocked ? 'blocked' : ''}`;
         item.dataset.index = index;
+        item.dataset.sender = deliveredMsg.sender;
         
         // Mesaj önizlemesi için ilk mesajı al
         let previewText = '';
         if (isBlocked) {
             previewText = '🔴 ENGELLENDİ';
-        } else if (isPast) {
-            // Geçmiş mesajlar için - mesaj geçmişinden ilk mesajı al
-            const senderHistory = messageHistory[scenario.sender];
-            if (senderHistory && senderHistory.messages && senderHistory.messages.length > 0) {
-                // Mesaj geçmişinden ilk mesajı göster
-                const firstMessage = senderHistory.messages[0];
-                previewText = firstMessage.text || '';
-                if (previewText.length > 40) {
-                    previewText = previewText.substring(0, 40) + '...';
-                }
-            } else {
-                // Mesaj geçmişi yoksa varsayılan göster
-                previewText = 'Mesajlaşma başladı';
+        } else if (deliveredMsg.previewText) {
+            previewText = deliveredMsg.previewText;
+            if (previewText.length > 40) {
+                previewText = previewText.substring(0, 40) + '...';
             }
         } else if (isUnread) {
-            // Yeni gelen mesaj için - içeriği gösterme, sadece "Yeni mesaj" göster
             previewText = 'Yeni mesaj';
         } else {
-            // Gelecek mesajlar için
-            previewText = '';
+            previewText = 'Mesajlaşma başladı';
         }
         
-        // Zaman metni - Instagram benzeri (Madde 5)
-        let timeText = 'Şimdi';
-        if (!isUnread && !isPast) {
-            timeText = 'Okundu';
-        } else if (isPast && senderHistory && senderHistory.timestamp) {
-            // Geçmiş mesajlar için zaman hesapla
-            const messageTime = new Date(senderHistory.timestamp);
-            const now = new Date();
-            const diffMs = now - messageTime;
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffHours = Math.floor(diffMins / 60);
-            const diffDays = Math.floor(diffHours / 24);
-            
-            if (diffMins < 1) {
-                timeText = 'Şimdi';
-            } else if (diffMins < 60) {
-                timeText = `${diffMins} dk önce`;
-            } else if (diffHours < 24) {
-                timeText = `${diffHours} sa önce`;
-            } else {
-                timeText = `${diffDays} gün önce`;
-            }
-        }
+        // Zaman metni - Instagram benzeri (Madde 5) - formatRelativeTime kullan
+        const timeText = formatRelativeTime(deliveredMsg.createdAt || deliveredMsg.deliveredAt);
         
         item.innerHTML = `
-            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}" alt="${scenario.sender}">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${deliveredMsg.sender}" alt="${deliveredMsg.sender}">
             <div class="inbox-item-content">
                 <div class="inbox-item-header">
-                    <span class="inbox-sender">${scenario.sender}${isBlocked ? ' <span class="blocked-label">🔴 ENGELLENDİ</span>' : ''}</span>
+                    <span class="inbox-sender">${deliveredMsg.sender}${isBlocked ? ' <span class="blocked-label">🔴 ENGELLENDİ</span>' : ''}</span>
                     <span class="inbox-time">${timeText}</span>
                 </div>
                 <div class="inbox-message-preview ${isBlocked ? 'blocked-preview' : ''}">
                     ${isUnread && !isBlocked ? '<span class="unread-dot"></span>' : ''}
-                    ${previewText || 'Mesajlaşma başladı'}
+                    ${previewText}
                 </div>
             </div>
         `;
@@ -1337,7 +1371,8 @@ function renderInboxList() {
             if (isBlocked) {
                 alert('Bu kullanıcı engellenmiştir.');
             } else {
-                openConversationFromInbox(index);
+                // deliveredMsg'dan conversation'ı aç
+                openConversationFromInbox(deliveredMsg);
             }
         });
         
@@ -1345,10 +1380,30 @@ function renderInboxList() {
     });
 }
 
-// Inbox'tan sohbet aç
-function openConversationFromInbox(index) {
-    currentSession.currentMessageIndex = index;
-    const scenario = currentSession.messageQueue[index];
+// Inbox'tan sohbet aç (deliveredMsg veya index alabilir)
+function openConversationFromInbox(deliveredMsgOrIndex) {
+    let scenario;
+    
+    // Eğer deliveredMsg objesi ise
+    if (deliveredMsgOrIndex && typeof deliveredMsgOrIndex === 'object' && deliveredMsgOrIndex.scenario) {
+        scenario = deliveredMsgOrIndex.scenario;
+        // deliveredMsg'ı read olarak işaretle
+        deliveredMsgOrIndex.readAt = new Date();
+        deliveredMsgOrIndex.status = 'read';
+        
+        // messageQueue'da index bul
+        const index = currentSession.messageQueue.findIndex(s => s === scenario);
+        if (index >= 0) {
+            currentSession.currentMessageIndex = index;
+        }
+    } else {
+        // Eğer index ise (eski kullanım)
+        const index = deliveredMsgOrIndex;
+        currentSession.currentMessageIndex = index;
+        scenario = currentSession.messageQueue[index];
+    }
+    
+    if (!scenario) return;
     
     // Badge'i güncelle
     if (currentSession.pendingMessages > 0) {
