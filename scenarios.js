@@ -108,6 +108,165 @@ const POSTS_100 = [
     { username: "hbo", avatar: "hbo", videoEmbedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1", caption: "", likes: 70000, type: "video" } // The Last of Us
 ];
 
+// Senaryo yapısı - Her oturum türü için zorbalık türlerine göre mesajlar
+// AI tarafından dinamik olarak oluşturulacak
+const SCENARIOS = {
+    'baslama': {
+        'sozel': [
+            { sender: 'ahmet_123', messages: [{ type: 'cyberbullying', text: 'Sen çok aptalsın', cyberType: 'sozel' }] },
+            { sender: 'mehmet_456', conversation: [{ type: 'safe', text: 'Merhaba, nasılsın?' }] }
+        ],
+        'dislama': [
+            { sender: 'ayse_789', messages: [{ type: 'cyberbullying', text: 'Seni gruba almıyoruz', cyberType: 'dislama' }] },
+            { sender: 'fatma_012', conversation: [{ type: 'safe', text: 'Bugün hava çok güzel' }] }
+        ],
+        'tehdit': [
+            { sender: 'ali_345', messages: [{ type: 'cyberbullying', text: 'Seni şikayet edeceğim', cyberType: 'tehdit' }] },
+            { sender: 'veli_678', conversation: [{ type: 'safe', text: 'Ödevini yaptın mı?' }] }
+        ],
+        'iftira': [
+            { sender: 'zeynep_901', messages: [{ type: 'cyberbullying', text: 'Herkes senin hakkında kötü konuşuyor', cyberType: 'iftira' }] },
+            { sender: 'elif_234', conversation: [{ type: 'safe', text: 'Yarın sinemaya gidelim mi?' }] }
+        ],
+        'kimlik': [
+            { sender: 'can_567', messages: [{ type: 'cyberbullying', text: 'Ben senin arkadaşınım, şifreni ver', cyberType: 'kimlik' }] },
+            { sender: 'deniz_890', conversation: [{ type: 'safe', text: 'Bu oyunu denedin mi?' }] }
+        ]
+    },
+    'uygulama': {
+        'sozel': [
+            { sender: 'user_001', messages: [{ type: 'cyberbullying', text: 'Gerçekten çok kötüsün', cyberType: 'sozel' }] },
+            { sender: 'user_002', conversation: [{ type: 'safe', text: 'Selam, nasıl gidiyor?' }] }
+        ],
+        'dislama': [
+            { sender: 'user_003', messages: [{ type: 'cyberbullying', text: 'Seni istemiyoruz', cyberType: 'dislama' }] },
+            { sender: 'user_004', conversation: [{ type: 'safe', text: 'Bugün çok güzelsin' }] }
+        ],
+        'tehdit': [
+            { sender: 'user_005', messages: [{ type: 'cyberbullying', text: 'Dikkat et kendine', cyberType: 'tehdit' }] },
+            { sender: 'user_006', conversation: [{ type: 'safe', text: 'Dersler nasıl gidiyor?' }] }
+        ],
+        'iftira': [
+            { sender: 'user_007', messages: [{ type: 'cyberbullying', text: 'Herkes seni sevmiyor', cyberType: 'iftira' }] },
+            { sender: 'user_008', conversation: [{ type: 'safe', text: 'Hafta sonu planın var mı?' }] }
+        ],
+        'kimlik': [
+            { sender: 'user_009', messages: [{ type: 'cyberbullying', text: 'Ben öğretmenim, bilgilerini ver', cyberType: 'kimlik' }] },
+            { sender: 'user_010', conversation: [{ type: 'safe', text: 'Yeni oyunu gördün mü?' }] }
+        ]
+    },
+    'genelleme-on': {
+        'sozel': [
+            { sender: 'test_001', messages: [{ type: 'cyberbullying', text: 'Sen hiçbir işe yaramazsın', cyberType: 'sozel' }] },
+            { sender: 'test_002', conversation: [{ type: 'safe', text: 'Merhaba, iyi misin?' }] }
+        ],
+        'dislama': [
+            { sender: 'test_003', messages: [{ type: 'cyberbullying', text: 'Seni davet etmeyeceğiz', cyberType: 'dislama' }] },
+            { sender: 'test_004', conversation: [{ type: 'safe', text: 'Hava gerçekten güzel' }] }
+        ],
+        'tehdit': [
+            { sender: 'test_005', messages: [{ type: 'cyberbullying', text: 'Bunu yaparsan kötü olur', cyberType: 'tehdit' }] },
+            { sender: 'test_006', conversation: [{ type: 'safe', text: 'Ödev bitti mi?' }] }
+        ],
+        'iftira': [
+            { sender: 'test_007', messages: [{ type: 'cyberbullying', text: 'Senin hakkında yalan söylüyorlar', cyberType: 'iftira' }] },
+            { sender: 'test_008', conversation: [{ type: 'safe', text: 'Sinemaya gider misin?' }] }
+        ],
+        'kimlik': [
+            { sender: 'test_009', messages: [{ type: 'cyberbullying', text: 'Ben arkadaşınım, şifreyi söyle', cyberType: 'kimlik' }] },
+            { sender: 'test_010', conversation: [{ type: 'safe', text: 'Oyun oynuyor musun?' }] }
+        ]
+    },
+    'genelleme-son': {
+        'sozel': [
+            { sender: 'son_001', messages: [{ type: 'cyberbullying', text: 'Çok saçmasın', cyberType: 'sozel' }] },
+            { sender: 'son_002', conversation: [{ type: 'safe', text: 'Nasılsın bugün?' }] }
+        ],
+        'dislama': [
+            { sender: 'son_003', messages: [{ type: 'cyberbullying', text: 'Grupta yerin yok', cyberType: 'dislama' }] },
+            { sender: 'son_004', conversation: [{ type: 'safe', text: 'İyi günler dilerim' }] }
+        ],
+        'tehdit': [
+            { sender: 'son_005', messages: [{ type: 'cyberbullying', text: 'Sana zarar veririm', cyberType: 'tehdit' }] },
+            { sender: 'son_006', conversation: [{ type: 'safe', text: 'Nasıl geçiyor günün?' }] }
+        ],
+        'iftira': [
+            { sender: 'son_007', messages: [{ type: 'cyberbullying', text: 'Seni kimse sevmiyor', cyberType: 'iftira' }] },
+            { sender: 'son_008', conversation: [{ type: 'safe', text: 'Gezmeye çıkalım mı?' }] }
+        ],
+        'kimlik': [
+            { sender: 'son_009', messages: [{ type: 'cyberbullying', text: 'Hesabını kontrol etmem lazım', cyberType: 'kimlik' }] },
+            { sender: 'son_010', conversation: [{ type: 'safe', text: 'Yeni film izledin mi?' }] }
+        ]
+    },
+    'izleme-2': {
+        'sozel': [
+            { sender: 'izleme2_001', messages: [{ type: 'cyberbullying', text: 'Berbatsın', cyberType: 'sozel' }] },
+            { sender: 'izleme2_002', conversation: [{ type: 'safe', text: 'Selamlar!' }] }
+        ],
+        'dislama': [
+            { sender: 'izleme2_003', messages: [{ type: 'cyberbullying', text: 'Seni aramaya gerek yok', cyberType: 'dislama' }] },
+            { sender: 'izleme2_004', conversation: [{ type: 'safe', text: 'Harikasın!' }] }
+        ],
+        'tehdit': [
+            { sender: 'izleme2_005', messages: [{ type: 'cyberbullying', text: 'Pişman olursun', cyberType: 'tehdit' }] },
+            { sender: 'izleme2_006', conversation: [{ type: 'safe', text: 'Derste görüşürüz' }] }
+        ],
+        'iftira': [
+            { sender: 'izleme2_007', messages: [{ type: 'cyberbullying', text: 'Herkes senden nefret ediyor', cyberType: 'iftira' }] },
+            { sender: 'izleme2_008', conversation: [{ type: 'safe', text: 'Güzel bir gün' }] }
+        ],
+        'kimlik': [
+            { sender: 'izleme2_009', messages: [{ type: 'cyberbullying', text: 'Benim, parolanı unuttum', cyberType: 'kimlik' }] },
+            { sender: 'izleme2_010', conversation: [{ type: 'safe', text: 'Spor yapıyor musun?' }] }
+        ]
+    },
+    'izleme-4': {
+        'sozel': [
+            { sender: 'izleme4_001', messages: [{ type: 'cyberbullying', text: 'Hiçbir şey beceremezsin', cyberType: 'sozel' }] },
+            { sender: 'izleme4_002', conversation: [{ type: 'safe', text: 'Hayırlı günler' }] }
+        ],
+        'dislama': [
+            { sender: 'izleme4_003', messages: [{ type: 'cyberbullying', text: 'Bizimle olma', cyberType: 'dislama' }] },
+            { sender: 'izleme4_004', conversation: [{ type: 'safe', text: 'Neşeli görünüyorsun' }] }
+        ],
+        'tehdit': [
+            { sender: 'izleme4_005', messages: [{ type: 'cyberbullying', text: 'Sana kötü şeyler olacak', cyberType: 'tehdit' }] },
+            { sender: 'izleme4_006', conversation: [{ type: 'safe', text: 'Yardım ister misin?' }] }
+        ],
+        'iftira': [
+            { sender: 'izleme4_007', messages: [{ type: 'cyberbullying', text: 'Kimse seni sevmiyor', cyberType: 'iftira' }] },
+            { sender: 'izleme4_008', conversation: [{ type: 'safe', text: 'Müzik dinliyor musun?' }] }
+        ],
+        'kimlik': [
+            { sender: 'izleme4_009', messages: [{ type: 'cyberbullying', text: 'Sistem kontrolü için şifreni ver', cyberType: 'kimlik' }] },
+            { sender: 'izleme4_010', conversation: [{ type: 'safe', text: 'Kitap okur musun?' }] }
+        ]
+    },
+    'izleme-8': {
+        'sozel': [
+            { sender: 'izleme8_001', messages: [{ type: 'cyberbullying', text: 'Gerçekten değersizsin', cyberType: 'sozel' }] },
+            { sender: 'izleme8_002', conversation: [{ type: 'safe', text: 'İyi akşamlar' }] }
+        ],
+        'dislama': [
+            { sender: 'izleme8_003', messages: [{ type: 'cyberbullying', text: 'Gruba alınmayacaksın', cyberType: 'dislama' }] },
+            { sender: 'izleme8_004', conversation: [{ type: 'safe', text: 'Seni çok seviyorum' }] }
+        ],
+        'tehdit': [
+            { sender: 'izleme8_005', messages: [{ type: 'cyberbullying', text: 'Dikkatli ol', cyberType: 'tehdit' }] },
+            { sender: 'izleme8_006', conversation: [{ type: 'safe', text: 'Bugün çok mutluyum' }] }
+        ],
+        'iftira': [
+            { sender: 'izleme8_007', messages: [{ type: 'cyberbullying', text: 'Arkadaşların senden hoşlanmıyor', cyberType: 'iftira' }] },
+            { sender: 'izleme8_008', conversation: [{ type: 'safe', text: 'Harika bir günün olsun' }] }
+        ],
+        'kimlik': [
+            { sender: 'izleme8_009', messages: [{ type: 'cyberbullying', text: 'Ben yöneticiyim, bilgilerini kontrol et', cyberType: 'kimlik' }] },
+            { sender: 'izleme8_010', conversation: [{ type: 'safe', text: 'Resim çekmeyi sever misin?' }] }
+        ]
+    }
+};
+
 // Story üretimi için gerçek ünlü isimleri
 const STORY_USERS = [
     "elraenn", "pqueen", "jahrein", "unlost", "kendine_muzisyen", "wtcn", "pinky", "irmak_tuzun",
@@ -122,6 +281,7 @@ const STORY_USERS = [
 if (typeof window !== 'undefined') {
     window.BULLYING_TYPES = BULLYING_TYPES;
     window.COMPLAINT_REASONS = COMPLAINT_REASONS;
+    window.SCENARIOS = SCENARIOS;
     window.POSTS_100 = POSTS_100;
     window.STORY_USERS = STORY_USERS;
 }
