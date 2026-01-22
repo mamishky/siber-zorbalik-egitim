@@ -11,7 +11,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 try {
-    firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
     console.log('✅ Firebase initialized successfully');
 } catch (error) {
     console.error('❌ Firebase initialization error:', error);
@@ -21,6 +21,9 @@ try {
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+// Manuel giriş flag'i - Manuel giriş yapıldığında "Beni Hatırla" kontrolü yapılmasın
+let isManualLogin = false;
+
 // Firebase bağlantı kontrolü
 if (auth && db) {
     console.log('✅ Firebase Auth and Firestore ready');
@@ -28,16 +31,10 @@ if (auth && db) {
     console.error('❌ Firebase Auth or Firestore not initialized');
 }
 
-// Firestore bağlantı hatası kontrolü
-db.enablePersistence().catch((err) => {
-    if (err.code === 'failed-precondition') {
-        console.warn('⚠️ Firestore persistence hatası: Birden fazla sekme açık olabilir');
-    } else if (err.code === 'unimplemented') {
-        console.warn('⚠️ Firestore persistence desteklenmiyor');
-    } else {
-        console.error('❌ Firestore persistence hatası:', err);
-    }
-});
+// Firestore persistence - Deprecated uyarısını önlemek için kaldırıldı
+// Not: enablePersistence() deprecated, yeni yöntem FirestoreSettings.cache
+// Ancak compat modda eski API kullanıldığı için persistence olmadan devam ediyoruz
+// Offline desteği için gerekirse yeni Firebase v9+ modular API'ye geçilebilir
 
 // Network hatalarını yakala ve kullanıcıyı bilgilendir
 window.addEventListener('error', (event) => {
@@ -185,40 +182,46 @@ auth.onAuthStateChanged(async (user) => {
     console.log('Auth state changed:', user ? user.uid : 'No user');
     
     if (user) {
-        // "Beni Hatırla" kontrolü - Sadece işaretliyse otomatik giriş yap
-        const rememberMe = localStorage.getItem('safetagram_remember');
-        
-        if (rememberMe !== 'true') {
-            // "Beni Hatırla" işaretli değilse oturumu kapat
-            console.log('⚠️ "Beni Hatırla" işaretli değil, oturum kapatılıyor...');
-            await auth.signOut();
-            currentUser = null;
-            showScreen('auth-screen');
-            return;
+        // "Beni Hatırla" kontrolü - Sadece otomatik giriş (sayfa yüklendiğinde) için
+        // Manuel giriş yapıldığında kontrol yapma
+        if (!isManualLogin) {
+            const rememberMe = localStorage.getItem('safetagram_remember');
+            
+            if (rememberMe !== 'true') {
+                // "Beni Hatırla" işaretli değilse ve otomatik giriş ise oturumu kapat
+                console.log('⚠️ "Beni Hatırla" işaretli değil, otomatik giriş engellendi...');
+                await auth.signOut();
+                currentUser = null;
+                showScreen('auth-screen');
+                return;
+            }
         }
         
+        // Manuel giriş flag'ini sıfırla
+        isManualLogin = false;
+        
         currentUser = user;
-        console.log('✅ User logged in (Remember me aktif):', user.email);
+        console.log('✅ User logged in:', user.email);
         
         try {
-            // Get user data from Firestore
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            if (userDoc.exists) {
-                const userData = userDoc.data();
-                currentUser.displayName = `${userData.firstName} ${userData.lastName}`;
-                currentUser.firstName = userData.firstName;
-                currentUser.lastName = userData.lastName;
-                currentUser.email = userData.email;
+        // Get user data from Firestore
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            currentUser.displayName = `${userData.firstName} ${userData.lastName}`;
+            currentUser.firstName = userData.firstName;
+            currentUser.lastName = userData.lastName;
+            currentUser.email = userData.email;
                 console.log('User data loaded:', currentUser.displayName);
             } else {
                 console.warn('User document not found in Firestore');
-            }
-            
-            // Show panel screen if on auth screen
-            if (document.getElementById('auth-screen').classList.contains('active')) {
+        }
+        
+        // Show panel screen if on auth screen
+        if (document.getElementById('auth-screen').classList.contains('active')) {
                 console.log('Switching to panel screen');
-                showScreen('panel-screen');
-                updatePanelUserInfo();
+            showScreen('panel-screen');
+            updatePanelUserInfo();
             }
         } catch (error) {
             console.error('Error loading user data:', error);
@@ -297,58 +300,58 @@ document.addEventListener('DOMContentLoaded', () => {
             loginForm.style.display = 'block';
         });
     }
-    
-    // Signup Form Handler
+
+// Signup Form Handler
     if (signupForm) {
         signupForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const firstName = document.getElementById('signup-firstname').value.trim();
-            const lastName = document.getElementById('signup-lastname').value.trim();
-            const email = document.getElementById('signup-email').value.trim();
-            const password = document.getElementById('signup-password').value;
-            
-            try {
-                // Create user with email and password
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-                
-                // Save user data to Firestore
-                await db.collection('users').doc(user.uid).set({
-                    firstName: firstName,
-                    lastName: lastName,
-                    email: email,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                // Show success notification
-                showNotification('Başarılı!', 'Üyeliğiniz onaylandı! Hoş geldiniz.', 'success');
-                
-                // Clear form
-                document.getElementById('signupForm').reset();
-                
-            } catch (error) {
-                console.error('Signup error:', error);
-                let errorMessage = 'Kayıt sırasında bir hata oluştu.';
-                
-                if (error.code === 'auth/email-already-in-use') {
-                    errorMessage = 'Bu e-posta adresi zaten kullanılıyor.';
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMessage = 'Geçersiz e-posta adresi.';
-                } else if (error.code === 'auth/weak-password') {
-                    errorMessage = 'Şifre çok zayıf. En az 6 karakter olmalı.';
-                }
-                
-                showNotification('Hata', errorMessage, 'error');
-            }
-        });
-    }
+    e.preventDefault();
     
+    const firstName = document.getElementById('signup-firstname').value.trim();
+    const lastName = document.getElementById('signup-lastname').value.trim();
+    const email = document.getElementById('signup-email').value.trim();
+    const password = document.getElementById('signup-password').value;
+    
+    try {
+        // Create user with email and password
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+        
+        // Save user data to Firestore
+        await db.collection('users').doc(user.uid).set({
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        // Show success notification
+        showNotification('Başarılı!', 'Üyeliğiniz onaylandı! Hoş geldiniz.', 'success');
+        
+        // Clear form
+        document.getElementById('signupForm').reset();
+        
+    } catch (error) {
+        console.error('Signup error:', error);
+        let errorMessage = 'Kayıt sırasında bir hata oluştu.';
+        
+        if (error.code === 'auth/email-already-in-use') {
+            errorMessage = 'Bu e-posta adresi zaten kullanılıyor.';
+        } else if (error.code === 'auth/invalid-email') {
+            errorMessage = 'Geçersiz e-posta adresi.';
+        } else if (error.code === 'auth/weak-password') {
+            errorMessage = 'Şifre çok zayıf. En az 6 karakter olmalı.';
+        }
+        
+        showNotification('Hata', errorMessage, 'error');
+    }
+});
+    }
+
     // Login Form Handler - BENİ HATIRLA EKLENDİ + GELİŞTİRİLMİŞ ERROR HANDLING
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
+    e.preventDefault();
+    
             const emailInput = document.getElementById('login-email');
             const passwordInput = document.getElementById('login-password');
             const rememberMeCheckbox = document.getElementById('remember-me');
@@ -377,6 +380,9 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 console.log('Login attempt:', email, 'Remember:', rememberMe);
                 
+                // Manuel giriş flag'ini set et - onAuthStateChanged'de kontrol yapılmasın
+                isManualLogin = true;
+                
                 // Firebase Auth persistence ayarla
                 const persistence = rememberMe ? 
                     firebase.auth.Auth.Persistence.LOCAL : 
@@ -398,7 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.removeItem('safetagram_email');
                 }
                 
-                showNotification('Başarılı!', 'Giriş yapıldı. Hoş geldiniz!', 'success');
+        showNotification('Başarılı!', 'Giriş yapıldı. Hoş geldiniz!', 'success');
                 
                 // Form resetleme - remember me checkbox'ı koru
                 emailInput.value = '';
@@ -407,13 +413,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     rememberMeCheckbox.checked = false;
                 }
                 
-            } catch (error) {
-                console.error('Login error:', error);
+    } catch (error) {
+        console.error('Login error:', error);
                 console.error('Error code:', error.code);
                 console.error('Error message:', error.message);
                 
-                let errorMessage = 'Giriş yapılırken bir hata oluştu.';
-                
+        let errorMessage = 'Giriş yapılırken bir hata oluştu.';
+        
                 switch(error.code) {
                     case 'auth/user-not-found':
                         errorMessage = 'Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı. Lütfen üye olun.';
@@ -449,20 +455,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const rememberMe = localStorage.getItem('safetagram_remember');
     const savedEmail = localStorage.getItem('safetagram_email');
     
-    // Güvenlik: Sayfa yüklendiğinde, eğer kullanıcı giriş yapmışsa ama "Beni Hatırla" işaretli değilse, oturumu kapat
-    // Bu kontrol, onAuthStateChanged'den önce çalışmalı
-    setTimeout(async () => {
-        const currentUser = auth.currentUser;
-        if (currentUser) {
-            const currentRememberMe = localStorage.getItem('safetagram_remember');
-            if (currentRememberMe !== 'true') {
-                // "Beni Hatırla" işaretli değilse oturumu kapat
-                console.log('⚠️ "Beni Hatırla" işaretli değil, oturum kapatılıyor...');
-                await auth.signOut();
-                showNotification('Bilgi', 'Oturum kapatıldı. "Beni Hatırla" işaretlemediğiniz için oturumunuz kaydedilmedi.', 'info');
-            }
-        }
-    }, 500); // onAuthStateChanged'den sonra çalışsın
+    // Not: "Beni Hatırla" kontrolü onAuthStateChanged içinde yapılıyor
+    // Burada sadece email'i form'a dolduruyoruz
     
     if (rememberMe === 'true' && savedEmail) {
         const emailInput = document.getElementById('login-email');
@@ -514,50 +508,50 @@ function initPanelButtons() {
     if (appEntryBtn) {
         appEntryBtn.addEventListener('click', () => {
             console.log('🚀 Uygulamaya Giriş butonuna tıklandı');
-            showScreen('app-entry-screen');
+    showScreen('app-entry-screen');
             updatePanelUserInfo();
-        });
+});
     }
-    
+
     // Academic Panel Button
     const academicPanelBtn = document.getElementById('academic-panel-btn');
     if (academicPanelBtn) {
         academicPanelBtn.addEventListener('click', () => {
-            showScreen('admin-panel');
-            loadAdminData();
-        });
+    showScreen('admin-panel');
+    loadAdminData();
+});
     }
-    
+
     // Back to Panel Button
     const backToPanelBtn = document.getElementById('back-to-panel');
     if (backToPanelBtn) {
         backToPanelBtn.addEventListener('click', () => {
-            showScreen('panel-screen');
-        });
+    showScreen('panel-screen');
+});
     }
-    
-    // Admin Back Button
+
+// Admin Back Button
     const adminBackBtn = document.getElementById('admin-back-btn');
     if (adminBackBtn) {
         adminBackBtn.addEventListener('click', () => {
-            showScreen('panel-screen');
-        });
+    showScreen('panel-screen');
+});
     }
-    
-    // Admin Logout
-    const adminLogoutBtn = document.getElementById('admin-logout');
-    if (adminLogoutBtn) {
-        adminLogoutBtn.addEventListener('click', async () => {
-            try {
-                await auth.signOut();
-                showNotification('Başarılı', 'Çıkış yapıldı.', 'success');
-            } catch (error) {
-                console.error('Logout error:', error);
-                showNotification('Hata', 'Çıkış yapılırken bir hata oluştu.', 'error');
-            }
-        });
-    }
-    
+
+// Admin Logout
+const adminLogoutBtn = document.getElementById('admin-logout');
+if (adminLogoutBtn) {
+    adminLogoutBtn.addEventListener('click', async () => {
+        try {
+            await auth.signOut();
+            showNotification('Başarılı', 'Çıkış yapıldı.', 'success');
+        } catch (error) {
+            console.error('Logout error:', error);
+            showNotification('Hata', 'Çıkış yapılırken bir hata oluştu.', 'error');
+        }
+    });
+}
+
     // Panel Logout
     const panelLogoutBtn = document.getElementById('panel-logout');
     if (panelLogoutBtn) {
@@ -586,31 +580,31 @@ function initSessionFormHandler() {
     console.log('✅ sessionForm event listener eklendi');
     
     sessionForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
+    e.preventDefault();
         console.log('📝 Session form submit edildi');
         console.log('👤 currentUser:', currentUser ? currentUser.email : 'null');
-        
-        if (!currentUser) {
+    
+    if (!currentUser) {
             console.error('❌ currentUser null, giriş yapılmamış');
-            showNotification('Hata', 'Lütfen önce giriş yapın.', 'error');
-            return;
-        }
+        showNotification('Hata', 'Lütfen önce giriş yapın.', 'error');
+        return;
+    }
         
         console.log('✅ currentUser var, form işleniyor');
-        
-        const name = document.getElementById('participant-name').value.trim();
-        const age = document.getElementById('participant-age').value;
-        const sessionType = document.getElementById('session-type').value;
-        const hintEnabled = document.getElementById('hint-use').checked;
+    
+    const name = document.getElementById('participant-name').value.trim();
+    const age = document.getElementById('participant-age').value;
+    const sessionType = document.getElementById('session-type').value;
+    const hintEnabled = document.getElementById('hint-use').checked;
         
         console.log('📋 Form değerleri:', { name, age, sessionType, hintEnabled });
-        
-        if (!name || !age || !sessionType) {
+    
+    if (!name || !age || !sessionType) {
             console.error('❌ Form alanları eksik');
-            showNotification('Hata', 'Lütfen tüm alanları doldurun!', 'error');
-            return;
-        }
-        
+        showNotification('Hata', 'Lütfen tüm alanları doldurun!', 'error');
+        return;
+    }
+    
         // Yaş validasyonu
         const ageNum = parseInt(age);
         if (isNaN(ageNum) || ageNum < 1 || ageNum > 120) {
@@ -633,9 +627,9 @@ function initSessionFormHandler() {
         }
         
         console.log('🔄 State sıfırlanıyor...');
-        
-        // Generate a unique session ID
-        const sessionId = `S${Date.now()}`;
+    
+    // Generate a unique session ID
+    const sessionId = `S${Date.now()}`;
         currentSession = {
         sessionId: sessionId,
         participantId: `P${Date.now()}`,
@@ -701,39 +695,39 @@ function initSessionFormHandler() {
         sessionStorage.removeItem('safestagram_session');
         
         console.log('💾 Firebase oturum oluşturuluyor...');
-        
-        // Create session in Firestore
-        try {
-            await db.collection('users').doc(currentUser.uid)
-                .collection('sessions').doc(sessionId).set({
-                    participantName: name,
-                    participantAge: parseInt(age),
-                    sessionType: sessionType,
-                    hintEnabled: hintEnabled,
-                    startedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    status: 'active'
-                });
+    
+    // Create session in Firestore
+    try {
+        await db.collection('users').doc(currentUser.uid)
+            .collection('sessions').doc(sessionId).set({
+                participantName: name,
+                participantAge: parseInt(age),
+                sessionType: sessionType,
+                hintEnabled: hintEnabled,
+                startedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                status: 'active'
+            });
             console.log('✅ Firebase oturum oluşturuldu');
-        } catch (error) {
+    } catch (error) {
             console.error('❌ Firebase oturum hatası:', error);
-            showNotification('Hata', 'Oturum oluşturulamadı.', 'error');
-            return;
-        }
-        
-        // Navigasyon becerisini başlangıçta true yap
-        currentSession.skills.navigation = true;
-        
+        showNotification('Hata', 'Oturum oluşturulamadı.', 'error');
+        return;
+    }
+    
+    // Navigasyon becerisini başlangıçta true yap
+    currentSession.skills.navigation = true;
+    
         // Prepare message queue - TAM 10 MESAJ (Madde 4)
         // 5 güvenli + 5 zorbalık (her türden 1)
-        currentSession.messageQueue = [];
+    currentSession.messageQueue = [];
         
         console.log('📨 Mesaj kuyruğu hazırlanıyor...');
-        
-        // Map session type to scenarios (handle new session types)
-        let scenarioType = sessionType;
-        if (sessionType === 'genelleme-on' || sessionType === 'genelleme-son') {
-            scenarioType = 'baslama'; // Use baslama scenarios for genelleme tests
-        }
+    
+    // Map session type to scenarios (handle new session types)
+    let scenarioType = sessionType;
+    if (sessionType === 'genelleme-on' || sessionType === 'genelleme-son') {
+        scenarioType = 'baslama'; // Use baslama scenarios for genelleme tests
+    }
     
     const cyberbullyingQueue = [];
     const safeQueue = [];
@@ -795,15 +789,15 @@ function initSessionFormHandler() {
         currentSession.messageQueue.unshift(firstSafe);
         }
         
-        currentSession.currentMessageIndex = 0;
+    currentSession.currentMessageIndex = 0;
         
         console.log('📋 Mesaj kuyruğu hazır:', currentSession.messageQueue.length, 'mesaj');
         console.log('🎯 Simülasyona geçiliyor...');
-        
-        showScreen('main-app');
-        generateFeed();
-        renderStories();
-        
+    
+    showScreen('main-app');
+    generateFeed();
+    renderStories();
+    
         console.log('✅ Ana ekran gösteriliyor');
         
         // İlk mesaj HEMEN gönder (Madde 4)
@@ -814,11 +808,11 @@ function initSessionFormHandler() {
             if (currentSession.messageQueue.length > 0) {
                 currentSession.messageQueue[0]._deliveredAt = new Date();
                 currentSession.messageQueue[0]._status = 'delivered';
-                sendNextMessageNotification();
+        sendNextMessageNotification();
                 console.log('✅ İlk mesaj gönderildi');
             }
         }, 1000); // 1 saniye sonra ilk mesaj
-    });
+});
 }
 
 // Global değişkenler - YENİ YAPI (Madde 6)
@@ -1108,13 +1102,13 @@ function generateStories() {
     const storyUsers = (typeof window !== 'undefined' && window.STORY_USERS) ? window.STORY_USERS : (typeof STORY_USERS !== 'undefined' ? STORY_USERS : []);
     
     if (storyUsers.length > 0) {
-        for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 100; i++) {
             const username = storyUsers[i % storyUsers.length];
-            storyState.stories.push({
+        storyState.stories.push({
                 username: username + (i > storyUsers.length - 1 ? Math.floor(i / storyUsers.length) : ''),
                 avatar: username,
-                watched: false
-            });
+            watched: false
+        });
         }
     }
 }
@@ -1289,8 +1283,8 @@ function sendNextMessageNotification() {
     currentSession.pendingMessages++;
     const badge = document.getElementById('message-badge');
     if (badge) {
-        badge.textContent = currentSession.pendingMessages;
-        badge.style.display = 'flex';
+    badge.textContent = currentSession.pendingMessages;
+    badge.style.display = 'flex';
     }
     
     // Get current message info for notification
@@ -1431,8 +1425,8 @@ function renderInboxList() {
             previewText = '🔴 ENGELLENDİ';
         } else if (deliveredMsg.previewText) {
             previewText = deliveredMsg.previewText;
-            if (previewText.length > 40) {
-                previewText = previewText.substring(0, 40) + '...';
+                if (previewText.length > 40) {
+                    previewText = previewText.substring(0, 40) + '...';
             }
         } else if (isUnread) {
             previewText = 'Yeni mesaj';
@@ -1485,7 +1479,7 @@ function openConversationFromInbox(deliveredMsgOrIndex) {
         // messageQueue'da index bul
         const index = currentSession.messageQueue.findIndex(s => s === scenario);
         if (index >= 0) {
-            currentSession.currentMessageIndex = index;
+    currentSession.currentMessageIndex = index;
         }
     } else {
         // Eğer index ise (eski kullanım)
@@ -1990,10 +1984,10 @@ document.getElementById('dm-send').addEventListener('click', async () => {
         
         // AI entegrasyonu HER ZAMAN AKTİF (Madde 1 & 3)
         // AI ile yeni mesaj oluştur (Gemini backend entegrasyonu)
-        const aiResponse = await generateAIMessage(text, allMessages, scenario);
-        
-        // AI cevabını göster
-        setTimeout(() => {
+            const aiResponse = await generateAIMessage(text, allMessages, scenario);
+            
+            // AI cevabını göster
+            setTimeout(() => {
                 const aiMessageDiv = document.createElement('div');
                 aiMessageDiv.className = 'message';
                 
@@ -2863,10 +2857,10 @@ if (exportSessionsBtn) {
                 .collection('sessions').get();
             
             if (sessionsSnapshot.empty) {
-                alert('Dışa aktarılacak veri bulunmuyor!');
-                return;
-            }
-            
+        alert('Dışa aktarılacak veri bulunmuyor!');
+        return;
+    }
+    
             let csv = '\ufeffOturum ID,Katılımcı,Oturum Türü,Mesaj Türü,Zorbalık Türü,Aksiyon,Sonuç,İpucu,Tarih/Saat\n';
             
             for (const sessionDoc of sessionsSnapshot.docs) {
@@ -2884,15 +2878,15 @@ if (exportSessionsBtn) {
             }
             
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
+    const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = `safetagram_oturum_kayitlari_${new Date().toISOString().split('T')[0]}.csv`;
-            link.click();
+    link.click();
         } catch (error) {
             console.error('CSV export error:', error);
             alert('CSV dışa aktarılırken hata oluştu!');
         }
-    });
+});
 }
 
 // Verileri Temizle
