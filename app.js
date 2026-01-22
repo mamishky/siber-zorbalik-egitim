@@ -28,6 +28,70 @@ if (auth && db) {
     console.error('❌ Firebase Auth or Firestore not initialized');
 }
 
+// Firestore bağlantı hatası kontrolü
+db.enablePersistence().catch((err) => {
+    if (err.code === 'failed-precondition') {
+        console.warn('⚠️ Firestore persistence hatası: Birden fazla sekme açık olabilir');
+    } else if (err.code === 'unimplemented') {
+        console.warn('⚠️ Firestore persistence desteklenmiyor');
+    } else {
+        console.error('❌ Firestore persistence hatası:', err);
+    }
+});
+
+// Network hatalarını yakala ve kullanıcıyı bilgilendir
+window.addEventListener('error', (event) => {
+    if (event.message && event.message.includes('ERR_BLOCKED_BY_CLIENT')) {
+        console.error('🚫 Firestore isteği engellendi!');
+        console.error('💡 Çözüm: Ad blocker veya tarayıcı uzantılarını devre dışı bırakın');
+        console.error('📖 Detaylar için: FIREBASE_ERROR_FIX.md dosyasına bakın');
+        
+        // Kullanıcıya bilgilendirme (sadece ilk kez)
+        if (!sessionStorage.getItem('firebase_error_shown')) {
+            setTimeout(() => {
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #ff4444;
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+                    z-index: 10000;
+                    max-width: 400px;
+                    font-family: Arial, sans-serif;
+                    font-size: 14px;
+                `;
+                errorDiv.innerHTML = `
+                    <strong>⚠️ Firestore Bağlantı Hatası</strong><br>
+                    Tarayıcı uzantıları (ad blocker) Firestore isteklerini engelliyor.<br>
+                    <small>Çözüm: Ad blocker'ı devre dışı bırakın veya gizli modda test edin.</small>
+                    <button onclick="this.parentElement.remove()" style="
+                        margin-top: 10px;
+                        padding: 5px 10px;
+                        background: white;
+                        color: #ff4444;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                    ">Kapat</button>
+                `;
+                document.body.appendChild(errorDiv);
+                sessionStorage.setItem('firebase_error_shown', 'true');
+                
+                // 10 saniye sonra otomatik kapat
+                setTimeout(() => {
+                    if (errorDiv.parentElement) {
+                        errorDiv.remove();
+                    }
+                }, 10000);
+            }, 2000);
+        }
+    }
+}, true);
+
 // Predefined message functions
 function generateBullyingMessage(bullyingType) {
     const messages = {
