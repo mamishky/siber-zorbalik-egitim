@@ -946,10 +946,17 @@ function generateFeed() {
         // Video veya image content
         let mediaContent = '';
         if (post.type === 'video') {
+            // Cloudinary video URL'sine autoplay parametresi ekle
+            const videoUrl = post.videoEmbedUrl.includes('autoplay') 
+                ? post.videoEmbedUrl 
+                : post.videoEmbedUrl + (post.videoEmbedUrl.includes('?') ? '&' : '?') + 'autoplay=true&muted=true';
+            
             mediaContent = `
-                <div class="post-video" data-post="${index}" style="width: 100%; overflow: hidden; position: relative;">
+                <div class="post-video" data-post="${index}" data-video-index="${index}" style="width: 100%; overflow: hidden; position: relative;">
                     <iframe
-                        src="${post.videoEmbedUrl}"
+                        id="video-iframe-${index}"
+                        src=""
+                        data-video-url="${videoUrl}"
                         width="100%"
                         style="aspect-ratio: 1 / 1; border: none; display: block;"
                         allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
@@ -1060,6 +1067,69 @@ function generateFeed() {
             }
         });
     });
+    
+    // Instagram benzeri video oynatma sistemi - Intersection Observer
+    setupVideoAutoplay();
+}
+
+// Instagram benzeri video oynatma - görünür videolar otomatik başlar, görünmeyenler durur
+function setupVideoAutoplay() {
+    const videoPosts = document.querySelectorAll('.post-video');
+    if (videoPosts.length === 0) return;
+    
+    // Intersection Observer options - video ekranın %50'sinden fazlası görünürse oynat
+    const observerOptions = {
+        root: null, // viewport
+        rootMargin: '0px',
+        threshold: 0.5 // Video'nun %50'si görünürse tetikle
+    };
+    
+    // Video oynatma/durdurma fonksiyonu
+    const handleVideoVisibility = (entries) => {
+        entries.forEach(entry => {
+            const iframe = entry.target.querySelector('iframe');
+            if (!iframe) return;
+            
+            const videoUrl = iframe.getAttribute('data-video-url');
+            if (!videoUrl) return;
+            
+            if (entry.isIntersecting) {
+                // Video görünür - oynat
+                if (!iframe.src || iframe.src === 'about:blank') {
+                    iframe.src = videoUrl;
+                }
+                // Cloudinary iframe'leri için autoplay zaten URL'de var
+            } else {
+                // Video görünmüyor - durdur (iframe src'sini boşalt)
+                // Not: Cloudinary iframe'leri için src'yi boşaltmak video'yu durdurur
+                iframe.src = 'about:blank';
+            }
+        });
+    };
+    
+    // Intersection Observer oluştur
+    const observer = new IntersectionObserver(handleVideoVisibility, observerOptions);
+    
+    // Her video post'unu gözlemle
+    videoPosts.forEach(post => {
+        observer.observe(post);
+    });
+    
+    // İlk görünür video'yu hemen başlat
+    const firstVisibleVideo = Array.from(videoPosts).find(post => {
+        const rect = post.getBoundingClientRect();
+        return rect.top >= 0 && rect.top < window.innerHeight * 0.5;
+    });
+    
+    if (firstVisibleVideo) {
+        const iframe = firstVisibleVideo.querySelector('iframe');
+        if (iframe) {
+            const videoUrl = iframe.getAttribute('data-video-url');
+            if (videoUrl && !iframe.src) {
+                iframe.src = videoUrl;
+            }
+        }
+    }
 }
 
 // Turkish names for stories
