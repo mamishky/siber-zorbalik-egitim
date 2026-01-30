@@ -642,7 +642,7 @@ function initSessionFormHandler() {
         totalDurationSec: 0,
         userId: currentUser.uid,
         hintEnabled: hintEnabled,
-        aiEnabled: true, // Her zaman aktif (Madde 1)
+        aiEnabled: false, // Yapay zeka mesaj desteği kapalı – API key sonradan eklenecek
         currentScenario: null,
         messageIndex: 0,
         conversationIndex: 0,
@@ -856,7 +856,7 @@ let currentSession = {
     selectedComplaintReason: null,
     conversationHistory: {}, // Stores message history by sender
     hintEnabled: true, // Default to true
-    aiEnabled: true // AI HER ZAMAN AKTİF (Madde 1)
+    aiEnabled: false // Yapay zeka mesaj desteği kapalı – API key sonradan eklenecek
 };
 
 // Persistent message history functions
@@ -1921,49 +1921,18 @@ function sendConversationMessage() {
 }
 
 // ============================================
-// YAPAY ZEKA ENTEGRASYONU (BACKEND ÜZERİNDEN)
+// YAPAY ZEKA MESAJ DESTEĞI (API KEY SONRADAN EKLENECEK)
 // ============================================
+// Mesajlar ve senaryolar şu an boş/fallback. API key verildiğinde
+// generateAIMessage tekrar backend (/api/ai/generate) çağrısına bağlanabilir.
 
 /**
- * AI ile mesaj oluştur (backend endpoint'i üzerinden)
- * API key güvenli bir şekilde backend'de tutuluyor
+ * AI ile mesaj oluştur. API key kaldırıldı – sonradan verilecek.
+ * Şu an sadece fallback cevap döner; mesaj/senaryo içeriği boş kalabilir.
  */
 async function generateAIMessage(userMessage, conversationHistory, scenario) {
-    try {
-        // Backend endpoint'ine istek gönder
-        const response = await fetch('/api/ai/generate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                scenarioId: scenario.sender || 'default',
-                userMessage: userMessage,
-                conversation: conversationHistory,
-                scenarioSender: scenario.sender,
-                participantAge: currentSession.participantAge || 15,
-                locale: 'tr'
-            })
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Backend AI hatası:', errorData);
-            throw new Error(errorData.error || 'AI servisi yanıt vermedi');
-        }
-
-        const data = await response.json();
-        
-        if (!data.ok || !data.message) {
-            throw new Error('Geçersiz AI yanıtı');
-        }
-
-        return data.message;
-    } catch (error) {
-        console.error('AI mesaj oluşturma hatası:', error);
-        // Hata durumunda fallback kullan
-        return getFallbackResponse(userMessage);
-    }
+    // API key olmadan çağrı yapılmıyor – fallback kullan
+    return getFallbackResponse(userMessage);
 }
 
 // Fallback: AI çalışmazsa basit cevaplar
@@ -2595,11 +2564,11 @@ document.getElementById('finish-session').addEventListener('click', async () => 
         messageQueue: [],
         currentMessageIndex: 0,
         selectedComplaintReason: null,
-        conversationHistory: {},
+conversationHistory: {},
         hintEnabled: true,
-        aiEnabled: true
+        aiEnabled: false // Yapay zeka mesaj desteği kapalı – API key sonradan eklenecek
     };
-    
+
     showScreen('panel-screen');
 });
 
