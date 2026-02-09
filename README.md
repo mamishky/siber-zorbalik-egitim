@@ -2,35 +2,38 @@
 
 ## 📌 Proje Açıklaması
 
-Safestagram, tez çalışması için geliştirilmiş Instagram benzeri bir siber zorbalık farkındalık eğitim web uygulamasıdır. Uygulama, kullanıcılara gerçekçi sosyal medya senaryoları üzerinden siber zorbalıkla başa çıkma becerilerini öğretir.
+Safetagram, tez çalışması için geliştirilmiş Instagram benzeri bir siber zorbalık farkındalık eğitim web uygulamasıdır. Uygulama, kullanıcılara gerçekçi sosyal medya senaryoları üzerinden siber zorbalıkla başa çıkma becerilerini öğretir.
 
 ## 🎯 Temel Özellikler
 
-### 0. Firebase Üyelik Sistemi (YENİ!)
+### 0. Firebase Üyelik Sistemi
 
 - **Üye Ol**: İsim, Soyisim, E-posta, Şifre ile kayıt
 - **Giriş Yap**: E-posta ve şifre ile giriş
+- **Beni Hatırla**: Otomatik giriş için checkbox seçeneği
 - **Kullanıcı Profili**: Sol üst köşede isim-soyisim gösterimi
 - **Çıkış Yap**: Güvenli çıkış yapma
 - **Panel Ekranı**: İki aşamalı giriş sistemi
   - Uygulamaya Giriş: Simülasyonu başlat
   - Akademisyen Paneli: Sadece kendi verilerinizi görüntüleyin
 - **Firestore Veritabanı**: Her kullanıcının verileri kendi hesabına özel saklanır
-- **Yeni Logo Tasarımı**: Righteous font ile özel SafeStagram logosu
-  - Altın/sarı kalkan içinde "S" harfi
+- **Yeni Logo Tasarımı**: Righteous font ile özel Safetagram logosu
+  - Altın/sarı kare içinde beyaz "S" harfi (Instagram benzeri)
   - Animasyonlu alt yazı: "Şikayet Et • Engelle • Bildir" (renk geçişli)
 
 ### 1. Instagram Benzeri Arayüz
-- **Ana Sayfa (Feed)**: Çocuk dostu 35+ post (kediler, köpekler, tavşanlar, kelebekler, gökkuşağı, balonlar, pastalar, dondurma, oyunlar, sporlar, sanat, müzik, plaj, lunapark, sirk, hayvanat bahçesi hayvanları ve daha fazlası)
+
+- **Ana Sayfa (Feed)**: 100 post (70 fotoğraf + 30 video) - Gerçek ünlü ve influencer isimleriyle
 - **Hikayeler (Stories)**: Kullanıcı hikayeleri
 - **Mesaj Kutusu/Inbox**: Mesaj listesi görünümü, okunmamış mesaj göstergeleri
 - **Direkt Mesajlar (DM)**: Asıl eğitim senaryolarının gerçekleştiği alan
 - **Modern Tasarım**: Instagram web arayüzüne benzer, ortalanmış feed (max 470px), temiz ve kompakt görünüm
-- **Alt Navigasyon Barı**: Kolay gezinme
+- **Alt Navigasyon Barı**: Kolay gezinme (Reels butonu gizli)
+- **Video Otomatik Oynatma**: Instagram benzeri scroll-based video autoplay/pause
 
 ### 2. Oturum Türleri (5 Farklı Oturum)
 
-Her oturum seçilen zorbalık türü için 5 mesaj içerir (3 siber zorbalık + 2 güvenli mesaj):
+Her oturum seçilen zorbalık türü için mesajlar içerir:
 
 1. **Başlama Düzeyi**: Katılımcının başlangıç seviyesini ölçer (ön-test verisi otomatik alınır)
 2. **Uygulama**: Öğrenme ve pratik yapma aşaması (son-test verisi otomatik alınır)
@@ -50,23 +53,18 @@ Her oturum başlangıcında tek bir zorbalık türü seçilir:
 
 ### 4. Mesaj Sistemi
 
-**Mesaj Dağılımı (Her Zorbalık Türü İçin):**
-- **5 farklı kişiden mesaj** gelir
-- **3 mesaj siber zorbalık** içerir
-- **2 mesaj güvenli/normal** mesajdır
+**⚠️ ÖNEMLİ NOT:** Mesaj sistemi şu an kapalıdır. Siber zorbalık ve güvenli mesajlar sonradan eklenecektir.
 
-**Mesaj Kutusu Akışı:**
-1. Kullanıcı 10 saniye sonra mesaj bildirimi alır
-2. Mesaj ikonuna tıklandığında **mesaj listesi/inbox** açılır
-3. Okunmamış mesajlar **mavi nokta** ile işaretli görünür
-4. Kullanıcı hangi mesaja tıklarsa **o sohbet açılır**
-5. Sohbette cevap yazar VEYA şikayet et/engelle butonlarını kullanır
+**Planlanan Mesaj Dağılımı:**
+- Her zorbalık türü için farklı kişilerden mesajlar gelecek
+- Siber zorbalık içeren ve içermeyen mesajlar olacak
+- Mesajlar inbox'ta listelenecek ve okunmamış mesaj göstergeleri olacak
 
-**Mesaj Özellikleri:**
+**Mesaj Özellikleri (Planlanan):**
 - **Güvenli mesajlar**: Serbest metin cevabı (max 180 karakter)
 - **Siber zorbalık mesajları**: Sırayla → ŞİKAYET ET → ENGELLE
 
-### 5. Sabit Bekleme Süreli Öğretim - Yeni İpucu Sistemi
+### 5. Sabit Bekleme Süreli Öğretim - İpucu Sistemi
 
 **İpucu Sistemi Özellikleri:**
 - **Yazılı ipucu metni KALDIRILDI** (overlay metin yok)
@@ -114,13 +112,12 @@ Her etkileşim için kaydedilen bilgiler:
 
 - **Giriş**: Firebase Authentication ile güvenli giriş
 - **Kullanıcıya Özel Veriler**: Sadece giriş yapan kullanıcının verileri görüntülenir
+- **Öğrenci Filtreleme**: Öğrenci seçimi ve oturum seçimi dropdown'ları
 - Tüm oturumlardan verileri görüntüleme
 - Oturum ve zorbalık türüne göre filtreleme
 - Excel (CSV) formatında veri aktarma
 - Kendi verilerini temizleme
 - Sol üstte kullanıcı adı gösterimi
-
-**Not**: Artık şifre sistemi kaldırıldı. Her kullanıcı kendi Firebase hesabı ile giriş yapıyor.
 
 ### 9. Özet Ekranı
 
@@ -136,6 +133,7 @@ Her oturum sonunda gösterilen bilgiler:
 - Modern web tarayıcı (Chrome, Firefox, Safari, Edge)
 - JavaScript etkin olmalı
 - İnternet bağlantısı (Firebase, Font Awesome ve DiceBear avatarları için)
+- Node.js 18+ (opsiyonel - sadece backend API için)
 
 ### Firebase Konfigürasyonu
 
@@ -153,19 +151,53 @@ const firebaseConfig = {
 };
 ```
 
+### Firebase Firestore Kurulumu
+
+**ÖNEMLİ:** Firestore Database'i aktif etmeniz ve güvenlik kurallarını ayarlamanız gerekmektedir.
+
+1. **Firebase Console'a gidin**: https://console.firebase.google.com/
+2. **"safestagram-a458a"** projesini seçin
+3. **Firestore Database** > **"Create Database"** (veya **"Resume Database"**)
+4. **Rules** sekmesine gidin ve `FIRESTORE_RULES.txt` dosyasındaki kuralları yapıştırın
+5. **"Publish"** butonuna tıklayın
+
+Detaylı adımlar için: `FIREBASE_REACTIVATE.md` dosyasına bakın.
+
 ### Çalıştırma
+
+#### Yöntem 1: Python HTTP Server (Önerilen - Basit)
 
 1. Repoyu klonlayın:
 ```bash
 git clone https://github.com/mamishky/siber-zorbalik-egitim.git
-```
-
-2. Dizine gidin:
-```bash
 cd siber-zorbalik-egitim
 ```
 
-3. `index.html` dosyasını bir web tarayıcısında açın:
+2. `start-server.sh` scriptini çalıştırın:
+```bash
+chmod +x start-server.sh
+./start-server.sh
+```
+
+3. Tarayıcıda açın: `http://localhost:8000`
+
+#### Yöntem 2: Node.js Express Server (Backend API için)
+
+1. Bağımlılıkları yükleyin:
+```bash
+npm install
+```
+
+2. Sunucuyu başlatın:
+```bash
+npm start
+```
+
+3. Tarayıcıda açın: `http://localhost:3000`
+
+#### Yöntem 3: Doğrudan Dosya Açma
+
+`index.html` dosyasını bir web tarayıcısında açın:
 ```bash
 # macOS
 open index.html
@@ -192,11 +224,22 @@ Uygulama şu adreste yayınlanacaktır:
 ```
 siber-zorbalik-egitim/
 │
-├── index.html          # Ana HTML dosyası (tüm ekranlar + Firebase SDK)
-├── styles.css          # CSS stilleri (Instagram + Yeni Logo Tasarımı)
-├── scenarios.js        # Yeni senaryo yapısı (5 oturum × 5 zorbalık türü × 5 kişi)
-├── app.js              # Ana JavaScript + Firebase entegrasyonu
-└── README.md           # Proje dokümantasyonu
+├── index.html              # Ana HTML dosyası (tüm ekranlar + Firebase SDK)
+├── styles.css              # CSS stilleri (Instagram + Logo Tasarımı)
+├── scenarios.js            # Senaryo yapısı (mesajlar şu an boş)
+├── app.js                  # Ana JavaScript + Firebase entegrasyonu
+├── server.js               # Express backend server (opsiyonel)
+├── start-server.sh         # Python HTTP server başlatma scripti
+│
+├── api/
+│   └── ai/
+│       └── generate.js     # AI mesaj üretimi (şu an kullanılmıyor)
+│
+├── FIRESTORE_RULES.txt     # Firestore güvenlik kuralları (kopyala-yapıştır)
+├── FIREBASE_REACTIVATE.md  # Firebase aktif etme rehberi
+├── FIREBASE_ERROR_FIX.md  # Firebase hata çözümleri
+├── LOCAL_SERVER.md         # Lokal server kullanım kılavuzu
+└── README.md               # Proje dokümantasyonu
 ```
 
 ## 🎮 Kullanım Kılavuzu
@@ -207,11 +250,13 @@ siber-zorbalik-egitim/
    - İsim ve soyisim girin
    - E-posta adresi girin
    - Şifre oluşturun (en az 6 karakter)
+   - "Beni Hatırla" checkbox'ını işaretleyebilirsiniz (otomatik giriş için)
    - "Üye Ol" butonuna tıklayın
    - "Üyeliğiniz onaylandı!" bildirimi görünecek
 
 2. **Giriş Yap**:
    - E-posta ve şifre ile giriş yapın
+   - "Beni Hatırla" seçeneği ile otomatik girişi aktif edebilirsiniz
    - Başarılı girişte panel ekranı açılacak
    - Sol üstte isim-soyisminiz görünecek
 
@@ -224,16 +269,19 @@ siber-zorbalik-egitim/
 
 1. **Simülasyon Başlatma**:
    - Panel ekranında "Uygulamaya Giriş" tıklayın
-   - Adınızı ve yaşınızı girin
+   - Adınızı ve yaşınızı girin (1-120 arası)
    - Oturum türünü seçin (Başlama Düzeyi, Uygulama, İzleme 2/4/8. Hafta)
+   - Zorbalık türünü seçin
+   - İpucu kullanımını seçin (Kullan / Kullanma)
    - "Başla" butonuna tıklayın
 
 2. **Ana Ekran**:
    - Instagram benzeri arayüzü keşfedin
-   - Çocuk dostu postları görün
-   - 10 saniye sonra mesaj bildirimi gelecektir
+   - Gerçek ünlü ve influencer isimleriyle postları görün
+   - Video postlar otomatik oynatılır (scroll-based)
+   - **Not:** Mesaj sistemi şu an kapalıdır, mesaj gelmeyecektir
 
-3. **Mesajlaşma**:
+3. **Mesajlaşma (Planlanan)**:
    - Mesaj ikonuna tıklayın
    - Mesaj listesinde (inbox) okunmamış mesajları görün
    - Mesaja tıklayarak sohbeti açın
@@ -257,6 +305,8 @@ siber-zorbalik-egitim/
 2. **Veri Görüntüleme**:
    - Sadece kendi oturumlarınızdan verileri görün
    - Sol üstte kullanıcı adınız görünür
+   - Öğrenci seçimi dropdown'ından öğrenci seçin
+   - Oturum seçimi dropdown'ından oturum seçin
    - Filtreleme yapın (oturum türü, zorbalık türü)
 
 3. **Veri Aktarma**:
@@ -274,10 +324,12 @@ siber-zorbalik-egitim/
 
 - **Frontend**: Vanilla HTML5, CSS3, JavaScript (ES6+)
 - **Backend**: Firebase Authentication & Firestore
+- **Backend API** (Opsiyonel): Node.js + Express + Google Gemini AI
 - **Veri Depolama**: Cloud Firestore + Browser LocalStorage (yedek)
 - **İkonlar**: Font Awesome 6.4.0
-- **Fontlar**: Righteous (Logo), Orbitron, Poppins
+- **Fontlar**: Righteous (Logo), Changa One, Orbitron, Poppins
 - **Avatarlar**: DiceBear Avataaars API
+- **Video Embed**: Cloudinary, YouTube
 - **Export**: CSV formatında veri aktarma
 
 ### Tarayıcı Desteği
@@ -326,27 +378,7 @@ users/{userId}/sessions/{sessionId}/data/{dataId}
 
 ### LocalStorage Kullanımı (Yedek)
 
-Veriler tarayıcının LocalStorage'ında `siberguven_data` anahtarı altında JSON formatında saklanır:
-
-```javascript
-[
-  {
-    "participantId": "P1704388245123",
-    "participantName": "Ahmet",
-    "participantAge": 14,
-    "sessionType": "baslama",
-    "sessionLabel": "Başlama Düzeyi",
-    "bullyingType": "sozel",
-    "bullyingLabel": "Sözel/Psikolojik Saldırı",
-    "messageType": "cyberbullying",
-    "action": "report",
-    "reactionTime": "3.45",
-    "hintUsed": false,
-    "correct": true,
-    "timestamp": "2024-01-15T10:30:45.123Z"
-  }
-]
-```
+Veriler tarayıcının LocalStorage'ında `safestagram_users` anahtarı altında JSON formatında saklanır.
 
 ## 📊 Veri Analizi
 
@@ -391,25 +423,32 @@ CSV dosyasında yer alan sütunlar:
 - **Yerel Yedekleme**: Veriler ayrıca LocalStorage'da da saklanır
 - **Katılımcı Gizliliği**: Katılımcı ID'leri timestamp bazlı oluşturulur
 
-**Firestore Güvenlik Kuralları (Önerilen):**
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      
-      match /sessions/{sessionId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-        
-        match /data/{dataId} {
-          allow read, write: if request.auth != null && request.auth.uid == userId;
-        }
-      }
-    }
-  }
-}
-```
+**Firestore Güvenlik Kuralları:**
+
+`FIRESTORE_RULES.txt` dosyasındaki kuralları Firebase Console > Firestore Database > Rules sekmesine yapıştırın.
+
+## 🐛 Bilinen Sorunlar ve Çözümler
+
+### Firebase Firestore Permission Hatası
+
+**Hata:** `permission-denied` veya `Missing or insufficient permissions`
+
+**Çözüm:**
+1. Firebase Console > Firestore Database > Rules sekmesine gidin
+2. `FIRESTORE_RULES.txt` dosyasındaki kuralları yapıştırın
+3. "Publish" butonuna tıklayın
+
+Detaylı adımlar için: `FIREBASE_REACTIVATE.md` dosyasına bakın.
+
+### Ad Blocker Engellemesi
+
+**Hata:** `ERR_BLOCKED_BY_CLIENT`
+
+**Çözüm:**
+- Tarayıcı uzantılarını (ad blocker) devre dışı bırakın
+- Veya gizli modda test edin
+
+Detaylar için: `FIREBASE_ERROR_FIX.md` dosyasına bakın.
 
 ## 🤝 Katkıda Bulunma
 
@@ -426,20 +465,32 @@ Proje Sahibi: [mamishky](https://github.com/mamishky)
 ## 📝 Notlar
 
 - Uygulama tamamen Türkçe dilindedir
-- 5 oturum × 5 zorbalık türü × 5 mesaj = 125 benzersiz senaryo
 - Mobil uyumlu responsive tasarım
-- Offline çalışabilir (avatarlar hariç)
-- Tarayıcı kapatılsa bile veriler korunur
+- Offline çalışabilir (avatarlar ve Firebase hariç)
+- Tarayıcı kapatılsa bile veriler korunur (Firestore'da)
 - Çocuk dostu içerik ve renkli tasarım
+- **Mesaj sistemi şu an kapalıdır** - Siber zorbalık ve güvenli mesajlar sonradan eklenecektir
+- **Yapay zeka mesaj desteği kaldırıldı** - API key sonradan eklenecektir
 
 ## 🔄 Güncellemeler
 
+### v3.1.0 (2026-01-30) - Mesaj Sistemi Kapatıldı & Firebase İyileştirmeleri
+
+- 🚫 **Mesaj kuyruğu kapatıldı**: Şu an hiçbir mesaj gelmiyor, senaryolar boş kalacak
+- 🤖 **Yapay zeka mesaj desteği kaldırıldı**: API key sonradan eklenecek
+- 🔧 **Firebase Firestore hata yönetimi**: Permission hataları için otomatik çözüm önerileri
+- 📄 **FIRESTORE_RULES.txt**: Hazır güvenlik kuralları dosyası eklendi
+- 📖 **FIREBASE_REACTIVATE.md**: Detaylı Firebase aktif etme rehberi
+- ✅ **Test fonksiyonları**: Firestore bağlantı testleri eklendi
+- 🎨 **UI iyileştirmeleri**: Beni Hatırla checkbox, admin panel dropdown'ları, logout modal butonları
+
 ### v3.0.0 (2026) - Firebase Entegrasyonu
+
 - 🔥 Firebase Authentication entegrasyonu
 - 🔐 Üyelik sistemi (Üye Ol + Giriş Yap)
 - 👤 Kullanıcı profili gösterimi
-- 🎨 Yeni SafeStagram logo tasarımı (Righteous font)
-- 🛡️ Altın/sarı kalkan içinde "S" harfi
+- 🎨 Yeni Safetagram logo tasarımı (Righteous font)
+- 🛡️ Altın/sarı kare içinde beyaz "S" harfi (Instagram benzeri)
 - 🌈 Animasyonlu alt yazı (renk geçişli)
 - 🔒 Firestore ile kullanıcıya özel veri saklama
 - 📊 Panel ekranı (İki aşamalı giriş sistemi)
@@ -448,17 +499,20 @@ Proje Sahibi: [mamishky](https://github.com/mamishky)
 - 🔐 Şifre sistemi kaldırıldı (Firebase Auth kullanımda)
 
 ### v2.0.0 (2026)
+
 - ✨ Yeni mesaj inbox/liste sistemi
-- 🎨 35+ çocuk dostu post eklendi
+- 🎨 100 post eklendi (70 fotoğraf + 30 video) - Gerçek ünlü isimleriyle
 - 🔔 Okunmamış mesaj göstergeleri
 - 💡 İpucu sistemi güncellendi (sadece buton animasyonu, metin kaldırıldı)
 - 📊 5 oturum türü (Başlama, Uygulama, İzleme 2/4/8. Hafta)
-- 🎯 Her zorbalık türü için 5 farklı kişiden mesaj
+- 🎯 Her zorbalık türü için farklı kişilerden mesaj
 - 🔒 Akademisyen şifresi güncellendi (06112002)
 - 📱 Modern Instagram web tasarımı (ortalanmış, max 470px feed)
 - 🎨 Daha kompakt ve temiz post görünümleri
+- 🎬 Video otomatik oynatma (scroll-based)
 
 ### v1.0.0 (2026)
+
 - İlk sürüm
 - Temel özellikler
 - Akademisyen paneli
