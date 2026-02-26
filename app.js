@@ -172,6 +172,70 @@ function continueConversation(conversationHistory, userMessage) {
 // Current user state
 let currentUser = null;
 
+// Dev modu: localhost + ?dev=1 ile simülasyon formunu atla, direkt main-app'e git
+function isDevMode() {
+    const local = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const params = new URLSearchParams(window.location.search);
+    return local && (params.get('dev') === '1' || params.get('dev') === 'true');
+}
+
+async function startDevSimulation() {
+    if (!currentUser) {
+        console.warn('Dev mod: currentUser yok, giriş gerekli');
+        return;
+    }
+    const sessionId = `S${Date.now()}_dev`;
+    currentSession = {
+        sessionId,
+        participantId: `P${Date.now()}`,
+        participantName: 'Test',
+        participantAge: 15,
+        sessionType: 'baslama',
+        currentBullyingType: 'all',
+        startTime: new Date(),
+        endTime: null,
+        totalDurationSec: 0,
+        userId: currentUser.uid,
+        hintEnabled: true,
+        aiEnabled: false,
+        currentScenario: null,
+        messageIndex: 0,
+        conversationIndex: 0,
+        sessionData: [],
+        skills: { navigation: true, reading: false, replying: false, reporting: false, complaintType: false, blocking: false, informAdult: false },
+        stats: { correct: 0, wrong: 0, hints: 0 },
+        currentMessageStartTime: null,
+        hintTimeout: null,
+        messageTimeout: null,
+        reportClicked: false,
+        blockClicked: false,
+        pendingMessages: 0,
+        messageQueue: [],
+        currentMessageIndex: 0,
+        selectedComplaintReason: null,
+        conversationHistory: {},
+        deliveredMessages: [],
+        perMessageResults: [],
+        skillSteps: { navigation: false, reading: false, replying: false, reporting: false, complaintType: false, blocking: false, informAdult: false }
+    };
+    try {
+        await db.collection('users').doc(currentUser.uid).collection('sessions').doc(sessionId).set({
+            participantName: 'Test',
+            participantAge: 15,
+            sessionType: 'baslama',
+            hintEnabled: true,
+            startedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            status: 'active'
+        });
+    } catch (e) {
+        console.warn('Dev mod: Firestore oturum kaydı atlandı', e);
+    }
+    showScreen('main-app');
+    generateFeed();
+    renderStories();
+    console.log('🚀 Dev mod: Simülasyon direkt açıldı');
+}
+
 // Show notification
 function showNotification(title, message, type = 'success') {
     const notification = document.createElement('div');
@@ -231,12 +295,17 @@ auth.onAuthStateChanged(async (user) => {
                 console.warn('User document not found in Firestore');
         }
         
-        // Show panel screen if on auth screen
+        // Show panel screen if on auth screen (veya dev modda direkt simülasyona git)
         if (document.getElementById('auth-screen').classList.contains('active')) {
+            if (isDevMode()) {
+                console.log('🔧 Dev mod: Simülasyona direkt gidiliyor...');
+                await startDevSimulation();
+            } else {
                 console.log('Switching to panel screen');
-            showScreen('panel-screen');
-            updatePanelUserInfo();
+                showScreen('panel-screen');
+                updatePanelUserInfo();
             }
+        }
         } catch (error) {
             console.error('Error loading user data:', error);
             
@@ -529,11 +598,16 @@ function initPanelButtons() {
     // App Entry Button
     const appEntryBtn = document.getElementById('app-entry-btn');
     if (appEntryBtn) {
-        appEntryBtn.addEventListener('click', () => {
+        appEntryBtn.addEventListener('click', async () => {
             console.log('🚀 Uygulamaya Giriş butonuna tıklandı');
-    showScreen('app-entry-screen');
+            if (isDevMode()) {
+                console.log('🔧 Dev mod: Simülasyona direkt gidiliyor...');
+                await startDevSimulation();
+                return;
+            }
+            showScreen('app-entry-screen');
             updatePanelUserInfo();
-});
+        });
     }
 
     // Academic Panel Button
@@ -865,6 +939,10 @@ const POSTS = (typeof window !== 'undefined' && window.POSTS_100) ? window.POSTS
 
 // Ekran geçişleri
 function showScreen(screenId) {
+    if (screenId === 'panel-screen' && isDevMode() && currentUser) {
+        startDevSimulation();
+        return;
+    }
     document.querySelectorAll('.screen').forEach(screen => {
         screen.classList.remove('active');
     });

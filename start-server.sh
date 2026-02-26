@@ -5,6 +5,7 @@
 
 echo "🚀 Safetagram Test Server başlatılıyor..."
 echo "📡 Server: http://localhost:8000"
+echo "🔧 Dev mod (formu atla): http://localhost:8000/?dev=1"
 echo "⏹️  Durdurmak için: Ctrl+C"
 echo ""
 
