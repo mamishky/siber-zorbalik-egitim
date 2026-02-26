@@ -1,0 +1,31 @@
+// Firebase Firestore Güvenlik Kuralları
+// Bu kuralları Firebase Console > Firestore Database > Rules sekmesine yapıştırın
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Kullanıcılar koleksiyonu - Her kullanıcı sadece kendi verisini okuyup yazabilir
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Oturumlar koleksiyonu - Kullanıcılar sadece kendi oturumlarını okuyup yazabilir
+    match /sessions/{sessionId} {
+      allow read, write: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // Yeni oturum oluşturma - userId kontrolü body'de
+    match /sessions/{sessionId} {
+      allow create: if request.auth != null && 
+        request.resource.data.userId == request.auth.uid;
+    }
+    
+    // Tüm diğer koleksiyonlar için - sadece authenticated kullanıcılar erişebilir
+    // (Geliştirme aşamasında - production'da daha sıkı kurallar ekleyin)
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

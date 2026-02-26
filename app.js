@@ -27,8 +27,22 @@ let isManualLogin = false;
 // Firebase bağlantı kontrolü
 if (auth && db) {
     console.log('✅ Firebase Auth and Firestore ready');
+    
+    // Firestore bağlantısını test et
+    testFirestoreConnection();
 } else {
     console.error('❌ Firebase Auth or Firestore not initialized');
+}
+
+// Firestore bağlantısını test et (sessiz mod - sadece gerçek kullanımda hata yakalama)
+async function testFirestoreConnection() {
+    // Test koleksiyonuna erişmeye çalışmak yerine, sadece db objesinin varlığını kontrol et
+    // Gerçek hatalar kullanıcı giriş yaptığında veya veri okuma/yazma yapıldığında yakalanacak
+    if (db) {
+        console.log('✅ Firestore bağlantısı hazır');
+    } else {
+        console.error('❌ Firestore başlatılamadı');
+    }
 }
 
 // Firestore persistence - Deprecated uyarısını önlemek için kaldırıldı
@@ -225,7 +239,16 @@ auth.onAuthStateChanged(async (user) => {
             }
         } catch (error) {
             console.error('Error loading user data:', error);
-            showNotification('Uyarı', 'Kullanıcı bilgileri yüklenemedi.', 'warning');
+            
+            // Permission hatası için özel mesaj
+            if (error.code === 'permission-denied') {
+                console.error('🚫 Firestore izin hatası: Güvenlik kuralları yanlış yapılandırılmış');
+                console.error('💡 Çözüm: Firebase Console > Firestore Database > Rules sekmesine gidin');
+                console.error('📖 Detaylı adımlar için: FIREBASE_REACTIVATE.md dosyasına bakın');
+                showNotification('Firestore İzin Hatası', 'Firebase Console\'da güvenlik kurallarını kontrol edin. Detaylar için konsola bakın.', 'error');
+            } else {
+                showNotification('Uyarı', 'Kullanıcı bilgileri yüklenemedi.', 'warning');
+            }
         }
     } else {
         currentUser = null;
@@ -717,101 +740,15 @@ function initSessionFormHandler() {
     // Navigasyon becerisini başlangıçta true yap
     currentSession.skills.navigation = true;
     
-        // Prepare message queue - TAM 10 MESAJ (Madde 4)
-        // 5 güvenli + 5 zorbalık (her türden 1)
+        // Mesaj kuyruğu kapalı – siber zorbalık/güvenli mesajlar sonradan eklenecek
+        // Şu an hiçbir mesaj gelmez; inbox boş kalır
     currentSession.messageQueue = [];
-        
-        console.log('📨 Mesaj kuyruğu hazırlanıyor...');
-    
-    // Map session type to scenarios (handle new session types)
-    let scenarioType = sessionType;
-    if (sessionType === 'genelleme-on' || sessionType === 'genelleme-son') {
-        scenarioType = 'baslama'; // Use baslama scenarios for genelleme tests
-    }
-    
-    const cyberbullyingQueue = [];
-    const safeQueue = [];
-    
-    // Get bullying types from scenarios.js
-    const BULLYING_TYPES = window.BULLYING_TYPES || ['sozel', 'dislama', 'tehdit', 'iftira', 'kimlik'];
-    
-    // Get SCENARIOS from window (scenarios.js'den yüklenir)
-    const SCENARIOS = window.SCENARIOS || {};
-    
-    // Iterate through all 5 bullying types
-    BULLYING_TYPES.forEach(bullyingType => {
-        const allScenarios = SCENARIOS[scenarioType] ? SCENARIOS[scenarioType][bullyingType] : (SCENARIOS['baslama'] ? SCENARIOS['baslama'][bullyingType] : []);
-        
-        // Separate cyberbullying and safe messages
-        const cyberbullyingMessages = allScenarios.filter(s => 
-            s.messages && s.messages.some(m => m.type === 'cyberbullying')
-        );
-        const safeMessages = allScenarios.filter(s => s.conversation);
-        
-        // Add 1 cyberbullying message from this type (HER TÜRDEN 1)
-        if (cyberbullyingMessages.length > 0) {
-            const randomCyberbullying = cyberbullyingMessages[Math.floor(Math.random() * cyberbullyingMessages.length)];
-            cyberbullyingQueue.push({
-                ...randomCyberbullying,
-                _bullyingType: bullyingType,
-                _kind: 'cyber',
-                _deliveredAt: null,
-                _status: 'pending'
-            });
-        }
-        
-        // Add 1 safe message from this type
-        if (safeMessages.length > 0) {
-            const randomSafe = safeMessages[Math.floor(Math.random() * safeMessages.length)];
-            safeQueue.push({
-                ...randomSafe,
-                _bullyingType: bullyingType,
-                _kind: 'safe',
-                _deliveredAt: null,
-                _status: 'pending'
-            });
-        }
-    });
-    
-    // Karıştır ve birleştir (5 safe + 5 cyber = 10 mesaj)
-    cyberbullyingQueue.sort(() => Math.random() - 0.5);
-    safeQueue.sort(() => Math.random() - 0.5);
-    
-    // Mesajları interleave et (karışık sıra)
-    currentSession.messageQueue = [...cyberbullyingQueue, ...safeQueue];
-    currentSession.messageQueue.sort(() => Math.random() - 0.5);
-    
-    // İlk mesajın güvenli olmasını tercih et (kullanıcı deneyimi)
-    const firstSafeIndex = currentSession.messageQueue.findIndex(m => m._kind === 'safe');
-    if (firstSafeIndex > 0) {
-        // İlk güvenli mesajı başa al
-        const firstSafe = currentSession.messageQueue.splice(firstSafeIndex, 1)[0];
-        currentSession.messageQueue.unshift(firstSafe);
-        }
-        
+    currentSession.deliveredMessages = currentSession.deliveredMessages || [];
     currentSession.currentMessageIndex = 0;
-        
-        console.log('📋 Mesaj kuyruğu hazır:', currentSession.messageQueue.length, 'mesaj');
-        console.log('🎯 Simülasyona geçiliyor...');
-    
+
     showScreen('main-app');
     generateFeed();
     renderStories();
-    
-        console.log('✅ Ana ekran gösteriliyor');
-        
-        // İlk mesaj HEMEN gönder (Madde 4)
-        // Kullanıcı ana sayfaya geldiğinde ilk mesaj gelir
-        // Sonraki mesajlar 10 saniye aralıklarla gelecek
-        setTimeout(() => {
-            console.log('⏰ İlk mesaj gönderiliyor...');
-            if (currentSession.messageQueue.length > 0) {
-                currentSession.messageQueue[0]._deliveredAt = new Date();
-                currentSession.messageQueue[0]._status = 'delivered';
-        sendNextMessageNotification();
-                console.log('✅ İlk mesaj gönderildi');
-            }
-        }, 1000); // 1 saniye sonra ilk mesaj
 });
 }
 
@@ -1339,8 +1276,11 @@ function showScreen(screenId) {
     document.getElementById(screenId).classList.add('active');
 }
 
-// Mesaj bildirimi göster (Instagram DM style) - 10 MESAJ SİSTEMİ (Madde 4)
+// Mesaj bildirimi göster (Instagram DM style) - mesaj kuyruğu kapalıyken çağrılmaz
 function sendNextMessageNotification() {
+    if (!currentSession.messageQueue || currentSession.messageQueue.length === 0) {
+        return;
+    }
     // Check if we've completed all 10 messages
     if (currentSession.currentMessageIndex >= 10 || currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
         // Tüm mesajlar tamamlandı - show summary
@@ -1646,6 +1586,10 @@ function openSpecificDM(scenario) {
 // Yardımcı fonksiyon: Mesaj tamamlandı, sonraki mesaj için zamanlayıcıyı kur (Madde 4)
 // ZAMANLAMA KURALI: Ana sayfaya dönüldükten sonra 10 saniye bekle
 function scheduleNextMessage() {
+    // Mesaj kuyruğu kapalı – hiçbir mesaj gönderilmez
+    if (!currentSession.messageQueue || currentSession.messageQueue.length === 0) {
+        return;
+    }
     // Önceki zamanlayıcıyı temizle
     if (currentSession.messageTimeout) {
         clearTimeout(currentSession.messageTimeout);
