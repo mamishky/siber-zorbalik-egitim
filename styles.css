@@ -374,8 +374,8 @@ select.form-control {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 16px;
-    height: 44px;
+    padding: 14px 16px 10px;
+    height: auto;
     box-sizing: border-box;
     background: white;
     border-bottom: 1px solid #dbdbdb;
@@ -388,7 +388,6 @@ select.form-control {
     display: flex;
     align-items: center;
     position: relative;
-    line-height: 0;
 }
 
 .logo-container i.fa-instagram {
@@ -410,11 +409,13 @@ select.form-control {
 
 /* Safetagram logo (inline SVG) */
 .safetagram-logo {
-    height: 36px;
+    height: 26px;
     width: auto;
     display: block;
     flex-shrink: 0;
+    margin-top: 4px;
     filter: drop-shadow(0 1px 4px rgba(107,155,210,.4));
+    overflow: visible;
 }
 
 .top-icons {
