@@ -1764,19 +1764,20 @@ select.form-control {
 .logo-shield-img {
     height: clamp(60px, 8vw, 90px);
     width: auto;
-    object-fit: contain;
-    display: block;
+    display: inline-block;
+    vertical-align: middle;
+    image-rendering: crisp-edges;
     animation: shieldPulse 3s ease-in-out infinite;
 }
 
 @keyframes shieldPulse {
     0%, 100% {
-        filter: drop-shadow(0 0 12px rgba(107,155,210,.6)) drop-shadow(0 0 22px rgba(240,168,104,.4));
+        filter: drop-shadow(0 0 10px rgba(107,155,210,.7)) drop-shadow(0 0 20px rgba(240,168,104,.5));
         transform: scale(1);
     }
     50% {
-        filter: drop-shadow(0 0 20px rgba(107,155,210,.9)) drop-shadow(0 0 35px rgba(240,168,104,.6));
-        transform: scale(1.05);
+        filter: drop-shadow(0 0 18px rgba(107,155,210,1)) drop-shadow(0 0 32px rgba(240,168,104,.8));
+        transform: scale(1.06);
     }
 }
 
