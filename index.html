@@ -182,22 +182,23 @@
 
         /* LOGO wrapper - ikon + yazı yan yana */
         .logo-shield-wrapper {
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 0.6em;
-            margin-bottom: 1rem;
+            gap: 0.15em;
+            margin: 0 auto 1rem auto;
         }
 
         .logo-shield-img {
             height: clamp(48px, 8vw, 110px);
             width: auto;
+            flex-shrink: 0;
         }
 
         /* LOGO - safetagram */
         .wordmark {
             font-family: 'Righteous', cursive;
-            font-size: clamp(48px, 8vw, 120px);
+            font-size: clamp(48px, 8vw, 110px);
             font-weight: 400;
             letter-spacing: 0.02em;
             line-height: 1;
