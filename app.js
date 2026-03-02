@@ -181,8 +181,7 @@ function isDevMode() {
 
 async function startDevSimulation() {
     if (!currentUser) {
-        console.warn('Dev mod: currentUser yok, giriş gerekli');
-        return;
+        currentUser = { uid: 'dev-user', email: 'dev@localhost', displayName: 'Dev Kullanıcı' };
     }
     const sessionId = `S${Date.now()}_dev`;
     currentSession = {
@@ -374,6 +373,13 @@ async function updatePanelUserInfo() {
 
 // Auth form toggles ve form handlers
 document.addEventListener('DOMContentLoaded', () => {
+    // Dev mod: login olmadan direkt simülasyona git
+    if (isDevMode()) {
+        console.log('🔧 Dev mod aktif: simülasyon açılıyor...');
+        startDevSimulation();
+        return;
+    }
+
     const showSignupBtn = document.getElementById('show-signup');
     const showLoginBtn = document.getElementById('show-login');
     const loginForm = document.getElementById('loginForm');
