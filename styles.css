@@ -1753,7 +1753,9 @@ select.form-control {
 /* Logo Styles with Righteous Font */
 .logo-shield-wrapper {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15em;
 }
 
 .logo-shield-img {
