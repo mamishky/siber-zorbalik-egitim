@@ -965,6 +965,8 @@ function generateFeed() {
         postDiv.className = 'post';
         
         // Video veya image content
+        // ✅ OPTİMİZASYON 1: Video postlarında iframe OLUŞTURULMAZ
+        // Sadece placeholder div oluşturulur, iframe lazım olduğunda dinamik eklenir
         let mediaContent = '';
         if (post.type === 'video') {
             // Cloudinary video URL'sine autoplay parametresi ekle
@@ -973,30 +975,26 @@ function generateFeed() {
                 : post.videoEmbedUrl + (post.videoEmbedUrl.includes('?') ? '&' : '?') + 'autoplay=true&muted=true';
             
             mediaContent = `
-                <div class="post-video" data-post="${index}" data-video-index="${index}" style="width: 100%; overflow: hidden; position: relative;">
-                    <iframe
-                        id="video-iframe-${index}"
-                        src=""
-                        data-video-url="${videoUrl}"
-                        width="100%"
-                        style="aspect-ratio: 1 / 1; border: none; display: block;"
-                        allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                        allowfullscreen
-                        frameborder="0">
-                    </iframe>
+                <div class="post-video" data-post="${index}" data-video-index="${index}" data-video-url="${videoUrl}" data-video-state="idle" style="width: 100%; overflow: hidden; position: relative;">
+                    <div class="video-placeholder" style="width: 100%; aspect-ratio: 1 / 1; background: #1a1a1a; display: flex; align-items: center; justify-content: center;">
+                        <div class="video-loading-indicator" style="text-align: center; color: #666;">
+                            <i class="fas fa-play-circle" style="font-size: 48px; opacity: 0.5;"></i>
+                        </div>
+                    </div>
                 </div>
             `;
         } else {
+            // ✅ OPTİMİZASYON 2: Görsellere loading="lazy" eklendi
             mediaContent = `
                 <div class="post-image">
-                    <img src="${post.image}" alt="Post" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="${post.image}" alt="Post" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
             `;
         }
         
         postDiv.innerHTML = `
             <div class="post-header">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${post.avatar}" alt="${post.username}">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${post.avatar}" alt="${post.username}" loading="lazy">
                 <span>${post.username}</span>
             </div>
             ${mediaContent}
@@ -1033,14 +1031,12 @@ function generateFeed() {
             
             const likesElement = document.querySelector(`.post-likes[data-post="${postIndex}"]`);
             
-            // Orijinal veriyi güncelle ki bir sonraki tıklamada doğru sayıdan devam etsin
             if (this.classList.contains('liked')) {
-                POSTS[postIndex].likes += 1; // Dizideki değeri 1 artır
+                POSTS[postIndex].likes += 1;
             } else {
-                POSTS[postIndex].likes -= 1; // Dizideki değeri 1 azalt
+                POSTS[postIndex].likes -= 1;
             }
             
-            // Güncel değeri ekrana yazdır
             likesElement.textContent = `${formatNumber(POSTS[postIndex].likes)} beğeni`;
         });
     });
@@ -1089,46 +1085,224 @@ function generateFeed() {
         });
     });
     
-    // Instagram benzeri video oynatma sistemi - Intersection Observer
+    // ✅ OPTİMİZASYON 3: Gelişmiş video oynatma sistemi
     setupVideoAutoplay();
 }
 
-// Instagram benzeri video oynatma - görünür videolar otomatik başlar, görünmeyenler durur
+// ============================================================================
+// ✅ OPTİMİZE EDİLMİŞ VİDEO OYNATMA SİSTEMİ
+// Strateji: Lazy iframe creation + Prefetch + iframe pooling
+// ============================================================================
+
+// Aktif iframe havuzu - aynı anda en fazla 3 iframe DOM'da olur
+const VIDEO_POOL = {
+    maxActive: 3,        // Aynı anda max aktif iframe sayısı
+    prefetchAhead: 2,    // Kaç video ilerisini önceden hazırla
+    activeIframes: new Map(),  // videoIndex -> iframe element
+    prefetchedUrls: new Set(), // Prefetch edilmiş URL'ler
+    currentlyPlaying: null     // Şu an oynayan video index
+};
+
+// Video iframe'ini dinamik olarak oluştur
+function createVideoIframe(videoContainer) {
+    const videoUrl = videoContainer.getAttribute('data-video-url');
+    const videoIndex = videoContainer.getAttribute('data-video-index');
+    if (!videoUrl) return null;
+    
+    // Zaten iframe varsa tekrar oluşturma
+    const existingIframe = videoContainer.querySelector('iframe');
+    if (existingIframe) return existingIframe;
+    
+    // Placeholder'ı kaldır
+    const placeholder = videoContainer.querySelector('.video-placeholder');
+    
+    // Loading spinner göster
+    if (placeholder) {
+        placeholder.innerHTML = `
+            <div style="text-align: center; color: #888;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 36px;"></i>
+                <div style="margin-top: 8px; font-size: 12px;">Video yükleniyor...</div>
+            </div>
+        `;
+    }
+    
+    // iframe oluştur
+    const iframe = document.createElement('iframe');
+    iframe.id = `video-iframe-${videoIndex}`;
+    iframe.src = videoUrl;
+    iframe.width = '100%';
+    iframe.style.cssText = 'aspect-ratio: 1 / 1; border: none; display: block;';
+    iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
+    iframe.setAttribute('allowfullscreen', '');
+    iframe.setAttribute('frameborder', '0');
+    
+    // iframe yüklendiğinde placeholder'ı kaldır
+    iframe.addEventListener('load', () => {
+        if (placeholder && placeholder.parentNode) {
+            placeholder.remove();
+        }
+        videoContainer.setAttribute('data-video-state', 'playing');
+        console.log(`▶️ Video ${videoIndex} yüklendi ve oynatılıyor`);
+    });
+    
+    videoContainer.appendChild(iframe);
+    VIDEO_POOL.activeIframes.set(videoIndex, iframe);
+    
+    return iframe;
+}
+
+// Eski (görünmeyen) iframe'leri temizle - bellek optimizasyonu
+function cleanupDistantIframes(currentIndex) {
+    const currentIdx = parseInt(currentIndex);
+    const toRemove = [];
+    
+    VIDEO_POOL.activeIframes.forEach((iframe, idx) => {
+        const numIdx = parseInt(idx);
+        // Mevcut videodan 3'ten fazla uzaktaki iframe'leri kaldır
+        if (Math.abs(numIdx - currentIdx) > 3) {
+            toRemove.push(idx);
+        }
+    });
+    
+    toRemove.forEach(idx => {
+        const iframe = VIDEO_POOL.activeIframes.get(idx);
+        if (iframe && iframe.parentNode) {
+            // iframe'i kaldır, placeholder'ı geri koy
+            const container = iframe.closest('.post-video');
+            iframe.remove();
+            
+            if (container) {
+                container.setAttribute('data-video-state', 'idle');
+                // Placeholder'ı geri ekle
+                const placeholder = document.createElement('div');
+                placeholder.className = 'video-placeholder';
+                placeholder.style.cssText = 'width: 100%; aspect-ratio: 1 / 1; background: #1a1a1a; display: flex; align-items: center; justify-content: center;';
+                placeholder.innerHTML = `
+                    <div class="video-loading-indicator" style="text-align: center; color: #666;">
+                        <i class="fas fa-play-circle" style="font-size: 48px; opacity: 0.5;"></i>
+                    </div>
+                `;
+                container.appendChild(placeholder);
+            }
+        }
+        VIDEO_POOL.activeIframes.delete(idx);
+        console.log(`🧹 Video ${idx} iframe temizlendi (uzak)`);
+    });
+}
+
+// Sonraki videoları prefetch et (link preload ile DNS/bağlantı hazırla)
+function prefetchUpcomingVideos(currentIndex) {
+    const allVideoPosts = document.querySelectorAll('.post-video');
+    const currentIdx = parseInt(currentIndex);
+    
+    allVideoPosts.forEach(post => {
+        const postIdx = parseInt(post.getAttribute('data-video-index'));
+        const videoUrl = post.getAttribute('data-video-url');
+        
+        if (!videoUrl) return;
+        
+        // Mevcut videodan 1-2 sonraki videoları prefetch et
+        if (postIdx > currentIdx && postIdx <= currentIdx + VIDEO_POOL.prefetchAhead) {
+            if (!VIDEO_POOL.prefetchedUrls.has(videoUrl)) {
+                // DNS prefetch + preconnect ile bağlantıyı hazırla
+                try {
+                    const urlObj = new URL(videoUrl);
+                    const origin = urlObj.origin;
+                    
+                    // Preconnect link ekle (henüz yoksa)
+                    if (!document.querySelector(`link[href="${origin}"][rel="preconnect"]`)) {
+                        const preconnect = document.createElement('link');
+                        preconnect.rel = 'preconnect';
+                        preconnect.href = origin;
+                        preconnect.crossOrigin = 'anonymous';
+                        document.head.appendChild(preconnect);
+                    }
+                    
+                    // Prefetch link ekle
+                    if (!document.querySelector(`link[href="${videoUrl}"][rel="prefetch"]`)) {
+                        const prefetch = document.createElement('link');
+                        prefetch.rel = 'prefetch';
+                        prefetch.href = videoUrl;
+                        prefetch.as = 'document'; // iframe içeriği
+                        document.head.appendChild(prefetch);
+                    }
+                    
+                    VIDEO_POOL.prefetchedUrls.add(videoUrl);
+                    console.log(`📦 Video ${postIdx} prefetch edildi`);
+                } catch (e) {
+                    // URL parse hatası - yoksay
+                }
+            }
+        }
+    });
+}
+
+// Instagram benzeri video oynatma - gelişmiş versiyon
 function setupVideoAutoplay() {
     const videoPosts = document.querySelectorAll('.post-video');
     if (videoPosts.length === 0) return;
     
-    // Intersection Observer options - video ekranın %50'sinden fazlası görünürse oynat
+    // ✅ Başlangıçta Cloudinary domain'lerine preconnect
+    const cloudinaryOrigins = new Set();
+    videoPosts.forEach(post => {
+        const url = post.getAttribute('data-video-url');
+        if (url) {
+            try {
+                cloudinaryOrigins.add(new URL(url).origin);
+            } catch(e) {}
+        }
+    });
+    cloudinaryOrigins.forEach(origin => {
+        if (!document.querySelector(`link[href="${origin}"][rel="preconnect"]`)) {
+            const link = document.createElement('link');
+            link.rel = 'preconnect';
+            link.href = origin;
+            link.crossOrigin = 'anonymous';
+            document.head.appendChild(link);
+            console.log(`🔗 Preconnect: ${origin}`);
+        }
+    });
+    
+    // ✅ Intersection Observer - çoklu threshold ile erken hazırlık
+    // rootMargin: '200px' → video ekrana girmeden 200px önce hazırlığa başla
     const observerOptions = {
-        root: null, // viewport
-        rootMargin: '0px',
-        threshold: 0.5 // Video'nun %50'si görünürse tetikle
+        root: null,
+        rootMargin: '200px 0px 200px 0px', // Üstten ve alttan 200px erken tetikle
+        threshold: [0, 0.25, 0.5, 0.75]    // Çoklu eşik
     };
     
-    // Video oynatma/durdurma fonksiyonu
     const handleVideoVisibility = (entries) => {
         entries.forEach(entry => {
-            const iframe = entry.target.querySelector('iframe');
-            if (!iframe) return;
-            
-            const videoUrl = iframe.getAttribute('data-video-url');
-            if (!videoUrl) return;
+            const videoContainer = entry.target;
+            const videoIndex = videoContainer.getAttribute('data-video-index');
+            const videoState = videoContainer.getAttribute('data-video-state');
             
             if (entry.isIntersecting) {
-                // Video görünür - oynat
-                if (!iframe.src || iframe.src === 'about:blank') {
-                    iframe.src = videoUrl;
+                // Video görünür bölgeye girdi
+                if (entry.intersectionRatio >= 0.5) {
+                    // %50+ görünür → iframe oluştur ve oynat
+                    if (videoState === 'idle' || videoState === 'prefetched') {
+                        createVideoIframe(videoContainer);
+                        VIDEO_POOL.currentlyPlaying = videoIndex;
+                        
+                        // Uzaktaki iframe'leri temizle
+                        cleanupDistantIframes(videoIndex);
+                        
+                        // Sonraki videoları prefetch et
+                        prefetchUpcomingVideos(videoIndex);
+                    }
+                } else if (entry.intersectionRatio >= 0.1) {
+                    // %10-50 arası görünür → prefetch başlat
+                    prefetchUpcomingVideos(videoIndex);
                 }
-                // Cloudinary iframe'leri için autoplay zaten URL'de var
             } else {
-                // Video görünmüyor - durdur (iframe src'sini boşalt)
-                // Not: Cloudinary iframe'leri için src'yi boşaltmak video'yu durdurur
-                iframe.src = 'about:blank';
+                // Video tamamen görünmüyor
+                // Ama iframe'i hemen silme - cleanupDistantIframes zaten uzak olanları temizler
+                // Bu sayede hızlıca geri scroll edildiğinde yeniden yükleme gerekmez
             }
         });
     };
     
-    // Intersection Observer oluştur
     const observer = new IntersectionObserver(handleVideoVisibility, observerOptions);
     
     // Her video post'unu gözlemle
@@ -1139,18 +1313,17 @@ function setupVideoAutoplay() {
     // İlk görünür video'yu hemen başlat
     const firstVisibleVideo = Array.from(videoPosts).find(post => {
         const rect = post.getBoundingClientRect();
-        return rect.top >= 0 && rect.top < window.innerHeight * 0.5;
+        return rect.top >= 0 && rect.top < window.innerHeight * 0.7;
     });
     
     if (firstVisibleVideo) {
-        const iframe = firstVisibleVideo.querySelector('iframe');
-        if (iframe) {
-            const videoUrl = iframe.getAttribute('data-video-url');
-            if (videoUrl && !iframe.src) {
-                iframe.src = videoUrl;
-            }
-        }
+        createVideoIframe(firstVisibleVideo);
+        const idx = firstVisibleVideo.getAttribute('data-video-index');
+        VIDEO_POOL.currentlyPlaying = idx;
+        prefetchUpcomingVideos(idx);
     }
+    
+    console.log(`🎬 Video sistemi başlatıldı: ${videoPosts.length} video, max ${VIDEO_POOL.maxActive} aktif iframe`);
 }
 
 // Turkish names for stories

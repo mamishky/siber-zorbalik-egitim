@@ -1,5 +1,28 @@
 // Senaryo ve mesaj yapılandırmaları
 
+// ✅ OPTİMİZASYON: Sayfa yüklenirken Cloudinary CDN'e erken bağlantı kur
+// Bu, videoların daha hızlı yüklenmesini sağlar (DNS lookup + TLS handshake önceden yapılır)
+(function addEarlyPreconnectHints() {
+    const origins = [
+        'https://player.cloudinary.com',
+        'https://res.cloudinary.com'
+    ];
+    origins.forEach(origin => {
+        // Preconnect
+        const preconnect = document.createElement('link');
+        preconnect.rel = 'preconnect';
+        preconnect.href = origin;
+        preconnect.crossOrigin = 'anonymous';
+        document.head.appendChild(preconnect);
+        
+        // DNS Prefetch (fallback)
+        const dnsPrefetch = document.createElement('link');
+        dnsPrefetch.rel = 'dns-prefetch';
+        dnsPrefetch.href = origin;
+        document.head.appendChild(dnsPrefetch);
+    });
+})();
+
 // Siber zorbalık türleri (5 tür - Madde 4)
 const BULLYING_TYPES = ['sozel', 'dislama', 'tehdit', 'iftira', 'kimlik'];
 
