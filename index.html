@@ -181,19 +181,20 @@
             width: 100%;
         }
 
-        /* LOGO wrapper - ikon + yazı yan yana */
-        .logo-shield-wrapper {
+        /* LOGO satır container */
+        .brand-row {
             display: inline-flex;
+            flex-direction: row;
             align-items: center;
             justify-content: center;
-            gap: 0.15em;
-            margin: 0 auto 1rem auto;
+            gap: 12px;
         }
 
         .logo-shield-img {
-            height: clamp(48px, 8vw, 110px);
+            height: clamp(48px, 8vw, 100px);
             width: auto;
             flex-shrink: 0;
+            display: block;
         }
 
         /* LOGO - safetagram */
@@ -205,8 +206,10 @@
             line-height: 1;
             margin: 0;
             padding: 0;
-            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
-            position: relative;
+            white-space: nowrap;
+            flex-shrink: 0;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            will-change: opacity, transform;
             opacity: 0;
             animation: 
                 logoFadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards,
@@ -535,9 +538,9 @@
 
         <div class="cyber-welcome-container">
             <header class="cyber-brand">
-                <div style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:10px;width:100%">
-                    <img src="assets/safetagram_logo.svg" alt="Safetagram" class="logo-shield-img" style="height:clamp(48px,7vw,100px);width:auto;flex-shrink:0">
-                    <h1 class="wordmark" style="margin:0;padding:0"><span style="color:#6A9FD8">Safe</span><span style="color:#F0A86E">tagram</span></h1>
+                <div class="brand-row">
+                    <img src="assets/safetagram_logo.svg" alt="Safetagram" class="logo-shield-img">
+                    <h1 class="wordmark"><span style="color:#6A9FD8">Safe</span><span style="color:#F0A86E">tagram</span></h1>
                 </div>
                 <div class="tagline">
                     <span class="action action-report">şikayet et</span>
@@ -689,9 +692,9 @@
             </div>
 
             <header class="cyber-brand">
-                <div style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:10px;width:100%">
-                    <img src="assets/safetagram_logo.svg" alt="Safetagram" class="logo-shield-img" style="height:clamp(48px,7vw,100px);width:auto;flex-shrink:0">
-                    <h1 class="wordmark" style="margin:0;padding:0"><span style="color:#6A9FD8">Safe</span><span style="color:#F0A86E">tagram</span></h1>
+                <div class="brand-row">
+                    <img src="assets/safetagram_logo.svg" alt="Safetagram" class="logo-shield-img">
+                    <h1 class="wordmark"><span style="color:#6A9FD8">Safe</span><span style="color:#F0A86E">tagram</span></h1>
                 </div>
                 <div class="tagline">
                     <span class="action action-report">şikayet et</span>
@@ -794,9 +797,9 @@
             </div>
             
             <header class="cyber-brand">
-                <div style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:10px;width:100%">
-                    <img src="assets/safetagram_logo.svg" alt="Safetagram" class="logo-shield-img" style="height:clamp(48px,7vw,100px);width:auto;flex-shrink:0">
-                    <h1 class="wordmark" style="margin:0;padding:0"><span style="color:#6A9FD8">Safe</span><span style="color:#F0A86E">tagram</span></h1>
+                <div class="brand-row">
+                    <img src="assets/safetagram_logo.svg" alt="Safetagram" class="logo-shield-img">
+                    <h1 class="wordmark"><span style="color:#6A9FD8">Safe</span><span style="color:#F0A86E">tagram</span></h1>
                 </div>
                 <div class="tagline">
                     <span class="action action-report">şikayet et</span>
