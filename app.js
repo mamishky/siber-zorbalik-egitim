@@ -1572,8 +1572,8 @@ function sendNextMessageNotification() {
     if (!currentSession.messageQueue || currentSession.messageQueue.length === 0) {
         return;
     }
-    // Check if we've completed all 10 messages
-    if (currentSession.currentMessageIndex >= 10 || currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
+    // Tüm mesajlar tamamlandı mı?
+    if (currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
         // Tüm mesajlar tamamlandı - show summary
         setTimeout(() => {
             showSummary();
@@ -1899,7 +1899,7 @@ function scheduleNextMessage() {
     currentSession.currentMessageIndex++;
     
     // Mesaj indeksini kontrol et
-    if (currentSession.currentMessageIndex >= 10 || currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
+    if (currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
         // Tüm mesajlar tamamlandı - 2 saniye sonra özet ekranı
         setTimeout(() => {
             showSummary();

@@ -289,10 +289,16 @@ const STORY_USERS = [
 
 // Rastgele zorba kullanıcı adları havuzu
 const BULLY_USERNAMES = [
-    'kullanici_34', 'gizli_profil', 'anon_user', 'yeni_hesap_2024', 'takipci_99',
-    'okul_arkadasi', 'sinif_grubu', 'gaming_tr', 'muzik_seven', 'spor_delisi',
-    'kafadan_kontak', 'bi_hesap', 'sadece_ben_', 'hayalet_profil', 'karanlik_mod',
-    'biri_biri', 'random_kullanici', 'yabanci_biri', 'tanidik_biri', 'merak_eden'
+    'burak.king61', 'kaansen.style', 'ceren_darkx', 'toxic.emirr', 'melis.savage_', 
+    'deniz.cold99', 'real.oguz_35', 'arda.nofilter', 'batu_firex', 'yagmur.zehir_', 
+    'bizim.ekip35', 'vip.squad_izmir', 'enes.kaptan07', 'sude.queenbee', 'sadece.biz_', 
+    'ozel.grup_34', 'pelin.ceo_', 'takim.lideri_', 'parti.krali_', 'bff.zone_only', 
+    'gece.kurdu_06', 'ss.koleksiyonu', 'gizli.hesap_x', 'karanlik.mod_', 'sessiz.izci_', 
+    'anonim.gorucu', 'ekran.gorusu_', 'sifre.avcisi_', 'golgede.olan_', 'uyari.son_kez', 
+    'herkes.diyor_', 'olay.patlak35', 'duydum.ki_', 'laf.makinesi07', 'millet.konusuyor', 
+    'itiraf.kutusu_', 'berk.expose_', 'dedikodu.ruzgari', 'okul.haber_', 'fistik.troll_', 
+    'mudur.yrd_resmi', 'emre.yenihesap_', 'destek.merkezi_', 'yeliz.11sinif', 'mert.acildurum', 
+    'izmir.odul_', 'merve.ogretmen_', 'brawlstars.ali', 'goztepe.burs_', 'kargo.teslimat_'
 ];
 
 // Tüm zorbalık senaryoları havuzu — her oturumda rastgele seçilir
@@ -386,12 +392,14 @@ function saveUsedScenarios(participantName, usedData) {
 }
 
 // Rastgele senaryo havuzundan kuyruk oluştur
-// Her tür için 2 senaryo seçer → toplamda 10 mesaj (5 tür × 2)
+// Her tür için 1 senaryo seçer → toplamda 5 zorbalık mesajı (5 tür × 1)
+// Normal mesajlar safetagram-ai.js tarafından ayrıca eklenir (5 adet)
+// Toplam: 5 zorbalık + 5 normal = 10 mesaj, tamamı rastgele karışık
 function buildMessageQueue(participantName, bullyingType) {
     const used = getUsedScenarios(participantName);
     const queue = [];
     const types = bullyingType === 'all' ? ['sozel', 'dislama', 'tehdit', 'iftira', 'kimlik'] : [bullyingType];
-    const scenariosPerType = bullyingType === 'all' ? 2 : 10;
+    const scenariosPerType = bullyingType === 'all' ? 1 : 5;
 
     types.forEach(type => {
         const pool = MESSAGE_POOL[type] || [];
