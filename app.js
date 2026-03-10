@@ -240,6 +240,14 @@ async function startDevSimulation() {
     showScreen('main-app');
     generateFeed();
     renderStories();
+
+    // İlk mesajı 5 saniye sonra gönder
+    if (currentSession.messageQueue.length > 0) {
+        currentSession.messageQueue[0]._deliveredAt = new Date();
+        currentSession.messageQueue[0]._status = 'delivered';
+        setTimeout(() => sendNextMessageNotification(), 5000);
+    }
+
     console.log('🚀 Dev mod: Simülasyon direkt açıldı');
 }
 
@@ -848,6 +856,13 @@ function initSessionFormHandler() {
     showScreen('main-app');
     generateFeed();
     renderStories();
+
+    // İlk mesajı 5 saniye sonra gönder
+    if (currentSession.messageQueue.length > 0) {
+        currentSession.messageQueue[0]._deliveredAt = new Date();
+        currentSession.messageQueue[0]._status = 'delivered';
+        setTimeout(() => sendNextMessageNotification(), 5000);
+    }
 });
 }
 
