@@ -336,7 +336,10 @@ const MESSAGE_POOL = {
         { messages: [{ type: 'cyberbullying', text: 'dediğimi yapmazsan', cyberType: 'tehdit', complaintReason: 'tehdit' }, { type: 'cyberbullying', text: 'seni şikayet ederim', cyberType: 'tehdit', complaintReason: 'tehdit' }] },
         { messages: [{ type: 'cyberbullying', text: 'bu konuşmaları ailene atarım', cyberType: 'tehdit', complaintReason: 'tehdit' }, { type: 'cyberbullying', text: 'sonra düşünürsün', cyberType: 'tehdit', complaintReason: 'tehdit' }] },
         { messages: [{ type: 'cyberbullying', text: 'son kez söylüyorum', cyberType: 'tehdit', complaintReason: 'tehdit' }, { type: 'cyberbullying', text: 'yoksa paylaşırım', cyberType: 'tehdit', complaintReason: 'tehdit' }] },
-        { messages: [{ type: 'cyberbullying', text: 'benimle uğraşma', cyberType: 'tehdit', complaintReason: 'tehdit' }, { type: 'cyberbullying', text: 'elime koz verme', cyberType: 'tehdit', complaintReason: 'tehdit' }] }
+        { messages: [{ type: 'cyberbullying', text: 'benimle uğraşma', cyberType: 'tehdit', complaintReason: 'tehdit' }, { type: 'cyberbullying', text: 'elime koz verme', cyberType: 'tehdit', complaintReason: 'tehdit' }] },
+        { messages: [{ type: 'cyberbullying', text: 'bana dokundun.', cyberType: 'tehdit', complaintReason: 'tehdit' }, { type: 'cyberbullying', text: 'taciz ettiğini söylerim.', cyberType: 'tehdit', complaintReason: 'tehdit' }] },
+        { messages: [{ type: 'cyberbullying', text: 'Annen baban bu yaptıklarını biliyor mu?', cyberType: 'tehdit', complaintReason: 'tehdit' }, { type: 'cyberbullying', text: 'Onların duymasını ister misin?', cyberType: 'tehdit', complaintReason: 'tehdit' }] },
+        { messages: [{ type: 'cyberbullying', text: 'ondan hoşlanıyorsun biliyorum.', cyberType: 'tehdit', complaintReason: 'tehdit' }, { type: 'cyberbullying', text: 'harçlığını vermezsen sosyal medyada her yere yazarım.', cyberType: 'tehdit', complaintReason: 'tehdit' }] }
     ],
     'iftira': [
         { messages: [{ type: 'cyberbullying', text: 'herkes senin hırsızlık yaptığını konuşuyor', cyberType: 'iftira', complaintReason: 'iftira' }, { type: 'cyberbullying', text: 'ben demiyorum onlar diyor', cyberType: 'iftira', complaintReason: 'iftira' }] },
