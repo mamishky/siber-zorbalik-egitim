@@ -209,7 +209,7 @@ async function startDevSimulation() {
         reportClicked: false,
         blockClicked: false,
         pendingMessages: 0,
-        messageQueue: (typeof buildMessageQueue === 'function') ? buildMessageQueue('Test', 'all') : [],
+        messageQueue: [],  // normalMesajlariKaristir ile doldurulacak (aşağıda)
         currentMessageIndex: 0,
         selectedComplaintReason: null,
         conversationHistory: {},
@@ -229,6 +229,14 @@ async function startDevSimulation() {
     } catch (e) {
         console.warn('Dev mod: Firestore oturum kaydı atlandı', e);
     }
+    // Dev modu kuyruk: zorbalık + normal AI mesajları karıştır
+    const _devBullyQueue = (typeof buildMessageQueue === 'function') ? buildMessageQueue('Test', 'all') : [];
+    if (typeof normalMesajlariKaristir === 'function') {
+        currentSession.messageQueue = await normalMesajlariKaristir(_devBullyQueue, 5);
+    } else {
+        currentSession.messageQueue = _devBullyQueue;
+    }
+
     showScreen('main-app');
     generateFeed();
     renderStories();
@@ -821,13 +829,18 @@ function initSessionFormHandler() {
     currentSession.skills.navigation = true;
     
     // Öğrenciye özgü, rastgele ve tekrarsız mesaj kuyruğu oluştur
+    let _bullyQueue = [];
     if (typeof buildMessageQueue === 'function') {
-        currentSession.messageQueue = buildMessageQueue(
+        _bullyQueue = buildMessageQueue(
             currentSession.participantName,
             currentSession.currentBullyingType || 'all'
         );
+    }
+    // Normal (zorbalık içermeyen) AI mesajlarını karıştır
+    if (typeof normalMesajlariKaristir === 'function') {
+        currentSession.messageQueue = await normalMesajlariKaristir(_bullyQueue, 5);
     } else {
-        currentSession.messageQueue = [];
+        currentSession.messageQueue = _bullyQueue;
     }
     currentSession.deliveredMessages = currentSession.deliveredMessages || [];
     currentSession.currentMessageIndex = 0;
@@ -2134,11 +2147,16 @@ function sendConversationMessage() {
 // generateAIMessage tekrar backend (/api/ai/generate) çağrısına bağlanabilir.
 
 /**
- * AI ile mesaj oluştur. API key kaldırıldı – sonradan verilecek.
- * Şu an sadece fallback cevap döner; mesaj/senaryo içeriği boş kalabilir.
+ * Normal (zorbalık içermeyen) sohbetlerde AI yanıtı üret.
+ * Siber zorbalık senaryolarında (scenario.isNormal !== true) fallback kullanılır.
  */
 async function generateAIMessage(userMessage, conversationHistory, scenario) {
-    // API key olmadan çağrı yapılmıyor – fallback kullan
+    // Sadece normal mesajlarda Gemini'yi çağır
+    if (scenario && scenario.isNormal && typeof geminiCevapUret === 'function') {
+        const participantAge = currentSession ? currentSession.participantAge : 14;
+        const cevap = await geminiCevapUret(userMessage, conversationHistory, participantAge);
+        if (cevap) return cevap;
+    }
     return getFallbackResponse(userMessage);
 }
 
