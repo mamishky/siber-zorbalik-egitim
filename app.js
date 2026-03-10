@@ -111,7 +111,7 @@ function generateBullyingMessage(bullyingType) {
             'Neden hep yanlış yapıyorsun? Hiçbir işe yaramıyorsun.',
             'Sınıfın en kötüsü sensin, herkes bunu biliyor.'
         ],
-        'dislanma': [
+        'dislama': [
             'Seni partiye davet etmedik, kimse seni istemiyor.',
             'Bizim gruba giremezsin, sen bizden değilsin.',
             'Kimse seninle oturmak istemiyor.'
@@ -169,6 +169,21 @@ function continueConversation(conversationHistory, userMessage) {
     return responses[Math.floor(Math.random() * responses.length)];
 }
 
+// Oturum tipi ve zorbalık türü etiketleri
+const SESSION_LABELS = {
+    'baslama': 'Başlama Düzeyi',
+    'orta': 'Orta Düzey',
+    'ileri': 'İleri Düzey'
+};
+
+const BULLYING_TYPE_LABELS = {
+    'sozel':   'Sözel/Psikolojik Saldırı',
+    'dislama': 'Dışlama',
+    'tehdit':  'Tehdit/Şantaj',
+    'iftira':  'Karalama/Aşağılama',
+    'kimlik':  'Kimliğe Bürünme'
+};
+
 // Current user state
 let currentUser = null;
 
@@ -184,7 +199,7 @@ async function startDevSimulation() {
         currentUser = { uid: 'dev-user', email: 'dev@localhost', displayName: 'Dev Kullanıcı' };
     }
     const sessionId = `S${Date.now()}_dev`;
-    currentSession = {
+    currentSession = getEmptySession({
         sessionId,
         participantId: `P${Date.now()}`,
         participantName: 'Test',
@@ -192,31 +207,10 @@ async function startDevSimulation() {
         sessionType: 'baslama',
         currentBullyingType: 'all',
         startTime: new Date(),
-        endTime: null,
-        totalDurationSec: 0,
         userId: currentUser.uid,
         hintEnabled: true,
-        aiEnabled: false,
-        currentScenario: null,
-        messageIndex: 0,
-        conversationIndex: 0,
-        sessionData: [],
-        skills: { navigation: true, reading: false, replying: false, reporting: false, complaintType: false, blocking: false, informAdult: false },
-        stats: { correct: 0, wrong: 0, hints: 0 },
-        currentMessageStartTime: null,
-        hintTimeout: null,
-        messageTimeout: null,
-        reportClicked: false,
-        blockClicked: false,
-        pendingMessages: 0,
-        messageQueue: [],  // normalMesajlariKaristir ile doldurulacak (aşağıda)
-        currentMessageIndex: 0,
-        selectedComplaintReason: null,
-        conversationHistory: {},
-        deliveredMessages: [],
-        perMessageResults: [],
-        skillSteps: { navigation: false, reading: false, replying: false, reporting: false, complaintType: false, blocking: false, informAdult: false }
-    };
+        skills: { navigation: true, reading: false, replying: false, reporting: false, complaintType: false, blocking: false, informAdult: false }
+    });
     try {
         await db.collection('users').doc(currentUser.uid).collection('sessions').doc(sessionId).set({
             participantName: 'Test',
@@ -335,10 +329,16 @@ auth.onAuthStateChanged(async (user) => {
             }
         }
     } else {
+        // Dev modda dummy currentUser varsa auth observer'ın onu sıfırlamasına izin verme
+        if (isDevMode()) {
+            console.log('🔧 Dev mod: auth observer redirect engellendi');
+            return;
+        }
         currentUser = null;
         console.log('User logged out');
         // Show auth screen if not on it
-        if (!document.getElementById('auth-screen').classList.contains('active')) {
+        const authScreen = document.getElementById('auth-screen');
+        if (authScreen && !authScreen.classList.contains('active')) {
             showScreen('auth-screen');
         }
     }
@@ -749,62 +749,17 @@ function initSessionFormHandler() {
     
     // Generate a unique session ID
     const sessionId = `S${Date.now()}`;
-        currentSession = {
-        sessionId: sessionId,
+    currentSession = getEmptySession({
+        sessionId,
         participantId: `P${Date.now()}`,
         participantName: name,
         participantAge: parseInt(age),
-        sessionType: sessionType,
+        sessionType,
         currentBullyingType: 'all',
         startTime: new Date(),
-        endTime: null,
-        totalDurationSec: 0,
         userId: currentUser.uid,
-        hintEnabled: hintEnabled,
-        aiEnabled: false, // Yapay zeka mesaj desteği kapalı – API key sonradan eklenecek
-        currentScenario: null,
-        messageIndex: 0,
-        conversationIndex: 0,
-        sessionData: [],
-        skills: {
-            navigation: false,
-            reading: false,
-            replying: false,
-            reporting: false,
-            complaintType: false,
-            blocking: false,
-            informAdult: false
-        },
-        stats: {
-            correct: 0,
-            wrong: 0,
-            hints: 0
-        },
-        currentMessageStartTime: null,
-        hintTimeout: null,
-        messageTimeout: null,
-        reportClicked: false,
-        blockClicked: false,
-        pendingMessages: 0,
-        messageQueue: [],
-        currentMessageIndex: 0,
-        selectedComplaintReason: null,
-        conversationHistory: {},
-        // Inbox mesajları (Madde 5)
-        deliveredMessages: [],
-        // Mesaj bazlı sonuçlar (Madde 16)
-        perMessageResults: [],
-        // Beceri basamakları kayıtları (Madde 13, 14)
-        skillSteps: {
-            navigation: false,
-            reading: false,
-            replying: false,
-            reporting: false,
-            complaintType: false,
-            blocking: false,
-            informAdult: false
-        }
-    };
+        hintEnabled
+    });
         
         console.log('✅ currentSession oluşturuldu:', sessionId);
         
@@ -866,59 +821,69 @@ function initSessionFormHandler() {
 });
 }
 
-// Global değişkenler - YENİ YAPI (Madde 6)
-let currentSession = {
-    sessionId: "",
-    userId: "",
-    sessionType: "",
-    participantId: "",
-    participantName: "",
-    participantAge: 0,
-    startTime: null,
-    endTime: null,
-    totalDurationSec: 0,
-    currentBullyingType: null,
-    currentScenario: null,
-    messageIndex: 0,
-    conversationIndex: 0,
-    sessionData: [],
-    skills: {
-        navigation: false,
-        reading: false,
-        replying: false,
-        reporting: false,
-        complaintType: false,
-        blocking: false,
-        informAdult: false
-    },
-    stats: {
-        correct: 0,
-        wrong: 0,
-        hints: 0
-    },
-    currentMessageStartTime: null,
-    hintTimeout: null,
-    messageTimeout: null,
-    reportClicked: false,
-    blockClicked: false,
-    pendingMessages: 0,
-    messageQueue: [],
-    currentMessageIndex: 0,
-    selectedComplaintReason: null,
-    conversationHistory: {}, // Stores message history by sender
-    hintEnabled: true, // Default to true
-    aiEnabled: false // Yapay zeka mesaj desteği kapalı – API key sonradan eklenecek
-};
-
-// Persistent message history functions
-function getParticipantStorageKey(participantName) {
-    return `safestagram_users`;
+// Boş oturum nesnesi üretir — tüm reset noktaları bu fonksiyonu kullanır
+function getEmptySession(overrides = {}) {
+    return {
+        sessionId: "",
+        userId: "",
+        sessionType: "",
+        participantId: "",
+        participantName: "",
+        participantAge: 0,
+        startTime: null,
+        endTime: null,
+        totalDurationSec: 0,
+        currentBullyingType: null,
+        currentScenario: null,
+        messageIndex: 0,
+        conversationIndex: 0,
+        sessionData: [],
+        skills: {
+            navigation: false,
+            reading: false,
+            replying: false,
+            reporting: false,
+            complaintType: false,
+            blocking: false,
+            informAdult: false
+        },
+        stats: { correct: 0, wrong: 0, hints: 0 },
+        currentMessageStartTime: null,
+        hintTimeout: null,
+        messageTimeout: null,
+        reportClicked: false,
+        blockClicked: false,
+        pendingMessages: 0,
+        messageQueue: [],
+        currentMessageIndex: 0,
+        selectedComplaintReason: null,
+        conversationHistory: {},
+        hintEnabled: true,
+        aiEnabled: false,
+        deliveredMessages: [],
+        perMessageResults: [],
+        skillSteps: {
+            navigation: false,
+            reading: false,
+            replying: false,
+            reporting: false,
+            complaintType: false,
+            blocking: false,
+            informAdult: false
+        },
+        ...overrides
+    };
 }
 
+// Global değişkenler - YENİ YAPI (Madde 6)
+let currentSession = getEmptySession();
+
+// Persistent message history functions
 function loadMessageHistory(participantName) {
     const allUsers = localStorage.getItem('safestagram_users');
     if (allUsers) {
-        const usersData = JSON.parse(allUsers);
+        let usersData;
+        try { usersData = JSON.parse(allUsers); } catch (e) { console.warn('[loadMessageHistory] bozuk veri:', e); return {}; }
         const normalizedName = participantName.toLowerCase().trim();
         if (usersData[normalizedName]) {
             return usersData[normalizedName].conversations || {};
@@ -929,7 +894,8 @@ function loadMessageHistory(participantName) {
 
 function saveMessageHistory(participantName, conversations) {
     const allUsers = localStorage.getItem('safestagram_users');
-    let usersData = allUsers ? JSON.parse(allUsers) : {};
+    let usersData = {};
+    if (allUsers) { try { usersData = JSON.parse(allUsers); } catch (e) { console.warn('[saveMessageHistory] bozuk veri sıfırlandı:', e); } }
     const normalizedName = participantName.toLowerCase().trim();
     
     if (!usersData[normalizedName]) {
@@ -986,7 +952,12 @@ function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(screen => {
         screen.classList.remove('active');
     });
-    document.getElementById(screenId).classList.add('active');
+    const el = document.getElementById(screenId);
+    if (el) {
+        el.classList.add('active');
+    } else {
+        console.error('[showScreen] Ekran bulunamadı:', screenId);
+    }
 }
 
 // Feed'i oluştur
@@ -1445,7 +1416,8 @@ function renderStories() {
 function loadStoryStates() {
     const saved = localStorage.getItem('siberguven_stories');
     if (saved) {
-        const savedStories = JSON.parse(saved);
+        let savedStories;
+        try { savedStories = JSON.parse(saved); } catch (e) { console.warn('[loadStoryStates] bozuk veri:', e); return; }
         storyState.stories = storyState.stories.map(story => {
             const savedStory = savedStories.find(s => s.username === story.username);
             return savedStory ? { ...story, watched: savedStory.watched } : story;
@@ -1558,14 +1530,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('story-close').addEventListener('click', closeStory);
 });
-
-// Ekran geçişleri
-function showScreen(screenId) {
-    document.querySelectorAll('.screen').forEach(screen => {
-        screen.classList.remove('active');
-    });
-    document.getElementById(screenId).classList.add('active');
-}
 
 // Mesaj bildirimi göster (Instagram DM style) - mesaj kuyruğu kapalıyken çağrılmaz
 function sendNextMessageNotification() {
@@ -1755,7 +1719,7 @@ function renderInboxList() {
         // Tıklama eventi - Instagram benzeri
         item.addEventListener('click', () => {
             if (isBlocked) {
-                alert('Bu kullanıcı engellenmiştir.');
+                showNotification('Engelli Kullanıcı', 'Bu kullanıcı engellenmiştir.', 'info');
             } else {
                 // deliveredMsg'dan conversation'ı aç
                 openConversationFromInbox(deliveredMsg);
@@ -1948,14 +1912,24 @@ document.getElementById('back-to-inbox').addEventListener('click', () => {
     // DİREK ANA SAYFAYA DÖN (inbox'a değil)
     showScreen('main-app');
     
-    // 10 saniye sonra sonraki mesajı gönder (Madde 4)
-    console.log('📱 Ana sayfaya dönüldü, 10 saniye sonra sonraki mesaj gelecek...');
-    scheduleNextMessage();
+    // Siber zorbalık senaryosunda hem şikayet hem engelleme yapıldıysa mesajı tamamla.
+    // Normal mesajlarda (conversation formatı) her zaman tamamla.
+    const isNormal = scenario && scenario.conversation !== undefined;
+    const isCyberbullyingDone = scenario && scenario.messages &&
+        currentSession.reportClicked && currentSession.blockClicked;
+    
+    if (isNormal || isCyberbullyingDone) {
+        console.log('📱 Mesaj tamamlandı, 10 saniye sonra sonraki mesaj gelecek...');
+        scheduleNextMessage();
+    } else {
+        console.log('📱 Ana sayfaya dönüldü ama mesaj henüz tamamlanmadı, kuyruk ilerletilmedi.');
+    }
 });
 
 // Mesaj gönder
 function sendMessage() {
     const scenario = currentSession.currentScenario;
+    if (!scenario || !scenario.messages) return;
     const message = scenario.messages[currentSession.messageIndex];
     
     if (!message) {
@@ -2490,7 +2464,9 @@ function showComplaintReasonDialog() {
     const modal = document.getElementById('complaint-modal');
     const reasonsContainer = document.getElementById('complaint-reasons');
     const scenario = currentSession.currentScenario;
+    if (!scenario || !scenario.messages) return; // Normal mesajlarda messages yok
     const message = scenario.messages[currentSession.messageIndex];
+    if (!message) return;
     const correctReason = message.complaintReason;
     
     // Nedenleri oluştur
@@ -2551,7 +2527,9 @@ function showComplaintReasonDialog() {
 // Şikayet gönder butonu
 document.getElementById('submit-complaint').addEventListener('click', () => {
     const scenario = currentSession.currentScenario;
+    if (!scenario || !scenario.messages) return;
     const message = scenario.messages[currentSession.messageIndex];
+    if (!message) return;
     const correctReason = message.complaintReason;
     const selectedReason = currentSession.selectedComplaintReason;
     
@@ -2615,7 +2593,9 @@ function showHint() {
     }
     
     const scenario = currentSession.currentScenario;
+    if (!scenario || !scenario.messages) return; // Normal mesajlarda ipucu yok
     const message = scenario.messages[currentSession.messageIndex];
+    if (!message) return;
     
     if (message.type !== 'cyberbullying') return;
     
@@ -2769,48 +2749,7 @@ document.getElementById('finish-session').addEventListener('click', async () => 
     }
     
     // Tüm verileri sıfırla (Madde 6)
-    currentSession = {
-        sessionId: "",
-        userId: "",
-        sessionType: "",
-        participantId: "",
-        participantName: "",
-        participantAge: 0,
-        startTime: null,
-        endTime: null,
-        totalDurationSec: 0,
-        currentBullyingType: null,
-        currentScenario: null,
-        messageIndex: 0,
-        conversationIndex: 0,
-        sessionData: [],
-        skills: {
-            navigation: false,
-            reading: false,
-            replying: false,
-            reporting: false,
-            complaintType: false,
-            blocking: false,
-            informAdult: false
-        },
-        stats: {
-            correct: 0,
-            wrong: 0,
-            hints: 0
-        },
-        currentMessageStartTime: null,
-        hintTimeout: null,
-        messageTimeout: null,
-        reportClicked: false,
-        blockClicked: false,
-        pendingMessages: 0,
-        messageQueue: [],
-        currentMessageIndex: 0,
-        selectedComplaintReason: null,
-conversationHistory: {},
-        hintEnabled: true,
-        aiEnabled: false // Yapay zeka mesaj desteği kapalı – API key sonradan eklenecek
-    };
+    currentSession = getEmptySession();
 
     showScreen('panel-screen');
 });
@@ -2874,54 +2813,55 @@ async function loadAdminData() {
         
         const allSkillsData = [];
         const allSessionData = [];
-        
-        for (const sessionDoc of sessionsSnapshot.docs) {
+        const pct = (s) => s.t > 0 ? ((s.c / s.t) * 100).toFixed(0) + '%' : '-';
+
+        // Filtrele
+        const filteredDocs = sessionsSnapshot.docs.filter(doc => {
+            const sd = doc.data();
+            const participantKey = `${sd.participantName}_${sd.participantAge}`;
+            if (selectedParticipant && participantKey !== selectedParticipant) return false;
+            if (selectedSessionType && sd.sessionType !== selectedSessionType) return false;
+            return true;
+        });
+
+        // Tüm alt koleksiyon sorgularını paralel çalıştır (N+1 → Promise.all)
+        const dataSnapshots = await Promise.all(
+            filteredDocs.map(doc =>
+                db.collection('users').doc(currentUser.uid)
+                    .collection('sessions').doc(doc.id)
+                    .collection('data').get()
+            )
+        );
+
+        filteredDocs.forEach((sessionDoc, i) => {
             const sessionData = sessionDoc.data();
             const sessionId = sessionDoc.id;
-            
-            // Filtre uygula - önce öğrenci, sonra oturum türü
-            const participantKey = `${sessionData.participantName}_${sessionData.participantAge}`;
-            if (selectedParticipant && participantKey !== selectedParticipant) {
-                continue; // Bu öğrenci seçili değil, atla
-            }
-            
-            if (selectedSessionType && sessionData.sessionType !== selectedSessionType) {
-                continue; // Bu oturum türü seçili değil, atla
-            }
-            
-            // Beceri analizi verisi oluştur
+            const dataSnapshot = dataSnapshots[i];
+
             const startedAtRaw = sessionData.startedAt ? sessionData.startedAt.seconds * 1000 : 0;
             const skillsRecord = {
-                sessionId: sessionId,
+                sessionId,
                 participantName: sessionData.participantName || 'Bilinmiyor',
                 participantAge: sessionData.participantAge || '-',
                 sessionType: sessionData.sessionType || 'baslama',
                 sessionLabel: SESSION_LABELS[sessionData.sessionType] || 'Bilinmiyor',
                 startedAt: sessionData.startedAt ? new Date(startedAtRaw).toLocaleString('tr-TR') : '-',
-                startedAtRaw: startedAtRaw,
+                startedAtRaw,
                 endedAt: sessionData.endedAt ? new Date(sessionData.endedAt.seconds * 1000).toLocaleString('tr-TR') : '-',
                 totalDurationSec: sessionData.totalDurationSec || 0,
                 totalDurationMin: sessionData.totalDurationSec ? (sessionData.totalDurationSec / 60).toFixed(1) : '0',
                 correctCount: 0, wrongCount: 0,
                 correctPercent: '0%', wrongPercent: '0%',
                 hintCount: 0,
-                // Zorbalık türü başarı sayaçları {correct, total}
                 bullyStats: { sozel: {c:0,t:0}, dislama: {c:0,t:0}, tehdit: {c:0,t:0}, iftira: {c:0,t:0}, kimlik: {c:0,t:0} }
             };
-            
-            // Mesaj bazlı oturum kayıtları
-            const dataSnapshot = await db.collection('users').doc(currentUser.uid)
-                .collection('sessions').doc(sessionId)
-                .collection('data').get();
-            
-            let correctCount = 0;
-            let wrongCount = 0;
-            let hintCount = 0;
-            
+
+            let correctCount = 0, wrongCount = 0, hintCount = 0;
+
             dataSnapshot.forEach(doc => {
                 const data = doc.data();
                 allSessionData.push({
-                    sessionId: sessionId,
+                    sessionId,
                     participantName: data.participantName || 'Bilinmiyor',
                     sessionLabel: data.sessionLabel || 'Bilinmiyor',
                     bullyingLabel: data.bullyingLabel || 'Bilinmiyor',
@@ -2933,12 +2873,11 @@ async function loadAdminData() {
                     hintUsed: data.hintUsed ? 'Evet' : 'Hayır',
                     timestamp: data.timestamp || '-'
                 });
-                
+
                 if (data.correct) correctCount++;
                 else wrongCount++;
                 if (data.hintUsed) hintCount++;
 
-                // Zorbalık türü başarı istatistiği
                 if (data.messageType === 'cyberbullying' && data.bullyingType) {
                     const bt = data.bullyingType;
                     if (skillsRecord.bullyStats[bt]) {
@@ -2947,25 +2886,21 @@ async function loadAdminData() {
                     }
                 }
             });
-            
-            // Yüzdeleri hesapla
+
             const total = correctCount + wrongCount;
             skillsRecord.correctCount = correctCount;
             skillsRecord.wrongCount = wrongCount;
             skillsRecord.hintCount = hintCount;
             skillsRecord.correctPercent = total > 0 ? ((correctCount / total) * 100).toFixed(1) + '%' : '0%';
             skillsRecord.wrongPercent   = total > 0 ? ((wrongCount  / total) * 100).toFixed(1) + '%' : '0%';
-
-            // Zorbalık türü başarı yüzdeleri (gösterim için)
-            const pct = (s) => s.t > 0 ? ((s.c / s.t) * 100).toFixed(0) + '%' : '-';
             skillsRecord.bully_sozel   = pct(skillsRecord.bullyStats.sozel);
             skillsRecord.bully_dislama = pct(skillsRecord.bullyStats.dislama);
             skillsRecord.bully_tehdit  = pct(skillsRecord.bullyStats.tehdit);
             skillsRecord.bully_iftira  = pct(skillsRecord.bullyStats.iftira);
             skillsRecord.bully_kimlik  = pct(skillsRecord.bullyStats.kimlik);
-            
+
             allSkillsData.push(skillsRecord);
-        }
+        });
         
         displaySkillsAnalysis(allSkillsData);
         displaySessionRecords(allSessionData);
@@ -3122,7 +3057,7 @@ const exportSkillsBtn = document.getElementById('export-skills-csv');
 if (exportSkillsBtn) {
     exportSkillsBtn.addEventListener('click', async () => {
         if (!currentUser) {
-            alert('Lütfen giriş yapın!');
+            showNotification('Giriş Gerekli', 'Lütfen giriş yapın!', 'warning');
             return;
         }
         
@@ -3131,7 +3066,7 @@ if (exportSkillsBtn) {
                 .collection('sessions').get();
             
             if (sessionsSnapshot.empty) {
-                alert('Dışa aktarılacak veri bulunmuyor!');
+                showNotification('Veri Yok', 'Dışa aktarılacak veri bulunmuyor!', 'info');
                 return;
             }
             
@@ -3174,7 +3109,7 @@ if (exportSkillsBtn) {
             link.click();
         } catch (error) {
             console.error('CSV export error:', error);
-            alert('CSV dışa aktarılırken hata oluştu!');
+            showNotification('Hata', 'CSV dışa aktarılırken hata oluştu!', 'error');
         }
     });
 }
@@ -3184,7 +3119,7 @@ const exportSessionsBtn = document.getElementById('export-sessions-csv');
 if (exportSessionsBtn) {
     exportSessionsBtn.addEventListener('click', async () => {
         if (!currentUser) {
-            alert('Lütfen giriş yapın!');
+            showNotification('Giriş Gerekli', 'Lütfen giriş yapın!', 'warning');
             return;
         }
         
@@ -3193,9 +3128,9 @@ if (exportSessionsBtn) {
                 .collection('sessions').get();
             
             if (sessionsSnapshot.empty) {
-        alert('Dışa aktarılacak veri bulunmuyor!');
-        return;
-    }
+                showNotification('Veri Yok', 'Dışa aktarılacak veri bulunmuyor!', 'info');
+                return;
+            }
     
             let csv = '\ufeffOturum ID,Katılımcı,Oturum Türü,Mesaj Türü,Zorbalık Türü,Aksiyon,Tepki Süresi,Sonuç,İpucu,Tarih/Saat\n';
             
@@ -3221,16 +3156,16 @@ if (exportSessionsBtn) {
     link.click();
         } catch (error) {
             console.error('CSV export error:', error);
-            alert('CSV dışa aktarılırken hata oluştu!');
+            showNotification('Hata', 'CSV dışa aktarılırken hata oluştu!', 'error');
         }
-});
+    });
 }
 
 // Verileri Temizle
 document.getElementById('clear-data').addEventListener('click', async () => {
     if (confirm('Tüm verileri silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!')) {
         if (!currentUser) {
-            alert('Lütfen giriş yapın.');
+            showNotification('Giriş Gerekli', 'Lütfen giriş yapın.', 'warning');
             return;
         }
         
@@ -3293,45 +3228,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             // Reset session
-            currentSession = {
-                sessionId: "",
-                userId: "",
-                sessionType: "",
-                participantId: "",
-                participantName: "",
-                participantAge: 0,
-                startTime: null,
-                currentBullyingType: null,
-                currentScenario: null,
-                messageIndex: 0,
-                conversationIndex: 0,
-                sessionData: [],
-                skills: {
-                    navigation: false,
-                    reading: false,
-                    replying: false,
-                    reporting: false,
-                    complaintType: false,
-                    blocking: false,
-                    informAdult: false
-                },
-                stats: {
-                    correct: 0,
-                    wrong: 0,
-                    hints: 0
-                },
-                currentMessageStartTime: null,
-                hintTimeout: null,
-                messageTimeout: null,
-                reportClicked: false,
-                blockClicked: false,
-                pendingMessages: 0,
-                messageQueue: [],
-                currentMessageIndex: 0,
-                selectedComplaintReason: null,
-                conversationHistory: {},
-                hintEnabled: true
-            };
+            currentSession = getEmptySession();
             
             // Hide overlay and return to panel screen
             logoutOverlay.style.display = 'none';
