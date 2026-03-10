@@ -287,6 +287,138 @@ const STORY_USERS = [
     "netflix", "instagram", "tiktok", "youtube", "twitter", "spotify", "snapchat", "bereal", "disney", "hbo", "marvel", "crunchyroll", "amc"
 ];
 
+// Rastgele zorba kullanıcı adları havuzu
+const BULLY_USERNAMES = [
+    'kullanici_34', 'gizli_profil', 'anon_user', 'yeni_hesap_2024', 'takipci_99',
+    'okul_arkadasi', 'sinif_grubu', 'gaming_tr', 'muzik_seven', 'spor_delisi',
+    'kafadan_kontak', 'bi_hesap', 'sadece_ben_', 'hayalet_profil', 'karanlik_mod',
+    'biri_biri', 'random_kullanici', 'yabanci_biri', 'tanidik_biri', 'merak_eden'
+];
+
+// Tüm zorbalık senaryoları havuzu — her oturumda rastgele seçilir
+const MESSAGE_POOL = {
+    'sozel': [
+        { messages: [{ type: 'cyberbullying', text: 'kanka bu attığın foto çok kötü', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'kendini bi gör', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'cidden komik duruyorsun', cyberType: 'sozel', complaintReason: 'sozel' }] },
+        { messages: [{ type: 'cyberbullying', text: 'ya sen niye hep böyle saçma şeyler paylaşıyorsun', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'millet seninle dalga geçiyor', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'farkında değilsin', cyberType: 'sozel', complaintReason: 'sozel' }] },
+        { messages: [{ type: 'cyberbullying', text: 'bunu paylaşman hata olmuş', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'herkes görüyor', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'sil bence', cyberType: 'sozel', complaintReason: 'sozel' }] },
+        { messages: [{ type: 'cyberbullying', text: 'sen bu kafayla zor ya', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'her şeyi yanlış yapıyorsun', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'kimse seni ciddiye almıyor', cyberType: 'sozel', complaintReason: 'sozel' }] },
+        { messages: [{ type: 'cyberbullying', text: "story'ni gördüm", cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'çok utanç verici', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'niye attın ki', cyberType: 'sozel', complaintReason: 'sozel' }] },
+        { messages: [{ type: 'cyberbullying', text: 'sen konuşunca ortam bozuluyor', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'insanlar rahatsız oluyor', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'biraz sus bence', cyberType: 'sozel', complaintReason: 'sozel' }] },
+        { messages: [{ type: 'cyberbullying', text: 'ya gerçekten çok garipsin', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'herkes seninle dalga geçiyor', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'haberin olsun', cyberType: 'sozel', complaintReason: 'sozel' }] },
+        { messages: [{ type: 'cyberbullying', text: 'seni izlerken utanıyorum', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'kendin fark etmiyorsun ama', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'komik duruyorsun', cyberType: 'sozel', complaintReason: 'sozel' }] },
+        { messages: [{ type: 'cyberbullying', text: 'kim sana gaz veriyor da bunları paylaşıyorsun', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'kendini rezil ediyorsun', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'yazık', cyberType: 'sozel', complaintReason: 'sozel' }] },
+        { messages: [{ type: 'cyberbullying', text: 'ya bi sus artık', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'her yerde saçma şeyler yapıyorsun', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'millet bıktı senden', cyberType: 'sozel', complaintReason: 'sozel' }] },
+        { messages: [{ type: 'cyberbullying', text: 'Çok çirkinsin', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'aynada kendine bakmıyor musun?', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'seninle mi dolaşacağımı sanıyorsun?', cyberType: 'sozel', complaintReason: 'sozel' }] },
+        { messages: [{ type: 'cyberbullying', text: 'kanka bu müziği mi dinliyorsun ya.', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'Aş artık kendini biraz.', cyberType: 'sozel', complaintReason: 'sozel' }] },
+        { messages: [{ type: 'cyberbullying', text: 'Gay mısın oğlum sen?', cyberType: 'sozel', complaintReason: 'sozel' }, { type: 'cyberbullying', text: 'bu kıza da bakmıyorsun?', cyberType: 'sozel', complaintReason: 'sozel' }] }
+    ],
+    'dislama': [
+        { messages: [{ type: 'cyberbullying', text: 'bugün dışarı çıkıyoruz', cyberType: 'dislama', complaintReason: 'dislama' }, { type: 'cyberbullying', text: 'ama sen gelme', cyberType: 'dislama', complaintReason: 'dislama' }, { type: 'cyberbullying', text: 'biz bizeyiz', cyberType: 'dislama', complaintReason: 'dislama' }] },
+        { messages: [{ type: 'cyberbullying', text: 'oyuna giriyoruz', cyberType: 'dislama', complaintReason: 'dislama' }, { type: 'cyberbullying', text: 'ama seni almıyoruz', cyberType: 'dislama', complaintReason: 'dislama' }, { type: 'cyberbullying', text: 'başka zaman', cyberType: 'dislama', complaintReason: 'dislama' }] },
+        { messages: [{ type: 'cyberbullying', text: 'yeni grup kurduk', cyberType: 'dislama', complaintReason: 'dislama' }, { type: 'cyberbullying', text: 'seni eklemedik', cyberType: 'dislama', complaintReason: 'dislama' }, { type: 'cyberbullying', text: 'karışıklık olmasın', cyberType: 'dislama', complaintReason: 'dislama' }] },
+        { messages: [{ type: 'cyberbullying', text: 'bugün maç var', cyberType: 'dislama', complaintReason: 'dislama' }, { type: 'cyberbullying', text: 'seni yazmadık', cyberType: 'dislama', complaintReason: 'dislama' }, { type: 'cyberbullying', text: 'kadro dolu', cyberType: 'dislama', complaintReason: 'dislama' }] },
+        { messages: [{ type: 'cyberbullying', text: 'biz artık kendi aramızda takılıyoruz', cyberType: 'dislama', complaintReason: 'dislama' }, { type: 'cyberbullying', text: 'sen başka arkadaşlarla takıl', cyberType: 'dislama', complaintReason: 'dislama' }] },
+        { messages: [{ type: 'cyberbullying', text: 'doğum gününe çağırmayacağız', cyberType: 'dislama', complaintReason: 'dislama' }, { type: 'cyberbullying', text: 'kalabalık olmasın istiyoruz', cyberType: 'dislama', complaintReason: 'dislama' }] },
+        { messages: [{ type: 'cyberbullying', text: 'bugün bizimle oturma', cyberType: 'dislama', complaintReason: 'dislama' }, { type: 'cyberbullying', text: 'yer yok', cyberType: 'dislama', complaintReason: 'dislama' }] },
+        { messages: [{ type: 'cyberbullying', text: 'seni çağırmadık', cyberType: 'dislama', complaintReason: 'dislama' }, { type: 'cyberbullying', text: 'çünkü seni istemiyoruz', cyberType: 'dislama', complaintReason: 'dislama' }, { type: 'cyberbullying', text: 'açık söyleyeyim', cyberType: 'dislama', complaintReason: 'dislama' }] },
+        { messages: [{ type: 'cyberbullying', text: 'teneffüste bizim yanımıza gelme', cyberType: 'dislama', complaintReason: 'dislama' }, { type: 'cyberbullying', text: 'biz başka yere geçiyoruz', cyberType: 'dislama', complaintReason: 'dislama' }] },
+        { messages: [{ type: 'cyberbullying', text: 'seninle aynı grupta olmak istemiyoruz', cyberType: 'dislama', complaintReason: 'dislama' }, { type: 'cyberbullying', text: 'başka grupla çalış', cyberType: 'dislama', complaintReason: 'dislama' }] }
+    ],
+    'tehdit': [
+        { messages: [{ type: 'cyberbullying', text: "elimde senin mesajların ss'i var", cyberType: 'tehdit', complaintReason: 'tehdit' }, { type: 'cyberbullying', text: 'yayılmasını istemiyorsan dediğimi yap', cyberType: 'tehdit', complaintReason: 'tehdit' }] },
+        { messages: [{ type: 'cyberbullying', text: 'beni kızdırma', cyberType: 'tehdit', complaintReason: 'tehdit' }, { type: 'cyberbullying', text: 'bunu herkese yollarım', cyberType: 'tehdit', complaintReason: 'tehdit' }] },
+        { messages: [{ type: 'cyberbullying', text: 'şifreni ver', cyberType: 'tehdit', complaintReason: 'tehdit' }, { type: 'cyberbullying', text: 'yoksa hesabını bozarım', cyberType: 'tehdit', complaintReason: 'tehdit' }] },
+        { messages: [{ type: 'cyberbullying', text: 'bu fotoğrafi sakladım', cyberType: 'tehdit', complaintReason: 'tehdit' }, { type: 'cyberbullying', text: 'istersem herkese atarım', cyberType: 'tehdit', complaintReason: 'tehdit' }] },
+        { messages: [{ type: 'cyberbullying', text: 'bana para at', cyberType: 'tehdit', complaintReason: 'tehdit' }, { type: 'cyberbullying', text: 'yoksa rezil olursun', cyberType: 'tehdit', complaintReason: 'tehdit' }] },
+        { messages: [{ type: 'cyberbullying', text: 'beni engellersen', cyberType: 'tehdit', complaintReason: 'tehdit' }, { type: 'cyberbullying', text: 'daha kötü şeyler yaparım', cyberType: 'tehdit', complaintReason: 'tehdit' }] },
+        { messages: [{ type: 'cyberbullying', text: 'dediğimi yapmazsan', cyberType: 'tehdit', complaintReason: 'tehdit' }, { type: 'cyberbullying', text: 'seni şikayet ederim', cyberType: 'tehdit', complaintReason: 'tehdit' }] },
+        { messages: [{ type: 'cyberbullying', text: 'bu konuşmaları ailene atarım', cyberType: 'tehdit', complaintReason: 'tehdit' }, { type: 'cyberbullying', text: 'sonra düşünürsün', cyberType: 'tehdit', complaintReason: 'tehdit' }] },
+        { messages: [{ type: 'cyberbullying', text: 'son kez söylüyorum', cyberType: 'tehdit', complaintReason: 'tehdit' }, { type: 'cyberbullying', text: 'yoksa paylaşırım', cyberType: 'tehdit', complaintReason: 'tehdit' }] },
+        { messages: [{ type: 'cyberbullying', text: 'benimle uğraşma', cyberType: 'tehdit', complaintReason: 'tehdit' }, { type: 'cyberbullying', text: 'elime koz verme', cyberType: 'tehdit', complaintReason: 'tehdit' }] }
+    ],
+    'iftira': [
+        { messages: [{ type: 'cyberbullying', text: 'herkes senin hırsızlık yaptığını konuşuyor', cyberType: 'iftira', complaintReason: 'iftira' }, { type: 'cyberbullying', text: 'ben demiyorum onlar diyor', cyberType: 'iftira', complaintReason: 'iftira' }] },
+        { messages: [{ type: 'cyberbullying', text: "sınıfta 'bu çocuk sorunlu' diyorlar", cyberType: 'iftira', complaintReason: 'iftira' }, { type: 'cyberbullying', text: 'adın çıkmış', cyberType: 'iftira', complaintReason: 'iftira' }] },
+        { messages: [{ type: 'cyberbullying', text: 'senin kopya çektiğini yaymışlar', cyberType: 'iftira', complaintReason: 'iftira' }, { type: 'cyberbullying', text: 'öğretmenler de duymuş', cyberType: 'iftira', complaintReason: 'iftira' }] },
+        { messages: [{ type: 'cyberbullying', text: 'kızlara rahatsız edici mesaj atıyormuşsun diyorlar', cyberType: 'iftira', complaintReason: 'iftira' }, { type: 'cyberbullying', text: 'haberin olsun', cyberType: 'iftira', complaintReason: 'iftira' }] },
+        { messages: [{ type: 'cyberbullying', text: 'kantindeki olayı sen yapmışsın diye anlatıyorlar', cyberType: 'iftira', complaintReason: 'iftira' }] },
+        { messages: [{ type: 'cyberbullying', text: 'senin birini dövdüğünü söylüyorlar', cyberType: 'iftira', complaintReason: 'iftira' }, { type: 'cyberbullying', text: 'millet korkuyor senden', cyberType: 'iftira', complaintReason: 'iftira' }] },
+        { messages: [{ type: 'cyberbullying', text: "senin birinin parasını aldığını konuşuyorlar", cyberType: 'iftira', complaintReason: 'iftira' }] },
+        { messages: [{ type: 'cyberbullying', text: 'herkes senden uzak dur diyor', cyberType: 'iftira', complaintReason: 'iftira' }, { type: 'cyberbullying', text: 'kötü şeyler anlatıyorlar senin hakkında', cyberType: 'iftira', complaintReason: 'iftira' }] },
+        { messages: [{ type: 'cyberbullying', text: 'senin hakkında şikayet varmış', cyberType: 'iftira', complaintReason: 'iftira' }, { type: 'cyberbullying', text: 'kimden bilmiyorum', cyberType: 'iftira', complaintReason: 'iftira' }] },
+        { messages: [{ type: 'cyberbullying', text: 'herkes senin başkalarına yalan söylediğini biliyor', cyberType: 'iftira', complaintReason: 'iftira' }, { type: 'cyberbullying', text: 'artık kimse sana güvenmiyor', cyberType: 'iftira', complaintReason: 'iftira' }] }
+    ],
+    'kimlik': [
+        { messages: [{ type: 'cyberbullying', text: 'merhaba öğrenci ben müdür yardımcısı', cyberType: 'kimlik', complaintReason: 'kimlik' }, { type: 'cyberbullying', text: 'disiplinle ilgili bir durum var', cyberType: 'kimlik', complaintReason: 'kimlik' }, { type: 'cyberbullying', text: 'velinin kimlik bilgilerini buraya yaz', cyberType: 'kimlik', complaintReason: 'kimlik' }] },
+        { messages: [{ type: 'cyberbullying', text: 'knk ben emre yeni hesap bu', cyberType: 'kimlik', complaintReason: 'kimlik' }, { type: 'cyberbullying', text: 'eski hesabımı kapattılar', cyberType: 'kimlik', complaintReason: 'kimlik' }, { type: 'cyberbullying', text: 'senin hesabın şifresini versene eski mesajlarımıza bi şeylere bakacağım', cyberType: 'kimlik', complaintReason: 'kimlik' }] },
+        { messages: [{ type: 'cyberbullying', text: 'değerli kullanıcı', cyberType: 'kimlik', complaintReason: 'kimlik' }, { type: 'cyberbullying', text: 'hesabınızla ilgili bir sorun bulunmaktadır', cyberType: 'kimlik', complaintReason: 'kimlik' }, { type: 'cyberbullying', text: 'hemen hesap bilgilerinizi bizimle paylaşmanız gerekmektedir', cyberType: 'kimlik', complaintReason: 'kimlik' }] },
+        { messages: [{ type: 'cyberbullying', text: "selam ben 11'lerden yeliz", cyberType: 'kimlik', complaintReason: 'kimlik' }, { type: 'cyberbullying', text: 'seni uzun zamandır beğeniyorum', cyberType: 'kimlik', complaintReason: 'kimlik' }, { type: 'cyberbullying', text: 'bi foto atabilir misin?', cyberType: 'kimlik', complaintReason: 'kimlik' }] },
+        { messages: [{ type: 'cyberbullying', text: 'ben mert yeni hesap açtım', cyberType: 'kimlik', complaintReason: 'kimlik' }, { type: 'cyberbullying', text: 'acil 500 tl atabilir misin?', cyberType: 'kimlik', complaintReason: 'kimlik' }, { type: 'cyberbullying', text: 'okulda geri vericem', cyberType: 'kimlik', complaintReason: 'kimlik' }] },
+        { messages: [{ type: 'cyberbullying', text: 'izmir belediyesinden hediye kazandın', cyberType: 'kimlik', complaintReason: 'kimlik' }, { type: 'cyberbullying', text: "hediyenin gelmesi için ev adresini ve tc'ni yazman gerekiyor", cyberType: 'kimlik', complaintReason: 'kimlik' }] },
+        { messages: [{ type: 'cyberbullying', text: 'öğrenci müdür emrah hoca hakkında işlem başlattı', cyberType: 'kimlik', complaintReason: 'kimlik' }, { type: 'cyberbullying', text: 'ne yaptığını önce buraya yaz', cyberType: 'kimlik', complaintReason: 'kimlik' }] },
+        { messages: [{ type: 'cyberbullying', text: 'ben brawl starstan ali', cyberType: 'kimlik', complaintReason: 'kimlik' }, { type: 'cyberbullying', text: 'hesabın çalınmış olabilir', cyberType: 'kimlik', complaintReason: 'kimlik' }, { type: 'cyberbullying', text: 'kontrol etmem için şifreni at', cyberType: 'kimlik', complaintReason: 'kimlik' }] },
+        { messages: [{ type: 'cyberbullying', text: 'tebrikler öğrenci Göztepe vakfından burs kazandın', cyberType: 'kimlik', complaintReason: 'kimlik' }, { type: 'cyberbullying', text: 'ödeme yapmamız için fotoğraflarını bize atman gerekiyor', cyberType: 'kimlik', complaintReason: 'kimlik' }, { type: 'cyberbullying', text: 'bugün son gün', cyberType: 'kimlik', complaintReason: 'kimlik' }] },
+        { messages: [{ type: 'cyberbullying', text: 'öğrenci ben merve öğretmenin', cyberType: 'kimlik', complaintReason: 'kimlik' }, { type: 'cyberbullying', text: 'seninle ilgili şikayet var', cyberType: 'kimlik', complaintReason: 'kimlik' }, { type: 'cyberbullying', text: "tüm konuşmaların ss'ini bana buradan at", cyberType: 'kimlik', complaintReason: 'kimlik' }] },
+        { messages: [{ type: 'cyberbullying', text: 'sayın müşterimiz satın almış olduğunuz biletinize ilişkin fatura oluşturabilmemiz için lütfen TC kimlik no ve adresinizi paylaşınız.', cyberType: 'kimlik', complaintReason: 'kimlik' }] },
+        { messages: [{ type: 'cyberbullying', text: 'Semicenk konser bileti var elimde. Sana yarı fiyatına verebilirim. Hesabıma 1000 TL atman yeterli.', cyberType: 'kimlik', complaintReason: 'kimlik' }] },
+        { messages: [{ type: 'cyberbullying', text: 'Adınıza düzenlenen 3566 numaralı kargonun adresinize teslim edilebilmesi için lütfen adres bilgilerinizi yazınız.', cyberType: 'kimlik', complaintReason: 'kimlik' }] }
+    ]
+};
+
+// Öğrenciye özgü kullanılmış senaryo indekslerini yönet
+function getUsedScenarios(participantName) {
+    const key = `used_scenarios_${participantName.toLowerCase().trim()}`;
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : { sozel: [], dislama: [], tehdit: [], iftira: [], kimlik: [] };
+}
+
+function saveUsedScenarios(participantName, usedData) {
+    const key = `used_scenarios_${participantName.toLowerCase().trim()}`;
+    localStorage.setItem(key, JSON.stringify(usedData));
+}
+
+// Rastgele senaryo havuzundan kuyruk oluştur
+// Her tür için 2 senaryo seçer → toplamda 10 mesaj (5 tür × 2)
+function buildMessageQueue(participantName, bullyingType) {
+    const used = getUsedScenarios(participantName);
+    const queue = [];
+    const types = bullyingType === 'all' ? ['sozel', 'dislama', 'tehdit', 'iftira', 'kimlik'] : [bullyingType];
+    const scenariosPerType = bullyingType === 'all' ? 2 : 10;
+
+    types.forEach(type => {
+        const pool = MESSAGE_POOL[type] || [];
+        const usedIndexes = used[type] || [];
+
+        // Kullanılmamış indexler
+        let available = pool.map((_, i) => i).filter(i => !usedIndexes.includes(i));
+
+        // Hepsi kullanıldıysa sıfırla
+        if (available.length < scenariosPerType) {
+            used[type] = [];
+            available = pool.map((_, i) => i);
+        }
+
+        // Karıştır ve seç
+        const shuffled = available.sort(() => Math.random() - 0.5);
+        const selected = shuffled.slice(0, Math.min(scenariosPerType, shuffled.length));
+
+        selected.forEach(idx => {
+            const scenario = { ...pool[idx] };
+            // Rastgele zorba kullanıcı adı ata
+            scenario.sender = BULLY_USERNAMES[Math.floor(Math.random() * BULLY_USERNAMES.length)]
+                + '_' + Math.floor(Math.random() * 900 + 100);
+            queue.push(scenario);
+            used[type].push(idx);
+        });
+    });
+
+    // Kuyruğu karıştır (farklı türler iç içe gelsin)
+    const shuffledQueue = queue.sort(() => Math.random() - 0.5);
+
+    saveUsedScenarios(participantName, used);
+    return shuffledQueue;
+}
+
 // Global scope'a atama (script tag ile yüklendiğinde erişilebilir olması için)
 if (typeof window !== 'undefined') {
     window.BULLYING_TYPES = BULLYING_TYPES;
@@ -294,4 +426,9 @@ if (typeof window !== 'undefined') {
     window.SCENARIOS = SCENARIOS;
     window.POSTS_100 = POSTS_100;
     window.STORY_USERS = STORY_USERS;
+    window.MESSAGE_POOL = MESSAGE_POOL;
+    window.BULLY_USERNAMES = BULLY_USERNAMES;
+    window.buildMessageQueue = buildMessageQueue;
+    window.getUsedScenarios = getUsedScenarios;
+    window.saveUsedScenarios = saveUsedScenarios;
 }

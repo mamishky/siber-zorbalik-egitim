@@ -209,7 +209,7 @@ async function startDevSimulation() {
         reportClicked: false,
         blockClicked: false,
         pendingMessages: 0,
-        messageQueue: [],
+        messageQueue: (typeof buildMessageQueue === 'function') ? buildMessageQueue('Test', 'all') : [],
         currentMessageIndex: 0,
         selectedComplaintReason: null,
         conversationHistory: {},
@@ -820,9 +820,15 @@ function initSessionFormHandler() {
     // Navigasyon becerisini başlangıçta true yap
     currentSession.skills.navigation = true;
     
-        // Mesaj kuyruğu kapalı – siber zorbalık/güvenli mesajlar sonradan eklenecek
-        // Şu an hiçbir mesaj gelmez; inbox boş kalır
-    currentSession.messageQueue = [];
+    // Öğrenciye özgü, rastgele ve tekrarsız mesaj kuyruğu oluştur
+    if (typeof buildMessageQueue === 'function') {
+        currentSession.messageQueue = buildMessageQueue(
+            currentSession.participantName,
+            currentSession.currentBullyingType || 'all'
+        );
+    } else {
+        currentSession.messageQueue = [];
+    }
     currentSession.deliveredMessages = currentSession.deliveredMessages || [];
     currentSession.currentMessageIndex = 0;
 
