@@ -322,7 +322,9 @@ const MESSAGE_POOL = {
         { messages: [{ type: 'cyberbullying', text: 'bugün bizimle oturma', cyberType: 'dislama', complaintReason: 'dislama' }, { type: 'cyberbullying', text: 'yer yok', cyberType: 'dislama', complaintReason: 'dislama' }] },
         { messages: [{ type: 'cyberbullying', text: 'seni çağırmadık', cyberType: 'dislama', complaintReason: 'dislama' }, { type: 'cyberbullying', text: 'çünkü seni istemiyoruz', cyberType: 'dislama', complaintReason: 'dislama' }, { type: 'cyberbullying', text: 'açık söyleyeyim', cyberType: 'dislama', complaintReason: 'dislama' }] },
         { messages: [{ type: 'cyberbullying', text: 'teneffüste bizim yanımıza gelme', cyberType: 'dislama', complaintReason: 'dislama' }, { type: 'cyberbullying', text: 'biz başka yere geçiyoruz', cyberType: 'dislama', complaintReason: 'dislama' }] },
-        { messages: [{ type: 'cyberbullying', text: 'seninle aynı grupta olmak istemiyoruz', cyberType: 'dislama', complaintReason: 'dislama' }, { type: 'cyberbullying', text: 'başka grupla çalış', cyberType: 'dislama', complaintReason: 'dislama' }] }
+        { messages: [{ type: 'cyberbullying', text: 'artık seni gruba almayacağız', cyberType: 'dislama', complaintReason: 'dislama' }] },
+        { messages: [{ type: 'cyberbullying', text: 'sinemaya gideceğiz ama senin paran yoktur gelemezsin.', cyberType: 'dislama', complaintReason: 'dislama' }, { type: 'cyberbullying', text: 'başka sefere artık.', cyberType: 'dislama', complaintReason: 'dislama' }] },
+        { messages: [{ type: 'cyberbullying', text: 'şu gruptaki kızlar gibi değilsin.', cyberType: 'dislama', complaintReason: 'dislama' }, { type: 'cyberbullying', text: 'artık ben de o gruptayım. Seninle takılmak zaten çok ezikçeydi.', cyberType: 'dislama', complaintReason: 'dislama' }] }
     ],
     'tehdit': [
         { messages: [{ type: 'cyberbullying', text: "elimde senin mesajların ss'i var", cyberType: 'tehdit', complaintReason: 'tehdit' }, { type: 'cyberbullying', text: 'yayılmasını istemiyorsan dediğimi yap', cyberType: 'tehdit', complaintReason: 'tehdit' }] },
