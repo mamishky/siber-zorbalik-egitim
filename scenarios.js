@@ -351,7 +351,10 @@ const MESSAGE_POOL = {
         { messages: [{ type: 'cyberbullying', text: "senin birinin parasını aldığını konuşuyorlar", cyberType: 'iftira', complaintReason: 'iftira' }] },
         { messages: [{ type: 'cyberbullying', text: 'herkes senden uzak dur diyor', cyberType: 'iftira', complaintReason: 'iftira' }, { type: 'cyberbullying', text: 'kötü şeyler anlatıyorlar senin hakkında', cyberType: 'iftira', complaintReason: 'iftira' }] },
         { messages: [{ type: 'cyberbullying', text: 'senin hakkında şikayet varmış', cyberType: 'iftira', complaintReason: 'iftira' }, { type: 'cyberbullying', text: 'kimden bilmiyorum', cyberType: 'iftira', complaintReason: 'iftira' }] },
-        { messages: [{ type: 'cyberbullying', text: 'herkes senin başkalarına yalan söylediğini biliyor', cyberType: 'iftira', complaintReason: 'iftira' }, { type: 'cyberbullying', text: 'artık kimse sana güvenmiyor', cyberType: 'iftira', complaintReason: 'iftira' }] }
+        { messages: [{ type: 'cyberbullying', text: 'adın kötüye çıkmış', cyberType: 'iftira', complaintReason: 'iftira' }, { type: 'cyberbullying', text: 'herkes konuşuyor', cyberType: 'iftira', complaintReason: 'iftira' }] },
+        { messages: [{ type: 'cyberbullying', text: 'saç kesimin çok komik olduğunu söylüyorlar.', cyberType: 'iftira', complaintReason: 'iftira' }, { type: 'cyberbullying', text: 'Benden duymuş ol', cyberType: 'iftira', complaintReason: 'iftira' }] },
+        { messages: [{ type: 'cyberbullying', text: 'kıtlıktan mı çıktın?', cyberType: 'iftira', complaintReason: 'iftira' }, { type: 'cyberbullying', text: 'yavaş beni de yiyeceksin.', cyberType: 'iftira', complaintReason: 'iftira' }] },
+        { messages: [{ type: 'cyberbullying', text: 'kusura bakma da sana bu kilolarla kimse aşık olmaz. Sen git önce bir 20 kilo ver sonra bunları düşün.', cyberType: 'iftira', complaintReason: 'iftira' }] }
     ],
     'kimlik': [
         { messages: [{ type: 'cyberbullying', text: 'merhaba öğrenci ben müdür yardımcısı', cyberType: 'kimlik', complaintReason: 'kimlik' }, { type: 'cyberbullying', text: 'disiplinle ilgili bir durum var', cyberType: 'kimlik', complaintReason: 'kimlik' }, { type: 'cyberbullying', text: 'velinin kimlik bilgilerini buraya yaz', cyberType: 'kimlik', complaintReason: 'kimlik' }] },
