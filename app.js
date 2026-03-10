@@ -2886,23 +2886,24 @@ async function loadAdminData() {
                 continue; // Bu oturum türü seçili değil, atla
             }
             
-            // Beceri analizi verisi oluştur (Madde 13, 14)
+            // Beceri analizi verisi oluştur
+            const startedAtRaw = sessionData.startedAt ? sessionData.startedAt.seconds * 1000 : 0;
             const skillsRecord = {
                 sessionId: sessionId,
                 participantName: sessionData.participantName || 'Bilinmiyor',
                 participantAge: sessionData.participantAge || '-',
                 sessionType: sessionData.sessionType || 'baslama',
                 sessionLabel: SESSION_LABELS[sessionData.sessionType] || 'Bilinmiyor',
-                startedAt: sessionData.startedAt ? new Date(sessionData.startedAt.seconds * 1000).toLocaleString('tr-TR') : '-',
+                startedAt: sessionData.startedAt ? new Date(startedAtRaw).toLocaleString('tr-TR') : '-',
+                startedAtRaw: startedAtRaw,
                 endedAt: sessionData.endedAt ? new Date(sessionData.endedAt.seconds * 1000).toLocaleString('tr-TR') : '-',
                 totalDurationSec: sessionData.totalDurationSec || 0,
                 totalDurationMin: sessionData.totalDurationSec ? (sessionData.totalDurationSec / 60).toFixed(1) : '0',
-                // Beceri basamakları (7 adet)
-                skill1: '-', skill2: '-', skill3: '-', skill4: '-', skill5: '-', skill6: '-', skill7: '-',
-                correctCount: 0,
-                wrongCount: 0,
-                correctPercent: '0%',
-                wrongPercent: '0%'
+                correctCount: 0, wrongCount: 0,
+                correctPercent: '0%', wrongPercent: '0%',
+                hintCount: 0,
+                // Zorbalık türü başarı sayaçları {correct, total}
+                bullyStats: { sozel: {c:0,t:0}, dislama: {c:0,t:0}, tehdit: {c:0,t:0}, iftira: {c:0,t:0}, kimlik: {c:0,t:0} }
             };
             
             // Mesaj bazlı oturum kayıtları
@@ -2912,6 +2913,7 @@ async function loadAdminData() {
             
             let correctCount = 0;
             let wrongCount = 0;
+            let hintCount = 0;
             
             dataSnapshot.forEach(doc => {
                 const data = doc.data();
@@ -2930,16 +2932,33 @@ async function loadAdminData() {
                 
                 if (data.correct) correctCount++;
                 else wrongCount++;
+                if (data.hintUsed) hintCount++;
+
+                // Zorbalık türü başarı istatistiği
+                if (data.messageType === 'cyberbullying' && data.bullyingType) {
+                    const bt = data.bullyingType;
+                    if (skillsRecord.bullyStats[bt]) {
+                        skillsRecord.bullyStats[bt].t++;
+                        if (data.correct) skillsRecord.bullyStats[bt].c++;
+                    }
+                }
             });
             
-            // Beceri analizini tamamla
+            // Yüzdeleri hesapla
             const total = correctCount + wrongCount;
-            if (total > 0) {
-                skillsRecord.correctCount = correctCount;
-                skillsRecord.wrongCount = wrongCount;
-                skillsRecord.correctPercent = ((correctCount / total) * 100).toFixed(1) + '%';
-                skillsRecord.wrongPercent = ((wrongCount / total) * 100).toFixed(1) + '%';
-            }
+            skillsRecord.correctCount = correctCount;
+            skillsRecord.wrongCount = wrongCount;
+            skillsRecord.hintCount = hintCount;
+            skillsRecord.correctPercent = total > 0 ? ((correctCount / total) * 100).toFixed(1) + '%' : '0%';
+            skillsRecord.wrongPercent   = total > 0 ? ((wrongCount  / total) * 100).toFixed(1) + '%' : '0%';
+
+            // Zorbalık türü başarı yüzdeleri (gösterim için)
+            const pct = (s) => s.t > 0 ? ((s.c / s.t) * 100).toFixed(0) + '%' : '-';
+            skillsRecord.bully_sozel   = pct(skillsRecord.bullyStats.sozel);
+            skillsRecord.bully_dislama = pct(skillsRecord.bullyStats.dislama);
+            skillsRecord.bully_tehdit  = pct(skillsRecord.bullyStats.tehdit);
+            skillsRecord.bully_iftira  = pct(skillsRecord.bullyStats.iftira);
+            skillsRecord.bully_kimlik  = pct(skillsRecord.bullyStats.kimlik);
             
             allSkillsData.push(skillsRecord);
         }
@@ -2955,7 +2974,7 @@ async function loadAdminData() {
     }
 }
 
-// ALAN 1: Beceri Analizi Tablosu (Madde 14, 16)
+// ALAN 1: Beceri Analizi Tablosu
 function displaySkillsAnalysis(data) {
     const container = document.getElementById('skills-analysis-display');
     
@@ -2963,45 +2982,74 @@ function displaySkillsAnalysis(data) {
         container.innerHTML = '<p style="text-align: center; padding: 20px;">Henüz beceri analizi verisi bulunmuyor.</p>';
         return;
     }
-    
-    let html = `
-        <table>
-            <thead>
-                <tr>
-                    <th>Oturum ID</th>
-                    <th>Katılımcı</th>
-                    <th>Yaş</th>
-                    <th>Oturum Türü</th>
-                    <th>Başlangıç</th>
-                    <th>Bitiş</th>
-                    <th>Toplam Süre (dk)</th>
-                    <th>Doğru</th>
-                    <th>Yanlış</th>
-                    <th>Doğru %</th>
-                    <th>Yanlış %</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
-    
+
+    // Oturumlar arası karşılaştırma: aynı öğrenci, birden fazla oturum
+    const byParticipant = {};
     data.forEach(item => {
-        html += `
-            <tr>
-                <td>${item.sessionId.substring(0, 8)}...</td>
-                <td>${item.participantName}</td>
-                <td>${item.participantAge}</td>
-                <td>${item.sessionLabel}</td>
-                <td>${item.startedAt}</td>
-                <td>${item.endedAt}</td>
-                <td>${item.totalDurationMin}</td>
-                <td>${item.correctCount}</td>
-                <td>${item.wrongCount}</td>
-                <td>${item.correctPercent}</td>
-                <td>${item.wrongPercent}</td>
-            </tr>
-        `;
+        const key = `${item.participantName}_${item.participantAge}`;
+        if (!byParticipant[key]) byParticipant[key] = [];
+        byParticipant[key].push(item);
     });
-    
+
+    let html = '';
+
+    // Oturumlar arası karşılaştırma bölümü
+    const multiSessions = Object.values(byParticipant).filter(arr => arr.length > 1);
+    if (multiSessions.length > 0) {
+        html += `<h4 style="padding:12px 20px 4px;color:#6c63ff;">📈 Oturumlar Arası Gelişim</h4>
+        <table><thead><tr>
+            <th>Öğrenci</th><th>Oturum</th><th>Tür</th>
+            <th>Doğru %</th><th>İpucu</th><th>Sözel</th><th>Dışlama</th>
+            <th>Tehdit</th><th>Karalama</th><th>Kimlik</th><th>Süre (dk)</th>
+        </tr></thead><tbody>`;
+
+        multiSessions.forEach(sessions => {
+            sessions.sort((a, b) => a.startedAtRaw - b.startedAtRaw);
+            sessions.forEach((item, i) => {
+                const trend = i > 0 ? (parseFloat(item.correctPercent) > parseFloat(sessions[i-1].correctPercent) ? '⬆️' : parseFloat(item.correctPercent) < parseFloat(sessions[i-1].correctPercent) ? '⬇️' : '➡️') : '';
+                html += `<tr>
+                    <td>${item.participantName} (${item.participantAge})</td>
+                    <td>${i + 1}. Oturum ${trend}</td>
+                    <td>${item.sessionLabel}</td>
+                    <td><strong>${item.correctPercent}</strong></td>
+                    <td>${item.hintCount}</td>
+                    <td>${item.bully_sozel}</td><td>${item.bully_dislama}</td>
+                    <td>${item.bully_tehdit}</td><td>${item.bully_iftira}</td>
+                    <td>${item.bully_kimlik}</td>
+                    <td>${item.totalDurationMin}</td>
+                </tr>`;
+            });
+        });
+        html += '</tbody></table>';
+    }
+
+    // Tüm oturumlar tablosu
+    html += `<h4 style="padding:12px 20px 4px;color:#6c63ff;">📋 Tüm Oturumlar</h4>
+    <table><thead><tr>
+        <th>Katılımcı</th><th>Yaş</th><th>Oturum Türü</th>
+        <th>Başlangıç</th><th>Süre (dk)</th>
+        <th>Doğru %</th><th>İpucu</th>
+        <th>Sözel ✓%</th><th>Dışlama ✓%</th>
+        <th>Tehdit ✓%</th><th>Karalama ✓%</th><th>Kimlik ✓%</th>
+    </tr></thead><tbody>`;
+
+    data.forEach(item => {
+        html += `<tr>
+            <td>${item.participantName}</td>
+            <td>${item.participantAge}</td>
+            <td>${item.sessionLabel}</td>
+            <td>${item.startedAt}</td>
+            <td>${item.totalDurationMin}</td>
+            <td><strong>${item.correctPercent}</strong></td>
+            <td>${item.hintCount}</td>
+            <td>${item.bully_sozel}</td>
+            <td>${item.bully_dislama}</td>
+            <td>${item.bully_tehdit}</td>
+            <td>${item.bully_iftira}</td>
+            <td>${item.bully_kimlik}</td>
+        </tr>`;
+    });
+
     html += '</tbody></table>';
     container.innerHTML = html;
 }
@@ -3081,7 +3129,7 @@ if (exportSkillsBtn) {
                 return;
             }
             
-            let csv = '\ufeffOturum ID,Katılımcı,Yaş,Oturum Türü,Başlangıç,Bitiş,Toplam Süre (dk),Doğru,Yanlış,Doğru %,Yanlış %\n';
+            let csv = '\ufeffOturum ID,Katılımcı,Yaş,Oturum Türü,Başlangıç,Bitiş,Süre (dk),Doğru %,İpucu,Sözel %,Dışlama %,Tehdit %,Karalama %,Kimlik Bürünme %\n';
             
             for (const doc of sessionsSnapshot.docs) {
                 const data = doc.data();
@@ -3091,23 +3139,26 @@ if (exportSkillsBtn) {
                 const endedAt = data.endedAt ? new Date(data.endedAt.seconds * 1000).toLocaleString('tr-TR') : '-';
                 const duration = data.totalDurationSec ? (data.totalDurationSec / 60).toFixed(1) : '0';
                 
-                // Alt koleksiyondan verileri al
                 const dataSnapshot = await db.collection('users').doc(currentUser.uid)
                     .collection('sessions').doc(sessionId)
                     .collection('data').get();
                 
-                let correctCount = 0;
-                let wrongCount = 0;
+                let correct = 0, total = 0, hints = 0;
+                const bs = { sozel:{c:0,t:0}, dislama:{c:0,t:0}, tehdit:{c:0,t:0}, iftira:{c:0,t:0}, kimlik:{c:0,t:0} };
                 dataSnapshot.forEach(d => {
-                    if (d.data().correct) correctCount++;
-                    else wrongCount++;
+                    const dd = d.data();
+                    total++;
+                    if (dd.correct) correct++;
+                    if (dd.hintUsed) hints++;
+                    if (dd.messageType === 'cyberbullying' && dd.bullyingType && bs[dd.bullyingType]) {
+                        bs[dd.bullyingType].t++;
+                        if (dd.correct) bs[dd.bullyingType].c++;
+                    }
                 });
+                const pct = (s) => s.t > 0 ? ((s.c/s.t)*100).toFixed(1)+'%' : '-';
+                const correctPct = total > 0 ? ((correct/total)*100).toFixed(1)+'%' : '0%';
                 
-                const total = correctCount + wrongCount;
-                const correctPercent = total > 0 ? ((correctCount / total) * 100).toFixed(1) : '0';
-                const wrongPercent = total > 0 ? ((wrongCount / total) * 100).toFixed(1) : '0';
-                
-                csv += `${sessionId},${data.participantName || 'Bilinmiyor'},${data.participantAge || '-'},${SESSION_LABELS[data.sessionType] || 'Bilinmiyor'},${startedAt},${endedAt},${duration},${correctCount},${wrongCount},${correctPercent}%,${wrongPercent}%\n`;
+                csv += `${sessionId},${data.participantName || 'Bilinmiyor'},${data.participantAge || '-'},${SESSION_LABELS[data.sessionType] || 'Bilinmiyor'},${startedAt},${endedAt},${duration},${correctPct},${hints},${pct(bs.sozel)},${pct(bs.dislama)},${pct(bs.tehdit)},${pct(bs.iftira)},${pct(bs.kimlik)}\n`;
             }
             
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });

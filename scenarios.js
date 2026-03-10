@@ -423,6 +423,8 @@ function buildMessageQueue(participantName, bullyingType) {
             // Rastgele zorba kullanıcı adı ata
             scenario.sender = BULLY_USERNAMES[Math.floor(Math.random() * BULLY_USERNAMES.length)]
                 + '_' + Math.floor(Math.random() * 900 + 100);
+            // Zorbalık türünü senaryoya ekle (saveMessageData'da kullanılır)
+            scenario._bullyingType = type;
             queue.push(scenario);
             used[type].push(idx);
         });
