@@ -2659,13 +2659,15 @@ function showNextStepHint(step) {
     }, 2000);
 }
 
-// Veri kaydet - CEVAP SÜRESİ KALDIRILDI (Madde 15)
+// Veri kaydet
 function saveMessageData(messageType, action, reactionTime, hintUsed, correct) {
-    // Get the bullying type from the current scenario (tagged during queue creation)
-    const scenarioBullyingType = currentSession.currentScenario && currentSession.currentScenario._bullyingType 
-        ? currentSession.currentScenario._bullyingType 
+    const scenarioBullyingType = currentSession.currentScenario && currentSession.currentScenario._bullyingType
+        ? currentSession.currentScenario._bullyingType
         : 'unknown';
-    
+
+    // Tepki süresini tam saniye olarak kaydet (örn: 5)
+    const reactionSec = reactionTime != null ? Math.round(reactionTime) : null;
+
     const data = {
         participantId: currentSession.participantId,
         participantName: currentSession.participantName,
@@ -2676,7 +2678,8 @@ function saveMessageData(messageType, action, reactionTime, hintUsed, correct) {
         bullyingLabel: BULLYING_TYPE_LABELS[scenarioBullyingType] || 'Bilinmiyor',
         messageType: messageType,
         action: action,
-        // CEVAP SÜRESİ KALDIRILDI (Madde 15) - reactionTime artık kaydedilmiyor
+        reactionSec: reactionSec,               // tam saniye (örn: 5)
+        reactionLabel: reactionSec != null ? reactionSec + ' saniye' : '-',
         hintUsed: hintUsed,
         correct: correct,
         timestamp: new Date().toISOString()
@@ -2924,6 +2927,7 @@ async function loadAdminData() {
                     bullyingLabel: data.bullyingLabel || 'Bilinmiyor',
                     messageType: data.messageType || '-',
                     action: data.action || '-',
+                    reactionLabel: data.reactionLabel || (data.reactionSec != null ? data.reactionSec + ' saniye' : '-'),
                     correct: data.correct ? '+' : '-',
                     correctBool: data.correct,
                     hintUsed: data.hintUsed ? 'Evet' : 'Hayır',
@@ -3073,6 +3077,7 @@ function displaySessionRecords(data) {
                     <th>Mesaj Türü</th>
                     <th>Zorbalık Türü</th>
                     <th>Aksiyon</th>
+                    <th>Tepki Süresi</th>
                     <th>Sonuç (+/-)</th>
                     <th>İpucu</th>
                     <th>Tarih/Saat</th>
@@ -3091,6 +3096,7 @@ function displaySessionRecords(data) {
                 <td>${item.messageType}</td>
                 <td>${item.bullyingLabel}</td>
                 <td>${item.action}</td>
+                <td>${item.reactionLabel}</td>
                 <td class="${resultClass}">${item.correct}</td>
                 <td>${item.hintUsed}</td>
                 <td>${new Date(item.timestamp).toLocaleString('tr-TR')}</td>
@@ -3191,7 +3197,7 @@ if (exportSessionsBtn) {
         return;
     }
     
-            let csv = '\ufeffOturum ID,Katılımcı,Oturum Türü,Mesaj Türü,Zorbalık Türü,Aksiyon,Sonuç,İpucu,Tarih/Saat\n';
+            let csv = '\ufeffOturum ID,Katılımcı,Oturum Türü,Mesaj Türü,Zorbalık Türü,Aksiyon,Tepki Süresi,Sonuç,İpucu,Tarih/Saat\n';
             
             for (const sessionDoc of sessionsSnapshot.docs) {
                 const sessionData = sessionDoc.data();
@@ -3203,7 +3209,8 @@ if (exportSessionsBtn) {
                 
                 dataSnapshot.forEach(doc => {
                     const d = doc.data();
-                    csv += `${sessionId},${d.participantName || 'Bilinmiyor'},${d.sessionLabel || 'Bilinmiyor'},${d.messageType || '-'},${d.bullyingLabel || 'Bilinmiyor'},${d.action || '-'},${d.correct ? '+' : '-'},${d.hintUsed ? 'Evet' : 'Hayır'},${new Date(d.timestamp).toLocaleString('tr-TR')}\n`;
+                    const reactionLabel = d.reactionLabel || (d.reactionSec != null ? d.reactionSec + ' saniye' : '-');
+                    csv += `${sessionId},${d.participantName || 'Bilinmiyor'},${d.sessionLabel || 'Bilinmiyor'},${d.messageType || '-'},${d.bullyingLabel || 'Bilinmiyor'},${d.action || '-'},${reactionLabel},${d.correct ? '+' : '-'},${d.hintUsed ? 'Evet' : 'Hayır'},${new Date(d.timestamp).toLocaleString('tr-TR')}\n`;
                 });
             }
             
