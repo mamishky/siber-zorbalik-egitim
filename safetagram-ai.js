@@ -112,7 +112,11 @@ async function normalMesajlarUret(adet) {
             body: JSON.stringify(body)
         });
 
-        if (!res.ok) throw new Error(`Gemini HTTP ${res.status}`);
+        if (!res.ok) {
+            const errBody = await res.text().catch(() => '');
+            console.error('[SafetagAI] normalMesajlarUret HTTP', res.status, errBody);
+            throw new Error(`Gemini HTTP ${res.status}: ${errBody.slice(0, 200)}`);
+        }
 
         const data = await res.json();
         let raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
@@ -171,15 +175,20 @@ async function geminiCevapUret(kullaniciMesaji, sohbetGecmisi, participantAge) {
             body: JSON.stringify(body)
         });
 
-        if (!res.ok) throw new Error(`Gemini HTTP ${res.status}`);
+        if (!res.ok) {
+            const errBody = await res.text().catch(() => '');
+            console.error('[SafetagAI] Gemini HTTP', res.status, errBody);
+            throw new Error(`Gemini HTTP ${res.status}: ${errBody.slice(0, 200)}`);
+        }
 
         const data = await res.json();
+        console.log('[SafetagAI] Gemini yanıtı:', JSON.stringify(data).slice(0, 300));
         const cevap = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-        if (!cevap) throw new Error('Boş yanıt');
+        if (!cevap) throw new Error('Boş yanıt: ' + JSON.stringify(data).slice(0, 200));
         return cevap;
 
     } catch (err) {
-        console.error('[SafetagAI] geminiCevapUret hatası, yedeklere düşüldü:', err.message);
+        console.error('[SafetagAI] geminiCevapUret hatası:', err.message);
         return null; // app.js fallback'e düşer
     }
 }
