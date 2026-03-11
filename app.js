@@ -1816,24 +1816,9 @@ function openSpecificDM(scenario) {
             sendConversationMessage();
         }, 1000);
     } else {
-        // Old messages format - cyberbullying
+        // Siber zorbalık mesaj formatı — sendMessage zinciri son mesajdan sonra butonları gösterir
         setTimeout(() => {
             sendMessage();
-            
-            // Mesaj siber zorbalıksa butonları görünür kıl
-            const message = scenario.messages[0];
-            if (message && message.type === 'cyberbullying') {
-                setTimeout(() => {
-                    const actionButtons = document.getElementById('action-buttons');
-                    const inputContainer = document.getElementById('dm-input-container');
-                    if (actionButtons) {
-                        actionButtons.style.display = 'flex';
-                    }
-                    if (inputContainer) {
-                        inputContainer.style.display = 'flex';
-                    }
-                }, 1500); // Mesaj gösterildikten sonra butonları göster
-            }
         }, 1000);
     }
 }
@@ -1997,38 +1982,44 @@ function sendMessage() {
             }
         }
     } else {
-        // Siber zorbalık mesajı - aksiyon butonları ve input birlikte gösteriliyor
-        const inputContainer = document.getElementById('dm-input-container');
-        const actionButtons = document.getElementById('action-buttons');
+        // Siber zorbalık mesajı — dizide daha fazla mesaj varsa sırayla gönder
+        const remainingMessages = scenario.messages.slice(currentSession.messageIndex + 1);
         
-        if (inputContainer) {
-            inputContainer.style.display = 'flex';
-        }
-        if (actionButtons) {
-            actionButtons.style.display = 'flex';
-        }
-        
-        // Butonları sıfırla
-        currentSession.reportClicked = false;
-        currentSession.blockClicked = false;
-        currentSession.selectedComplaintReason = null;
-        const reportBtn = document.getElementById('report-btn');
-        const blockBtn = document.getElementById('block-btn');
-        if (reportBtn) {
-            reportBtn.disabled = false;
-            reportBtn.classList.remove('blink');
-        }
-        if (blockBtn) {
-            blockBtn.disabled = false;
-            blockBtn.classList.remove('blink');
-        }
-        
-        // 5 saniye sonra ipucu göster (sadece buton yanıp sönsün, metin YOK)
-        // Check if hints are enabled before setting timeout
-        if (currentSession.hintEnabled) {
-            currentSession.hintTimeout = setTimeout(() => {
-                showHint();
-            }, 5000);
+        if (remainingMessages.length > 0) {
+            // Sonraki mesajı 1.5 saniye sonra gönder (gerçekçi yazma süresi)
+            setTimeout(() => {
+                currentSession.messageIndex++;
+                sendMessage();
+            }, 1500);
+        } else {
+            // Son zorbalık mesajı — aksiyon butonlarını göster
+            const inputContainer = document.getElementById('dm-input-container');
+            const actionButtons = document.getElementById('action-buttons');
+            
+            if (inputContainer) inputContainer.style.display = 'flex';
+            if (actionButtons) actionButtons.style.display = 'flex';
+            
+            // Butonları sıfırla
+            currentSession.reportClicked = false;
+            currentSession.blockClicked = false;
+            currentSession.selectedComplaintReason = null;
+            const reportBtn = document.getElementById('report-btn');
+            const blockBtn = document.getElementById('block-btn');
+            if (reportBtn) {
+                reportBtn.disabled = false;
+                reportBtn.classList.remove('blink');
+            }
+            if (blockBtn) {
+                blockBtn.disabled = false;
+                blockBtn.classList.remove('blink');
+            }
+            
+            // 5 saniye sonra ipucu göster (sadece buton yanıp sönsün)
+            if (currentSession.hintEnabled) {
+                currentSession.hintTimeout = setTimeout(() => {
+                    showHint();
+                }, 5000);
+            }
         }
     }
 }
