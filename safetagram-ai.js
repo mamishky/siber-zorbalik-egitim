@@ -5,7 +5,7 @@
 // ============================================================
 
 const GEMINI_API_KEY = 'AIzaSyCRYA-ZvvZtLg9FYuKWYVd3iGnNgjduU1I';
-const GEMINI_MODEL   = 'gemini-2.0-flash';
+const GEMINI_MODEL   = 'gemini-2.0-flash-lite';
 const GEMINI_URL     = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
 // ── System prompt — değiştirme ───────────────────────────────
@@ -137,13 +137,22 @@ async function normalMesajlarUret(adet) {
 // ── Gemini ile sohbet yanıtı üret ───────────────────────────
 async function geminiCevapUret(kullaniciMesaji, sohbetGecmisi, participantAge) {
     try {
-        // Sohbet geçmişini Gemini formatına çevir (son 6 mesaj)
-        const gecmis = (sohbetGecmisi || []).slice(-6).map(m => ({
+        // Sohbet geçmişini Gemini formatına çevir (son 6 mesaj).
+        // sohbetGecmisi DOM'dan geliyor — son eleman kullanıcının az önce
+        // yazdığı mesaj, o yüzden slice(-1) ile çıkarıyoruz; aşağıda ayrıca ekliyoruz.
+        const eskiMesajlar = (sohbetGecmisi || []).slice(0, -1).slice(-6);
+        const gecmis = eskiMesajlar.map(m => ({
             role: m.sender === 'user' ? 'user' : 'model',
             parts: [{ text: m.text }]
         }));
 
-        // Mevcut kullanıcı mesajını ekle
+        // İlk tur her zaman 'user' rolüyle başlamalı — Gemini şartı
+        // Geçmiş 'model' ile başlıyorsa (ilk mesaj karşı taraftan geldiyse) önüne boş bir user turu koy
+        if (gecmis.length > 0 && gecmis[0].role === 'model') {
+            gecmis.unshift({ role: 'user', parts: [{ text: '.' }] });
+        }
+
+        // Mevcut kullanıcı mesajını ekle (tek sefer)
         gecmis.push({ role: 'user', parts: [{ text: kullaniciMesaji }] });
 
         const body = {
