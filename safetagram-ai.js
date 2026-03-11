@@ -139,12 +139,63 @@ async function normalMesajlarUret(adet) {
     }
 }
 
+// ── Gemini API isteği (retry destekli) ──────────────────────
+async function geminiIstekAt(body, deneme = 0) {
+    const res = await fetch(GEMINI_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
+
+    if (res.status === 429 && deneme < 2) {
+        // Kota aşımı — 4 saniye bekle, bir kez daha dene
+        console.warn('[SafetagAI] 429 kota aşımı, 4sn sonra tekrar deneniyor...');
+        await new Promise(r => setTimeout(r, 4000));
+        return geminiIstekAt(body, deneme + 1);
+    }
+
+    if (!res.ok) {
+        const errBody = await res.text().catch(() => '');
+        console.error('[SafetagAI] Gemini HTTP', res.status, errBody.slice(0, 200));
+        throw new Error(`Gemini HTTP ${res.status}`);
+    }
+    return res.json();
+}
+
+// ── Bağlam-duyarlı yerel fallback ───────────────────────────
+function baglamliYedekCevap(kullaniciMesaji, sohbetGecmisi) {
+    const u = kullaniciMesaji.toLowerCase();
+    const sonBotMesaj = (sohbetGecmisi || [])
+        .filter(m => m.sender !== 'user')
+        .slice(-1)[0]?.text?.toLowerCase() || '';
+
+    if (u.includes('?') || u.endsWith('?')) {
+        if (sonBotMesaj.includes('kedi') || u.includes('kedi'))   return 'Kedi konusu çok eğlenceli. Bizde de kedi var.';
+        if (sonBotMesaj.includes('oyun') || u.includes('oyun'))   return 'Ben de o oyunu oynamak istiyorum.';
+        if (sonBotMesaj.includes('ders') || u.includes('ders'))   return 'Bence o ders aslında ilginç.';
+        if (sonBotMesaj.includes('yemek') || u.includes('yemek')) return 'Evde yapılan yemekler hep daha güzel oluyor.';
+        if (sonBotMesaj.includes('çiçek') || u.includes('çiçek')) return 'Rengarenk çiçekler çok güzel görünüyor.';
+        return 'Bilmiyorum ama merak ettim. Sen nasıl buldun?';
+    }
+
+    const kisa = [
+        'Gerçekten mi? Çok ilginç.',
+        'Ben de benzer şeyler yaşadım.',
+        'Anlıyorum seni.',
+        'Kulağa çok güzel geliyor.',
+        'Bence de öyle.'
+    ];
+    return kisa[Math.floor(Math.random() * kisa.length)];
+}
+
 // ── Gemini ile sohbet yanıtı üret ───────────────────────────
 async function geminiCevapUret(kullaniciMesaji, sohbetGecmisi, participantAge) {
     try {
+        if (!GEMINI_API_KEY) throw new Error('API anahtarı yok');
+
         // Sohbet geçmişini Gemini formatına çevir (son 6 mesaj).
         // sohbetGecmisi DOM'dan geliyor — son eleman kullanıcının az önce
-        // yazdığı mesaj, o yüzden slice(-1) ile çıkarıyoruz; aşağıda ayrıca ekliyoruz.
+        // yazdığı mesaj, o yüzden slice(0,-1) ile çıkarıyoruz; aşağıda ayrıca ekliyoruz.
         const eskiMesajlar = (sohbetGecmisi || []).slice(0, -1).slice(-6);
         const gecmis = eskiMesajlar.map(m => ({
             role: m.sender === 'user' ? 'user' : 'model',
@@ -152,45 +203,27 @@ async function geminiCevapUret(kullaniciMesaji, sohbetGecmisi, participantAge) {
         }));
 
         // İlk tur her zaman 'user' rolüyle başlamalı — Gemini şartı
-        // Geçmiş 'model' ile başlıyorsa (ilk mesaj karşı taraftan geldiyse) önüne boş bir user turu koy
         if (gecmis.length > 0 && gecmis[0].role === 'model') {
             gecmis.unshift({ role: 'user', parts: [{ text: '.' }] });
         }
 
-        // Mevcut kullanıcı mesajını ekle (tek sefer)
         gecmis.push({ role: 'user', parts: [{ text: kullaniciMesaji }] });
 
         const body = {
             system_instruction: { parts: [{ text: CEVAP_SYSTEM_PROMPT }] },
             contents: gecmis,
-            generationConfig: {
-                temperature: 0.8,
-                topP: 0.9,
-                maxOutputTokens: 256
-            }
+            generationConfig: { temperature: 0.8, topP: 0.9, maxOutputTokens: 128 }
         };
 
-        const res = await fetch(GEMINI_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        });
-
-        if (!res.ok) {
-            const errBody = await res.text().catch(() => '');
-            console.error('[SafetagAI] Gemini HTTP', res.status, errBody);
-            throw new Error(`Gemini HTTP ${res.status}: ${errBody.slice(0, 200)}`);
-        }
-
-        const data = await res.json();
-        console.log('[SafetagAI] Gemini yanıtı:', JSON.stringify(data).slice(0, 300));
+        const data = await geminiIstekAt(body);
         const cevap = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-        if (!cevap) throw new Error('Boş yanıt: ' + JSON.stringify(data).slice(0, 200));
+        if (!cevap) throw new Error('Boş yanıt');
         return cevap;
 
     } catch (err) {
         console.error('[SafetagAI] geminiCevapUret hatası:', err.message);
-        return null; // app.js fallback'e düşer
+        // Bağlam-duyarlı yerel fallback — rastgele saçma cevap yerine ilgili bir yanıt
+        return baglamliYedekCevap(kullaniciMesaji, sohbetGecmisi);
     }
 }
 

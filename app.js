@@ -2140,17 +2140,11 @@ async function generateAIMessage(userMessage, conversationHistory, scenario) {
     return getFallbackResponse(userMessage);
 }
 
-// Fallback: AI çalışmazsa basit cevaplar
+// Fallback: safetagram-ai.js yüklenmediyse son çare
 function getFallbackResponse(userMessage) {
-    const responses = [
-        "Harika! Devam edelim 🎉",
-        "Evet, haklısın! 👍",
-        "Çok güzel bir fikir! ✨",
-        "Aynen öyle! 😊",
-        "Süper! 🚀",
-        "Tamam, anladım! 👌"
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
+    const u = (userMessage || '').toLowerCase();
+    if (u.includes('?')) return 'Ben de merak etmiştim. Çok ilginç.';
+    return 'Anlıyorum. Devam et.';
 }
 
 // Güvenli mesaja cevap gönder
