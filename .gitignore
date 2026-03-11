@@ -8,6 +8,9 @@ yarn.lock
 .env.local
 .env.*.local
 
+# Local API key config (never commit this)
+config.js
+
 # Vercel
 .vercel
 

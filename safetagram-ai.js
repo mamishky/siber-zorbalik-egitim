@@ -4,7 +4,8 @@
 // Zorbalık senaryolarına DOKUNMA — onlar scenarios.js'de.
 // ============================================================
 
-const GEMINI_API_KEY = 'AIzaSyCRYA-ZvvZtLg9FYuKWYVd3iGnNgjduU1I';
+// API anahtarı config.js'den okunur (gitignored) — sabit yazmayın
+const GEMINI_API_KEY = (typeof window !== 'undefined' && window.GEMINI_API_KEY) || '';
 const GEMINI_MODEL   = 'gemini-2.0-flash';
 const GEMINI_URL     = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
