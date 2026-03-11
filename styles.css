@@ -1376,6 +1376,11 @@ body {
     background: #dcfce7;
 }
 
+.complaint-reason-option.wrong {
+    border-color: #ef4444;
+    background: #fee2e2;
+}
+
 .complaint-reason-option.blink-hint {
     animation: blinkHint 0.5s infinite;
 }

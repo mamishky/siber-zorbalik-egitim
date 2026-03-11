@@ -2556,22 +2556,42 @@ document.getElementById('submit-complaint').addEventListener('click', () => {
         // Yanlış seçim
         const correctOption = document.querySelector(`[data-reason="${correctReason}"]`);
         const selectedOption = document.querySelector(`[data-reason="${selectedReason}"]`);
-        
-        // Seçilen seçeneğin seçimini kaldır
-        if (selectedOption) {
-            selectedOption.classList.remove('selected');
-            selectedOption.querySelector('input[type="radio"]').checked = false;
-        }
-        
-        // Doğru cevabı yalnızca ipucu açıksa yanıp söndür
-        if (currentSession.hintEnabled && correctOption) {
-            correctOption.classList.add('blink-hint');
+
+        if (!currentSession.hintEnabled) {
+            // İpucu KAPALI: yanlışı kaydet, doğruyu kısaca göster, devam et
+            const reactionTime = (Date.now() - currentSession.currentMessageStartTime) / 1000;
+            saveMessageData('cyberbullying', 'report', reactionTime, false, false);
+            currentSession.stats.wrong++;
+
+            // Yanlış seçimi kırmızı, doğru seçimi yeşil göster
+            if (selectedOption) selectedOption.classList.add('wrong');
+            if (correctOption) correctOption.classList.add('correct');
+
+            // 1.5 sn sonra modalı kapat, engelleme adımına geç
+            setTimeout(() => {
+                document.getElementById('complaint-modal').style.display = 'none';
+
+                currentSession.reportClicked = true;
+                currentSession.skills.reporting = true;
+                currentSession.skills.complaintType = false; // Yanlış tür seçildi
+
+                document.getElementById('report-btn').disabled = true;
+                document.getElementById('report-btn').classList.remove('blink');
+
+                showNextStepHint('block');
+            }, 1500);
+        } else {
+            // İpucu AÇIK: seçimi sıfırla, doğruyu yanıp söndür, tekrar denesin
+            if (selectedOption) {
+                selectedOption.classList.remove('selected');
+                selectedOption.querySelector('input[type="radio"]').checked = false;
+            }
+            if (correctOption) correctOption.classList.add('blink-hint');
             currentSession.stats.hints++;
+
+            currentSession.selectedComplaintReason = null;
+            document.getElementById('submit-complaint').disabled = true;
         }
-        
-        // Seçimi sıfırla
-        currentSession.selectedComplaintReason = null;
-        document.getElementById('submit-complaint').disabled = true;
     }
 });
 
