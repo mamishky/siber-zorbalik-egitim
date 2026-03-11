@@ -2349,15 +2349,9 @@ function returnToFeed() {
 // Thank you modal'ı kapat ve akışa devam et
 document.getElementById('close-thank-you-modal').addEventListener('click', () => {
     document.getElementById('thank-you-modal').style.display = 'none';
-    
-    // Modal'ı kapat ama FEED'E DÖNME - kullanıcı kendisi geri butonuna basacak
-    // NOT: showScreen('main-app') KALDIRILDI - kullanıcı manuel olarak dönmeli
-    
-    // Mesaj tamamlandı - zamanlayıcıyı kur (indeks scheduleNextMessage içinde artırılacak)
-    // Ama önce mevcut mesajın indeksini artır çünkü engelleme tamamlandı
-    // NOT: scheduleNextMessage içinde indeks artırılıyor, burada artırmaya gerek yok
-    // Sadece zamanlayıcıyı kur
-    scheduleNextMessage();
+    // Modalı kapat, DM ekranında kal. Kullanıcı geri butonuna basacak.
+    // scheduleNextMessage() back-to-inbox handler'ında çağrılacak.
+    // Burada çağrılırsa back-to-inbox ile çift increment oluşur → mesajlar atlanır.
 });
 
 // Şikayet et butonu
