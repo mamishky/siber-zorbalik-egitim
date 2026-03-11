@@ -196,20 +196,21 @@ function normalSenaryoyaDonustur(mesajObj) {
 // Mevcut siber zorbalık kuyruğunu alır, 5 normal mesaj üretir,
 // ikisini rastgele karıştırarak yeni diziyi döndürür.
 async function normalMesajlariKaristir(queue, adet) {
+    let mesajlar;
     try {
-        const mesajlar = await normalMesajlarUret(adet);
-        const senaryolar = mesajlar.map(normalSenaryoyaDonustur);
-
-        const karisik = [...queue];
-        senaryolar.forEach(s => {
-            const pos = Math.floor(Math.random() * (karisik.length + 1));
-            karisik.splice(pos, 0, s);
-        });
-        return karisik;
+        mesajlar = await normalMesajlarUret(adet);
     } catch (err) {
-        console.error('[SafetagAI] normalMesajlariKaristir hatası:', err.message);
-        return queue; // hata olursa saf kuyruk döner
+        console.warn('[SafetagAI] Gemini ulaşılamadı, yedek mesajlar kullanılıyor:', err.message);
+        mesajlar = yedekMesajlar(adet);
     }
+
+    const senaryolar = mesajlar.map(normalSenaryoyaDonustur);
+    const karisik = [...queue];
+    senaryolar.forEach(s => {
+        const pos = Math.floor(Math.random() * (karisik.length + 1));
+        karisik.splice(pos, 0, s);
+    });
+    return karisik;
 }
 
 // ── Global scope'a aç ────────────────────────────────────────
