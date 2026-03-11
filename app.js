@@ -2553,7 +2553,7 @@ document.getElementById('submit-complaint').addEventListener('click', () => {
             showNextStepHint('block');
         }, 500);
     } else {
-        // Yanlış seçim - doğru cevabı göster
+        // Yanlış seçim
         const correctOption = document.querySelector(`[data-reason="${correctReason}"]`);
         const selectedOption = document.querySelector(`[data-reason="${selectedReason}"]`);
         
@@ -2563,16 +2563,15 @@ document.getElementById('submit-complaint').addEventListener('click', () => {
             selectedOption.querySelector('input[type="radio"]').checked = false;
         }
         
-        // Doğru cevabı yanıp söndür
-        if (correctOption) {
+        // Doğru cevabı yalnızca ipucu açıksa yanıp söndür
+        if (currentSession.hintEnabled && correctOption) {
             correctOption.classList.add('blink-hint');
+            currentSession.stats.hints++;
         }
         
         // Seçimi sıfırla
         currentSession.selectedComplaintReason = null;
         document.getElementById('submit-complaint').disabled = true;
-        
-        currentSession.stats.hints++;
     }
 });
 
