@@ -3026,13 +3026,24 @@ function displaySessionRecords(data) {
     container.innerHTML = html;
 }
 
+// Admin sekme navigasyonu
+document.querySelectorAll('.admin-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        const target = document.getElementById('tab-' + tab.dataset.tab);
+        if (target) target.classList.add('active');
+    });
+});
+
 // Filtreleme - Firebase'den çek
 document.getElementById('filter-participant').addEventListener('change', () => {
-    loadAdminData(); // Öğrenci değiştiğinde yeniden yükle
+    loadAdminData();
 });
 
 document.getElementById('filter-session').addEventListener('change', () => {
-    loadAdminData(); // Oturum türü değiştiğinde yeniden yükle
+    loadAdminData();
 });
 
 // Beceri Analizi CSV İndir (Madde 14)

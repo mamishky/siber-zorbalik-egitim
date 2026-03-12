@@ -832,12 +832,7 @@
             </div>
         </div>
         
-        <div class="admin-controls">
-            <button class="btn-primary" id="export-skills-csv">Beceri Analizi CSV İndir</button>
-            <button class="btn-primary" id="export-sessions-csv">Oturum Kayıtları CSV İndir</button>
-            <button class="btn-danger" id="clear-data">Tüm Verileri Temizle</button>
-        </div>
-        
+        <!-- Filtreler -->
         <div class="data-filters">
             <div class="filter-group">
                 <label for="filter-participant">1️⃣ Öğrenci Seçin</label>
@@ -845,7 +840,6 @@
                     <option value="">Tüm Öğrenciler</option>
                 </select>
             </div>
-            
             <div class="filter-group">
                 <label for="filter-session">2️⃣ Oturum Türü Seçin</label>
                 <select id="filter-session">
@@ -860,16 +854,32 @@
                 </select>
             </div>
         </div>
-        
-        <!-- ALAN 1: Beceri Analizi Kayıtları -->
-        <div class="data-section">
-            <h3 style="padding: 20px 20px 0;">📊 Beceri Analizi Kayıtları</h3>
+
+        <!-- Sekme Navigasyonu -->
+        <div class="admin-tabs">
+            <button class="admin-tab active" data-tab="skills">📊 Beceri Analizi</button>
+            <button class="admin-tab" data-tab="records">📝 Mesaj Kayıtları</button>
+        </div>
+
+        <!-- Sekme İçerikleri & Aksiyon Butonları -->
+        <div class="admin-tab-content active" id="tab-skills">
+            <div class="admin-controls">
+                <button class="btn-primary" id="export-skills-csv">
+                    <i class="fas fa-download"></i> Beceri Analizi CSV İndir
+                </button>
+                <button class="btn-danger" id="clear-data">
+                    <i class="fas fa-trash"></i> Tüm Verileri Temizle
+                </button>
+            </div>
             <div id="skills-analysis-display" class="data-table"></div>
         </div>
-        
-        <!-- ALAN 2: Oturum Kayıtları (Mesaj Bazlı) -->
-        <div class="data-section">
-            <h3 style="padding: 20px 20px 0;">📝 Oturum Kayıtları (Mesaj Bazlı)</h3>
+
+        <div class="admin-tab-content" id="tab-records">
+            <div class="admin-controls">
+                <button class="btn-primary" id="export-sessions-csv">
+                    <i class="fas fa-download"></i> Mesaj Kayıtları CSV İndir
+                </button>
+            </div>
             <div id="session-records-display" class="data-table"></div>
         </div>
     </div>
