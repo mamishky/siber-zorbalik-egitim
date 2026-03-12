@@ -112,6 +112,12 @@ body {
     white-space: nowrap;
     align-items: center;
     display: flex;
+    gap: 8px;
+}
+
+.admin-controls .btn-primary i,
+.admin-controls .btn-danger i {
+    flex-shrink: 0;
 }
 
 .data-filters {
