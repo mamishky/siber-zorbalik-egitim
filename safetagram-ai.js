@@ -1,15 +1,15 @@
 // ============================================================
-// Safetagram AI — Google Gemini ile normal mesaj üretimi
+// Safetagram AI — OpenRouter API ile normal mesaj üretimi
 // Sadece zorbalık İÇERMEYEN mesajlar bu dosya üzerinden gelir.
 // Zorbalık senaryolarına DOKUNMA — onlar scenarios.js'de.
 // ============================================================
 
 // API anahtarı config.js'den okunur (gitignored) — sabit yazmayın
-const GEMINI_API_KEY = (typeof window !== 'undefined' && window.GEMINI_API_KEY) || '';
-const GEMINI_MODEL   = 'gemini-2.0-flash';
-const GEMINI_URL     = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+const OR_API_KEY = (typeof window !== 'undefined' && window.OPENROUTER_API_KEY) || '';
+const OR_MODEL   = 'openai/gpt-4o-mini';
+const OR_URL     = 'https://openrouter.ai/api/v1/chat/completions';
 
-// ── System prompt — değiştirme ───────────────────────────────
+// ── System prompt — ilk normal mesajlar için ─────────────────
 const NORMAL_MESAJ_SYSTEM_PROMPT = `Sen "Safetagram" adlı bir Instagram benzeri eğitim platformunda mesaj üreten bir yardımcısın.
 
 GÖREV:
@@ -91,44 +91,82 @@ function yedekMesajlar(adet) {
     return karistir.slice(0, Math.min(adet, karistir.length));
 }
 
-// ── Gemini ile normal mesaj üret ────────────────────────────
+// ── Bağlam-duyarlı yerel fallback (API tamamen çevrimdışı) ───
+function baglamliYedekCevap(kullaniciMesaji, sohbetGecmisi) {
+    const u = kullaniciMesaji.toLowerCase();
+    const sonBotMesaj = (sohbetGecmisi || [])
+        .filter(m => m.sender !== 'user')
+        .slice(-1)[0]?.text?.toLowerCase() || '';
+
+    if (u.includes('?')) {
+        if (sonBotMesaj.includes('kedi') || u.includes('kedi'))   return 'Kedi konusu çok eğlenceli. Bizde de kedi var.';
+        if (sonBotMesaj.includes('oyun') || u.includes('oyun'))   return 'Ben de o oyunu oynamak istiyorum.';
+        if (sonBotMesaj.includes('ders') || u.includes('ders'))   return 'Bence o ders aslında ilginç.';
+        if (sonBotMesaj.includes('yemek') || u.includes('yemek')) return 'Evde yapılan yemekler hep daha güzel oluyor.';
+        if (sonBotMesaj.includes('çiçek') || u.includes('çiçek')) return 'Rengarenk çiçekler çok güzel görünüyor.';
+        return 'Bilmiyorum ama merak ettim. Sen nasıl buldun?';
+    }
+
+    const kisaYanitlar = [
+        'Gerçekten mi? Çok ilginç.',
+        'Ben de benzer şeyler yaşadım.',
+        'Anlıyorum seni.',
+        'Kulağa çok güzel geliyor.',
+        'Bence de öyle.'
+    ];
+    return kisaYanitlar[Math.floor(Math.random() * kisaYanitlar.length)];
+}
+
+// ── OpenRouter API isteği (retry destekli) ───────────────────
+async function orIstekAt(messages, maxTokens, deneme = 0) {
+    const res = await fetch(OR_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OR_API_KEY}`,
+            'HTTP-Referer': window.location.origin,
+            'X-Title': 'Safetagram'
+        },
+        body: JSON.stringify({
+            model: OR_MODEL,
+            messages,
+            max_tokens: maxTokens,
+            temperature: 0.8
+        })
+    });
+
+    if (res.status === 429 && deneme < 2) {
+        console.warn('[SafetagAI] 429 kota aşımı, 4sn sonra tekrar deneniyor...');
+        await new Promise(r => setTimeout(r, 4000));
+        return orIstekAt(messages, maxTokens, deneme + 1);
+    }
+
+    if (!res.ok) {
+        const errBody = await res.text().catch(() => '');
+        console.error('[SafetagAI] OpenRouter HTTP', res.status, errBody.slice(0, 200));
+        throw new Error(`OpenRouter HTTP ${res.status}`);
+    }
+
+    return res.json();
+}
+
+// ── OpenRouter ile normal mesaj üret ────────────────────────
 async function normalMesajlarUret(adet) {
     try {
-        const body = {
-            system_instruction: { parts: [{ text: NORMAL_MESAJ_SYSTEM_PROMPT }] },
-            contents: [{
-                role: 'user',
-                parts: [{ text: `Tam olarak ${adet} adet farklı normal mesaj üret. Yanıtı SADECE JSON dizisi olarak ver.` }]
-            }],
-            generationConfig: {
-                temperature: 0.9,
-                topP: 0.95,
-                maxOutputTokens: 1024
-            }
-        };
+        const messages = [
+            { role: 'system',  content: NORMAL_MESAJ_SYSTEM_PROMPT },
+            { role: 'user',    content: `Tam olarak ${adet} adet farklı normal mesaj üret. Yanıtı SADECE JSON dizisi olarak ver.` }
+        ];
 
-        const res = await fetch(GEMINI_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        });
+        const data = await orIstekAt(messages, 1024);
+        let raw = data?.choices?.[0]?.message?.content || '';
 
-        if (!res.ok) {
-            const errBody = await res.text().catch(() => '');
-            console.error('[SafetagAI] normalMesajlarUret HTTP', res.status, errBody);
-            throw new Error(`Gemini HTTP ${res.status}: ${errBody.slice(0, 200)}`);
-        }
-
-        const data = await res.json();
-        let raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-        // Gemini bazen ```json ... ``` ile sarar — temizle
+        // Model bazen ```json ... ``` ile sarar — temizle
         raw = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
 
         const parsed = JSON.parse(raw);
         if (!Array.isArray(parsed)) throw new Error('Beklenen dizi değil');
 
-        // Gerekli alanları doğrula
         return parsed
             .filter(m => m.gonderen && m.mesaj)
             .slice(0, adet);
@@ -139,96 +177,44 @@ async function normalMesajlarUret(adet) {
     }
 }
 
-// ── Gemini API isteği (retry destekli) ──────────────────────
-async function geminiIstekAt(body, deneme = 0) {
-    const res = await fetch(GEMINI_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-    });
-
-    if (res.status === 429 && deneme < 2) {
-        // Kota aşımı — 4 saniye bekle, bir kez daha dene
-        console.warn('[SafetagAI] 429 kota aşımı, 4sn sonra tekrar deneniyor...');
-        await new Promise(r => setTimeout(r, 4000));
-        return geminiIstekAt(body, deneme + 1);
-    }
-
-    if (!res.ok) {
-        const errBody = await res.text().catch(() => '');
-        console.error('[SafetagAI] Gemini HTTP', res.status, errBody.slice(0, 200));
-        throw new Error(`Gemini HTTP ${res.status}`);
-    }
-    return res.json();
-}
-
-// ── Bağlam-duyarlı yerel fallback ───────────────────────────
-function baglamliYedekCevap(kullaniciMesaji, sohbetGecmisi) {
-    const u = kullaniciMesaji.toLowerCase();
-    const sonBotMesaj = (sohbetGecmisi || [])
-        .filter(m => m.sender !== 'user')
-        .slice(-1)[0]?.text?.toLowerCase() || '';
-
-    if (u.includes('?') || u.endsWith('?')) {
-        if (sonBotMesaj.includes('kedi') || u.includes('kedi'))   return 'Kedi konusu çok eğlenceli. Bizde de kedi var.';
-        if (sonBotMesaj.includes('oyun') || u.includes('oyun'))   return 'Ben de o oyunu oynamak istiyorum.';
-        if (sonBotMesaj.includes('ders') || u.includes('ders'))   return 'Bence o ders aslında ilginç.';
-        if (sonBotMesaj.includes('yemek') || u.includes('yemek')) return 'Evde yapılan yemekler hep daha güzel oluyor.';
-        if (sonBotMesaj.includes('çiçek') || u.includes('çiçek')) return 'Rengarenk çiçekler çok güzel görünüyor.';
-        return 'Bilmiyorum ama merak ettim. Sen nasıl buldun?';
-    }
-
-    const kisa = [
-        'Gerçekten mi? Çok ilginç.',
-        'Ben de benzer şeyler yaşadım.',
-        'Anlıyorum seni.',
-        'Kulağa çok güzel geliyor.',
-        'Bence de öyle.'
-    ];
-    return kisa[Math.floor(Math.random() * kisa.length)];
-}
-
-// ── Gemini ile sohbet yanıtı üret ───────────────────────────
+// ── OpenRouter ile sohbet yanıtı üret ───────────────────────
 async function geminiCevapUret(kullaniciMesaji, sohbetGecmisi, participantAge) {
     try {
-        if (!GEMINI_API_KEY) throw new Error('API anahtarı yok');
+        if (!OR_API_KEY) throw new Error('API anahtarı yok');
 
-        // Sohbet geçmişini Gemini formatına çevir (son 6 mesaj).
-        // sohbetGecmisi DOM'dan geliyor — son eleman kullanıcının az önce
-        // yazdığı mesaj, o yüzden slice(0,-1) ile çıkarıyoruz; aşağıda ayrıca ekliyoruz.
+        // Sohbet geçmişini OpenAI formatına çevir (son 6 mesaj).
+        // sohbetGecmisi DOM'dan geliyor — son eleman kullanıcının mesajı, slice(0,-1) ile çıkar.
         const eskiMesajlar = (sohbetGecmisi || []).slice(0, -1).slice(-6);
         const gecmis = eskiMesajlar.map(m => ({
-            role: m.sender === 'user' ? 'user' : 'model',
-            parts: [{ text: m.text }]
+            role: m.sender === 'user' ? 'user' : 'assistant',
+            content: m.text
         }));
 
-        // İlk tur her zaman 'user' rolüyle başlamalı — Gemini şartı
-        if (gecmis.length > 0 && gecmis[0].role === 'model') {
-            gecmis.unshift({ role: 'user', parts: [{ text: '.' }] });
+        // Geçmiş 'assistant' ile başlıyorsa (ilk mesaj karşı taraftan) önüne boş user turu koy
+        if (gecmis.length > 0 && gecmis[0].role === 'assistant') {
+            gecmis.unshift({ role: 'user', content: '.' });
         }
 
-        gecmis.push({ role: 'user', parts: [{ text: kullaniciMesaji }] });
+        // Mevcut kullanıcı mesajını ekle (tek sefer)
+        gecmis.push({ role: 'user', content: kullaniciMesaji });
 
-        const body = {
-            system_instruction: { parts: [{ text: CEVAP_SYSTEM_PROMPT }] },
-            contents: gecmis,
-            generationConfig: { temperature: 0.8, topP: 0.9, maxOutputTokens: 128 }
-        };
+        const messages = [
+            { role: 'system', content: CEVAP_SYSTEM_PROMPT },
+            ...gecmis
+        ];
 
-        const data = await geminiIstekAt(body);
-        const cevap = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        const data = await orIstekAt(messages, 128);
+        const cevap = data?.choices?.[0]?.message?.content?.trim();
         if (!cevap) throw new Error('Boş yanıt');
         return cevap;
 
     } catch (err) {
         console.error('[SafetagAI] geminiCevapUret hatası:', err.message);
-        // Bağlam-duyarlı yerel fallback — rastgele saçma cevap yerine ilgili bir yanıt
         return baglamliYedekCevap(kullaniciMesaji, sohbetGecmisi);
     }
 }
 
 // ── Normal mesaj objesini conversation formatına çevir ───────
-// app.js'deki sendConversationMessage() bu formatı kullanıyor
 function normalSenaryoyaDonustur(mesajObj) {
     return {
         sender: mesajObj.gonderen,
@@ -245,14 +231,12 @@ function normalSenaryoyaDonustur(mesajObj) {
 }
 
 // ── Kuyruğa normal mesajları karıştır (async) ────────────────
-// Mevcut siber zorbalık kuyruğunu alır, 5 normal mesaj üretir,
-// ikisini rastgele karıştırarak yeni diziyi döndürür.
 async function normalMesajlariKaristir(queue, adet) {
     let mesajlar;
     try {
         mesajlar = await normalMesajlarUret(adet);
     } catch (err) {
-        console.warn('[SafetagAI] Gemini ulaşılamadı, yedek mesajlar kullanılıyor:', err.message);
+        console.warn('[SafetagAI] API ulaşılamadı, yedek mesajlar kullanılıyor:', err.message);
         mesajlar = yedekMesajlar(adet);
     }
 
