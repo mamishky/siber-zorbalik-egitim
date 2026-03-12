@@ -961,8 +961,11 @@ function showScreen(screenId) {
 function generateFeed() {
     const feedContainer = document.getElementById('feed-container');
     feedContainer.innerHTML = '';
-    
-    POSTS.forEach((post, index) => {
+
+    // Her oturumda postları rastgele sırala
+    const shuffledPosts = [...POSTS].sort(() => Math.random() - 0.5);
+
+    shuffledPosts.forEach((post, index) => {
         const postDiv = document.createElement('div');
         postDiv.className = 'post';
         
