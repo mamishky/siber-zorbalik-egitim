@@ -165,9 +165,9 @@ async function orIstekAt(messages, maxTokens, deneme = 0) {
 // ── OpenRouter ile normal mesaj üret ────────────────────────
 async function normalMesajlarUret(adet) {
     try {
+        // Gemma system prompt desteklemediği için talimatı user mesajına göm
         const messages = [
-            { role: 'system',  content: NORMAL_MESAJ_SYSTEM_PROMPT },
-            { role: 'user',    content: `Tam olarak ${adet} adet farklı normal mesaj üret. Yanıtı SADECE JSON dizisi olarak ver.` }
+            { role: 'user', content: NORMAL_MESAJ_SYSTEM_PROMPT + `\n\nTam olarak ${adet} adet farklı normal mesaj üret. Yanıtı SADECE JSON dizisi olarak ver, başka hiçbir şey yazma.` }
         ];
 
         const data = await orIstekAt(messages, 1024);
@@ -203,18 +203,28 @@ async function geminiCevapUret(kullaniciMesaji, sohbetGecmisi, participantAge) {
             content: m.text
         }));
 
-        // Geçmiş 'assistant' ile başlıyorsa (ilk mesaj karşı taraftan) önüne boş user turu koy
-        if (gecmis.length > 0 && gecmis[0].role === 'assistant') {
-            gecmis.unshift({ role: 'user', content: '.' });
-        }
-
         // Mevcut kullanıcı mesajını ekle (tek sefer)
         gecmis.push({ role: 'user', content: kullaniciMesaji });
 
-        const messages = [
-            { role: 'system', content: CEVAP_SYSTEM_PROMPT },
-            ...gecmis
-        ];
+        // Gemma system prompt desteklemediği için talimatı ilk user mesajına göm.
+        // Geçmiş yoksa doğrudan user mesajına ekle; varsa ilk user mesajının başına ekle.
+        let messages;
+        if (gecmis.length === 1) {
+            // Sadece mevcut kullanıcı mesajı var — talimatı başa ekle
+            messages = [{ role: 'user', content: CEVAP_SYSTEM_PROMPT + '\n\nKullanıcı mesajı: ' + kullaniciMesaji }];
+        } else {
+            // Geçmiş var — ilk user mesajının başına talimatı ekle, sıra korunsun
+            messages = gecmis.map((m, i) => {
+                if (i === 0 && m.role === 'user') {
+                    return { role: 'user', content: CEVAP_SYSTEM_PROMPT + '\n\nKullanıcı mesajı: ' + m.content };
+                }
+                return m;
+            });
+            // Geçmiş assistant ile başlıyorsa (ilk mesaj karşı taraftan) önüne boş user turu ekle
+            if (messages[0].role === 'assistant') {
+                messages.unshift({ role: 'user', content: CEVAP_SYSTEM_PROMPT + '\n\n.' });
+            }
+        }
 
         const data = await orIstekAt(messages, 128);
         const cevap = data?.choices?.[0]?.message?.content?.trim();
