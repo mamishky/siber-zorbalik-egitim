@@ -6,7 +6,7 @@
 
 // API anahtarı config.js'den okunur (gitignored) — sabit yazmayın
 const OR_API_KEY = (typeof window !== 'undefined' && window.OPENROUTER_API_KEY) || '';
-const OR_MODEL   = 'meta-llama/llama-3.1-8b-instruct:free';
+const OR_MODEL   = 'google/gemma-3-12b-it:free';
 const OR_URL     = 'https://openrouter.ai/api/v1/chat/completions';
 const OR_TIMEOUT_MS = 10000; // 10 saniye — aşılırsa fallback'e geç
 
