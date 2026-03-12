@@ -4,12 +4,11 @@
 // Zorbalık senaryolarına DOKUNMA — onlar scenarios.js'de.
 // ============================================================
 
-// config.js yüklüyse oradan, yoksa buraya yazılı anahtar kullanılır
-const OR_API_KEY = (typeof window !== 'undefined' && window.OPENROUTER_API_KEY)
-    || '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';
+// API anahtarı Cloudflare Worker'da tutuluyor — burada anahtar yok
+const OR_API_KEY = ''; // Artık kullanılmıyor, Worker hallediyor
 const OR_MODEL   = 'google/gemma-3-12b-it:free';
-const OR_URL     = 'https://openrouter.ai/api/v1/chat/completions';
-const OR_TIMEOUT_MS = 25000; // 25 saniye — Gemma bazen yavaş
+const OR_URL     = 'https://safetagramai.m-farukerdogan.workers.dev';
+const OR_TIMEOUT_MS = 25000;
 
 // ── System prompt — ilk normal mesajlar için ─────────────────
 const NORMAL_MESAJ_SYSTEM_PROMPT = `Sen "Safetagram" adlı bir Instagram benzeri eğitim platformunda mesaj üreten bir yardımcısın.
@@ -130,10 +129,7 @@ async function orIstekAt(messages, maxTokens, deneme = 0) {
             method: 'POST',
             signal: controller.signal,
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${OR_API_KEY}`,
-                'HTTP-Referer': (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:8000'),
-                'X-Title': 'Safetagram'
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 model: OR_MODEL,
@@ -193,8 +189,7 @@ async function normalMesajlarUret(adet) {
 // ── OpenRouter ile sohbet yanıtı üret ───────────────────────
 async function geminiCevapUret(kullaniciMesaji, sohbetGecmisi, participantAge) {
     try {
-        if (!OR_API_KEY) throw new Error('API anahtarı yok — config.js yüklendi mi?');
-        console.log('[SafetagAI] OR_API_KEY uzunluğu:', OR_API_KEY.length, '| model:', OR_MODEL);
+        console.log('[SafetagAI] Worker üzerinden istek atılıyor, model:', OR_MODEL);
 
         // Sohbet geçmişini OpenAI formatına çevir (son 6 mesaj).
         // sohbetGecmisi DOM'dan geliyor — son eleman kullanıcının mesajı, slice(0,-1) ile çıkar.
