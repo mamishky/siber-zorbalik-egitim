@@ -6,8 +6,9 @@
 
 // API anahtarı config.js'den okunur (gitignored) — sabit yazmayın
 const OR_API_KEY = (typeof window !== 'undefined' && window.OPENROUTER_API_KEY) || '';
-const OR_MODEL   = 'openai/gpt-4o-mini';
+const OR_MODEL   = 'meta-llama/llama-3.1-8b-instruct:free';
 const OR_URL     = 'https://openrouter.ai/api/v1/chat/completions';
+const OR_TIMEOUT_MS = 10000; // 10 saniye — aşılırsa fallback'e geç
 
 // ── System prompt — ilk normal mesajlar için ─────────────────
 const NORMAL_MESAJ_SYSTEM_PROMPT = `Sen "Safetagram" adlı bir Instagram benzeri eğitim platformunda mesaj üreten bir yardımcısın.
@@ -117,37 +118,48 @@ function baglamliYedekCevap(kullaniciMesaji, sohbetGecmisi) {
     return kisaYanitlar[Math.floor(Math.random() * kisaYanitlar.length)];
 }
 
-// ── OpenRouter API isteği (retry destekli) ───────────────────
+// ── OpenRouter API isteği (timeout + retry destekli) ─────────
 async function orIstekAt(messages, maxTokens, deneme = 0) {
-    const res = await fetch(OR_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${OR_API_KEY}`,
-            'HTTP-Referer': window.location.origin,
-            'X-Title': 'Safetagram'
-        },
-        body: JSON.stringify({
-            model: OR_MODEL,
-            messages,
-            max_tokens: maxTokens,
-            temperature: 0.8
-        })
-    });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), OR_TIMEOUT_MS);
 
-    if (res.status === 429 && deneme < 2) {
-        console.warn('[SafetagAI] 429 kota aşımı, 4sn sonra tekrar deneniyor...');
-        await new Promise(r => setTimeout(r, 4000));
+    let res;
+    try {
+        res = await fetch(OR_URL, {
+            method: 'POST',
+            signal: controller.signal,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${OR_API_KEY}`,
+                'HTTP-Referer': 'http://localhost:8000',
+                'X-Title': 'Safetagram'
+            },
+            body: JSON.stringify({
+                model: OR_MODEL,
+                messages,
+                max_tokens: maxTokens,
+                temperature: 0.8
+            })
+        });
+    } finally {
+        clearTimeout(timer);
+    }
+
+    if (res.status === 429 && deneme < 1) {
+        console.warn('[SafetagAI] 429 — 3sn sonra tekrar deneniyor...');
+        await new Promise(r => setTimeout(r, 3000));
         return orIstekAt(messages, maxTokens, deneme + 1);
     }
 
     if (!res.ok) {
         const errBody = await res.text().catch(() => '');
-        console.error('[SafetagAI] OpenRouter HTTP', res.status, errBody.slice(0, 200));
+        console.error('[SafetagAI] OpenRouter HTTP', res.status, errBody.slice(0, 300));
         throw new Error(`OpenRouter HTTP ${res.status}`);
     }
 
-    return res.json();
+    const data = await res.json();
+    console.log('[SafetagAI] OpenRouter yanıtı OK, model:', data?.model);
+    return data;
 }
 
 // ── OpenRouter ile normal mesaj üret ────────────────────────
@@ -180,7 +192,8 @@ async function normalMesajlarUret(adet) {
 // ── OpenRouter ile sohbet yanıtı üret ───────────────────────
 async function geminiCevapUret(kullaniciMesaji, sohbetGecmisi, participantAge) {
     try {
-        if (!OR_API_KEY) throw new Error('API anahtarı yok');
+        if (!OR_API_KEY) throw new Error('API anahtarı yok — config.js yüklendi mi?');
+        console.log('[SafetagAI] OR_API_KEY uzunluğu:', OR_API_KEY.length, '| model:', OR_MODEL);
 
         // Sohbet geçmişini OpenAI formatına çevir (son 6 mesaj).
         // sohbetGecmisi DOM'dan geliyor — son eleman kullanıcının mesajı, slice(0,-1) ile çıkar.
