@@ -103,6 +103,14 @@ body {
     gap: 10px;
 }
 
+.admin-controls .btn-primary,
+.admin-controls .btn-danger {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+
 .data-filters {
     padding: 20px;
     display: grid;
