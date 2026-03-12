@@ -881,7 +881,7 @@
         <div class="admin-tab-content active" id="tab-skills">
             <div class="admin-controls">
                 <button class="btn-primary" id="export-skills-csv">
-                    <i class="fas fa-download"></i> Beceri Analizi CSV İndir
+                    <i class="fas fa-file-excel"></i> Beceri Analizi Excel İndir
                 </button>
                 <button class="btn-danger" id="clear-data">
                     <i class="fas fa-trash"></i> Tüm Verileri Temizle
@@ -893,7 +893,7 @@
         <div class="admin-tab-content" id="tab-records">
             <div class="admin-controls">
                 <button class="btn-primary" id="export-sessions-csv">
-                    <i class="fas fa-download"></i> Mesaj Kayıtları CSV İndir
+                    <i class="fas fa-file-excel"></i> Mesaj Kayıtları Excel İndir
                 </button>
             </div>
             <div id="session-records-display" class="data-table"></div>
@@ -1141,6 +1141,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <script src="config.js"></script>
     <script defer src="scenarios.js"></script>
     <script defer src="safetagram-ai.js"></script>

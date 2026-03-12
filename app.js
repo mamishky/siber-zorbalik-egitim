@@ -3083,6 +3083,17 @@ document.getElementById('filter-session').addEventListener('change', () => {
 });
 
 // Beceri Analizi CSV İndir (Madde 14)
+function downloadExcel(rows, filename) {
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    const colWidths = rows[0].map((_, ci) => ({
+        wch: Math.max(...rows.map(r => String(r[ci] ?? '').length), 10)
+    }));
+    ws['!cols'] = colWidths;
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Veri');
+    XLSX.writeFile(wb, filename);
+}
+
 const exportSkillsBtn = document.getElementById('export-skills-csv');
 if (exportSkillsBtn) {
     exportSkillsBtn.addEventListener('click', async () => {
@@ -3100,7 +3111,7 @@ if (exportSkillsBtn) {
                 return;
             }
             
-            let csv = '\ufeffOturum ID,Katılımcı,Yaş,Oturum Türü,Başlangıç,Bitiş,Süre (dk),Doğru %,İpucu,Sözel %,Dışlama %,Tehdit %,Karalama %,Kimlik Bürünme %\n';
+            const rows = [['Oturum ID', 'Katılımcı', 'Yaş', 'Oturum Türü', 'Başlangıç', 'Bitiş', 'Süre (dk)', 'Doğru %', 'İpucu Sayısı', 'Sözel %', 'Dışlama %', 'Tehdit %', 'Karalama %', 'Kimlik Bürünme %']];
             
             for (const doc of sessionsSnapshot.docs) {
                 const data = doc.data();
@@ -3129,22 +3140,26 @@ if (exportSkillsBtn) {
                 const pct = (s) => s.t > 0 ? ((s.c/s.t)*100).toFixed(1)+'%' : '-';
                 const correctPct = total > 0 ? ((correct/total)*100).toFixed(1)+'%' : '0%';
                 
-                csv += `${sessionId},${data.participantName || 'Bilinmiyor'},${data.participantAge || '-'},${SESSION_LABELS[data.sessionType] || 'Bilinmiyor'},${startedAt},${endedAt},${duration},${correctPct},${hints},${pct(bs.sozel)},${pct(bs.dislama)},${pct(bs.tehdit)},${pct(bs.iftira)},${pct(bs.kimlik)}\n`;
+                rows.push([
+                    sessionId,
+                    data.participantName || 'Bilinmiyor',
+                    data.participantAge || '-',
+                    SESSION_LABELS[data.sessionType] || 'Bilinmiyor',
+                    startedAt, endedAt, parseFloat(duration),
+                    correctPct, hints,
+                    pct(bs.sozel), pct(bs.dislama), pct(bs.tehdit), pct(bs.iftira), pct(bs.kimlik)
+                ]);
             }
             
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `safetagram_beceri_analizi_${new Date().toISOString().split('T')[0]}.csv`;
-            link.click();
+            downloadExcel(rows, `safetagram_beceri_analizi_${new Date().toISOString().split('T')[0]}.xlsx`);
         } catch (error) {
-            console.error('CSV export error:', error);
-            showNotification('Hata', 'CSV dışa aktarılırken hata oluştu!', 'error');
+            console.error('Excel export error:', error);
+            showNotification('Hata', 'Excel dışa aktarılırken hata oluştu!', 'error');
         }
     });
 }
 
-// Oturum Kayıtları CSV İndir (Madde 16)
+// Oturum Kayıtları Excel İndir
 const exportSessionsBtn = document.getElementById('export-sessions-csv');
 if (exportSessionsBtn) {
     exportSessionsBtn.addEventListener('click', async () => {
@@ -3161,8 +3176,8 @@ if (exportSessionsBtn) {
                 showNotification('Veri Yok', 'Dışa aktarılacak veri bulunmuyor!', 'info');
                 return;
             }
-    
-            let csv = '\ufeffOturum ID,Katılımcı,Oturum Türü,Mesaj Türü,Zorbalık Türü,Aksiyon,Tepki Süresi,Sonuç,İpucu,Tarih/Saat\n';
+
+            const rows = [['Oturum ID', 'Katılımcı', 'Oturum Türü', 'Mesaj Türü', 'Zorbalık Türü', 'Aksiyon', 'Tepki Süresi (sn)', 'Sonuç', 'İpucu', 'Tarih/Saat']];
             
             for (const sessionDoc of sessionsSnapshot.docs) {
                 const sessionData = sessionDoc.data();
@@ -3174,19 +3189,26 @@ if (exportSessionsBtn) {
                 
                 dataSnapshot.forEach(doc => {
                     const d = doc.data();
-                    const reactionLabel = d.reactionLabel || (d.reactionSec != null ? d.reactionSec + ' saniye' : '-');
-                    csv += `${sessionId},${d.participantName || 'Bilinmiyor'},${d.sessionLabel || 'Bilinmiyor'},${d.messageType || '-'},${d.bullyingLabel || 'Bilinmiyor'},${d.action || '-'},${reactionLabel},${d.correct ? '+' : '-'},${d.hintUsed ? 'Evet' : 'Hayır'},${new Date(d.timestamp).toLocaleString('tr-TR')}\n`;
+                    const reactionSec = d.reactionSec != null ? d.reactionSec : '-';
+                    rows.push([
+                        sessionId,
+                        d.participantName || 'Bilinmiyor',
+                        d.sessionLabel || 'Bilinmiyor',
+                        d.messageType || '-',
+                        d.bullyingLabel || 'Bilinmiyor',
+                        d.action || '-',
+                        reactionSec,
+                        d.correct ? 'Doğru' : 'Yanlış',
+                        d.hintUsed ? 'Evet' : 'Hayır',
+                        new Date(d.timestamp).toLocaleString('tr-TR')
+                    ]);
                 });
             }
             
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `safetagram_oturum_kayitlari_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
+            downloadExcel(rows, `safetagram_oturum_kayitlari_${new Date().toISOString().split('T')[0]}.xlsx`);
         } catch (error) {
-            console.error('CSV export error:', error);
-            showNotification('Hata', 'CSV dışa aktarılırken hata oluştu!', 'error');
+            console.error('Excel export error:', error);
+            showNotification('Hata', 'Excel dışa aktarılırken hata oluştu!', 'error');
         }
     });
 }
