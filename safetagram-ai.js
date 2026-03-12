@@ -6,7 +6,7 @@
 
 // config.js yüklüyse oradan, yoksa buraya yazılı anahtar kullanılır
 const OR_API_KEY = (typeof window !== 'undefined' && window.OPENROUTER_API_KEY)
-    || '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';
+    || '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';
 const OR_MODEL   = 'google/gemma-3-12b-it:free';
 const OR_URL     = 'https://openrouter.ai/api/v1/chat/completions';
 const OR_TIMEOUT_MS = 25000; // 25 saniye — Gemma bazen yavaş
