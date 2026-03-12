@@ -4,8 +4,9 @@
 // Zorbalık senaryolarına DOKUNMA — onlar scenarios.js'de.
 // ============================================================
 
-// API anahtarı config.js'den okunur (gitignored) — sabit yazmayın
-const OR_API_KEY = (typeof window !== 'undefined' && window.OPENROUTER_API_KEY) || '';
+// config.js yüklüyse oradan, yoksa buraya yazılı anahtar kullanılır
+const OR_API_KEY = (typeof window !== 'undefined' && window.OPENROUTER_API_KEY)
+    || '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';
 const OR_MODEL   = 'google/gemma-3-12b-it:free';
 const OR_URL     = 'https://openrouter.ai/api/v1/chat/completions';
 const OR_TIMEOUT_MS = 25000; // 25 saniye — Gemma bazen yavaş
