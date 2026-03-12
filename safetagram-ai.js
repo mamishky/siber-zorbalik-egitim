@@ -8,7 +8,7 @@
 const OR_API_KEY = (typeof window !== 'undefined' && window.OPENROUTER_API_KEY) || '';
 const OR_MODEL   = 'google/gemma-3-12b-it:free';
 const OR_URL     = 'https://openrouter.ai/api/v1/chat/completions';
-const OR_TIMEOUT_MS = 10000; // 10 saniye — aşılırsa fallback'e geç
+const OR_TIMEOUT_MS = 25000; // 25 saniye — Gemma bazen yavaş
 
 // ── System prompt — ilk normal mesajlar için ─────────────────
 const NORMAL_MESAJ_SYSTEM_PROMPT = `Sen "Safetagram" adlı bir Instagram benzeri eğitim platformunda mesaj üreten bir yardımcısın.
@@ -131,7 +131,7 @@ async function orIstekAt(messages, maxTokens, deneme = 0) {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${OR_API_KEY}`,
-                'HTTP-Referer': 'http://localhost:8000',
+                'HTTP-Referer': (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:8000'),
                 'X-Title': 'Safetagram'
             },
             body: JSON.stringify({

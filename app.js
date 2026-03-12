@@ -209,7 +209,7 @@ async function startDevSimulation() {
         startTime: new Date(),
         userId: currentUser.uid,
         hintEnabled: true,
-        skills: { navigation: true, reading: false, replying: false, reporting: false, complaintType: false, blocking: false, informAdult: false }
+        skills: { navigation: true, reading: false, replying: false, reporting: false, complaintType: false, blocking: false }
     });
     try {
         await db.collection('users').doc(currentUser.uid).collection('sessions').doc(sessionId).set({
@@ -844,8 +844,7 @@ function getEmptySession(overrides = {}) {
             replying: false,
             reporting: false,
             complaintType: false,
-            blocking: false,
-            informAdult: false
+            blocking: false
         },
         stats: { correct: 0, wrong: 0, hints: 0 },
         currentMessageStartTime: null,
@@ -859,7 +858,6 @@ function getEmptySession(overrides = {}) {
         selectedComplaintReason: null,
         conversationHistory: {},
         hintEnabled: true,
-        aiEnabled: false,
         deliveredMessages: [],
         perMessageResults: [],
         skillSteps: {
@@ -868,8 +866,7 @@ function getEmptySession(overrides = {}) {
             replying: false,
             reporting: false,
             complaintType: false,
-            blocking: false,
-            informAdult: false
+            blocking: false
         },
         ...overrides
     };
@@ -2364,12 +2361,6 @@ document.getElementById('report-btn').addEventListener('click', () => {
     showComplaintReasonDialog();
 });
 
-// Yetişkine bildir butonu - Şimdilik kullanılmıyor ama skill tracking için hazır
-function informAdult() {
-    currentSession.skills.informAdult = true;
-    showNotification('Bildirildi', 'Bir yetişkine bildirildi olarak işaretlendi.', 'success');
-}
-
 // Engelle butonu
 document.getElementById('block-btn').addEventListener('click', () => {
     if (currentSession.hintTimeout) {
@@ -2561,7 +2552,7 @@ document.getElementById('submit-complaint').addEventListener('click', () => {
 
                 currentSession.reportClicked = true;
                 currentSession.skills.reporting = true;
-                currentSession.skills.complaintType = false; // Yanlış tür seçildi
+                // complaintType bir kez kazanıldıysa (önceki senaryoda doğru) sıfırlanmaz
 
                 document.getElementById('report-btn').disabled = true;
                 document.getElementById('report-btn').classList.remove('blink');
@@ -2703,13 +2694,7 @@ function showSummary() {
     
     document.getElementById('skill-blocking').textContent = currentSession.skills.blocking ? '✓' : '✗';
     document.getElementById('skill-blocking').className = currentSession.skills.blocking ? 'skill-positive' : 'skill-negative';
-    
-    const informAdultEl = document.getElementById('skill-inform-adult');
-    if (informAdultEl) {
-        informAdultEl.textContent = currentSession.skills.informAdult ? '✓' : '✗';
-        informAdultEl.className = currentSession.skills.informAdult ? 'skill-positive' : 'skill-negative';
-    }
-    
+
     showScreen('summary-screen');
 }
 
