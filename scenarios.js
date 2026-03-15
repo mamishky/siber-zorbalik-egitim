@@ -240,16 +240,39 @@ function saveUsedScenarios(participantName, usedData) {
 }
 
 // Rastgele senaryo havuzundan kuyruk oluştur
-// Her tür için 1 senaryo seçer → toplamda 5 zorbalık mesajı (5 tür × 1)
-// Normal mesajlar safetagram-ai.js tarafından ayrıca eklenir (5 adet)
-// Toplam: 5 zorbalık + 5 normal = 10 mesaj, tamamı rastgele karışık
+// 'all' modunda: 5 türden 3 rastgele tür seçilir, her türden 1 senaryo → 3 zorbalık mesajı
+// Normal mesajlar safetagram-ai.js tarafından ayrıca eklenir (2 adet)
+// Toplam: 3 zorbalık + 2 normal = 5 mesaj, tamamı rastgele karışık
+// Önceki oturumla aynı 3-tür kombinasyonu tekrarlanmaz (localStorage takibi)
 function buildMessageQueue(participantName, bullyingType) {
     const used = getUsedScenarios(participantName);
     const queue = [];
-    const types = bullyingType === 'all' ? ['sozel', 'dislama', 'tehdit', 'iftira', 'kimlik'] : [bullyingType];
-    const scenariosPerType = bullyingType === 'all' ? 1 : 5;
 
-    types.forEach(type => {
+    let selectedTypes;
+    if (bullyingType === 'all') {
+        const CYBER_TYPES = ['sozel', 'dislama', 'tehdit', 'iftira', 'kimlik'];
+        const lastTypes = used._lastSessionTypes || [];
+
+        // İlk karıştırma
+        let shuffled = [...CYBER_TYPES].sort(() => Math.random() - 0.5);
+        let candidate = shuffled.slice(0, 3);
+
+        // Önceki oturumla tam aynıysa tekrar karıştır (en fazla 10 deneme)
+        for (let attempt = 0; attempt < 10; attempt++) {
+            const sameAsLast = lastTypes.length === 3 &&
+                [...candidate].sort().join(',') === [...lastTypes].sort().join(',');
+            if (!sameAsLast) break;
+            shuffled = [...CYBER_TYPES].sort(() => Math.random() - 0.5);
+            candidate = shuffled.slice(0, 3);
+        }
+
+        selectedTypes = candidate;
+        used._lastSessionTypes = selectedTypes;
+    } else {
+        selectedTypes = [bullyingType];
+    }
+
+    selectedTypes.forEach(type => {
         const pool = MESSAGE_POOL[type] || [];
         const usedIndexes = used[type] || [];
 
@@ -257,30 +280,27 @@ function buildMessageQueue(participantName, bullyingType) {
         let available = pool.map((_, i) => i).filter(i => !usedIndexes.includes(i));
 
         // Hepsi kullanıldıysa sıfırla
-        if (available.length < scenariosPerType) {
+        if (available.length < 1) {
             used[type] = [];
             available = pool.map((_, i) => i);
         }
 
-        // Karıştır ve seç
-        const shuffled = available.sort(() => Math.random() - 0.5);
-        const selected = shuffled.slice(0, Math.min(scenariosPerType, shuffled.length));
+        // Karıştır ve 1 tane seç
+        const shuffledPool = available.sort(() => Math.random() - 0.5);
+        const idx = shuffledPool[0];
 
-        selected.forEach(idx => {
-            const scenario = {
-                ...pool[idx],
-                messages: pool[idx].messages ? [...pool[idx].messages] : undefined
-            };
-            // Rastgele zorba kullanıcı adı ata
-            const bullyName = BULLY_USERNAMES[Math.floor(Math.random() * BULLY_USERNAMES.length)]
-                + '_' + Math.floor(Math.random() * 900 + 100);
-            scenario.sender = bullyName;
-            scenario.avatar = bullyName; // Avatar seed olarak da kullanılır
-            // Zorbalık türünü senaryoya ekle (saveMessageData'da kullanılır)
-            scenario._bullyingType = type;
-            queue.push(scenario);
-            used[type].push(idx);
-        });
+        const scenario = {
+            ...pool[idx],
+            messages: pool[idx].messages ? [...pool[idx].messages] : undefined
+        };
+        // Rastgele zorba kullanıcı adı ata
+        const bullyName = BULLY_USERNAMES[Math.floor(Math.random() * BULLY_USERNAMES.length)]
+            + '_' + Math.floor(Math.random() * 900 + 100);
+        scenario.sender = bullyName;
+        scenario.avatar = bullyName;
+        scenario._bullyingType = type;
+        queue.push(scenario);
+        used[type].push(idx);
     });
 
     // Kuyruğu karıştır (farklı türler iç içe gelsin)

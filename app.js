@@ -223,10 +223,10 @@ async function startDevSimulation() {
     } catch (e) {
         console.warn('Dev mod: Firestore oturum kaydı atlandı', e);
     }
-    // Dev modu kuyruk: zorbalık + normal AI mesajları karıştır
+    // Dev modu kuyruk: 3 zorbalık + 2 normal AI mesajı karıştır
     const _devBullyQueue = (typeof buildMessageQueue === 'function') ? buildMessageQueue('Test', 'all') : [];
     if (typeof normalMesajlariKaristir === 'function') {
-        currentSession.messageQueue = await normalMesajlariKaristir(_devBullyQueue, 5);
+        currentSession.messageQueue = await normalMesajlariKaristir(_devBullyQueue, 2);
     } else {
         currentSession.messageQueue = _devBullyQueue;
     }
@@ -799,9 +799,9 @@ function initSessionFormHandler() {
             currentSession.currentBullyingType || 'all'
         );
     }
-    // Normal (zorbalık içermeyen) AI mesajlarını karıştır
+    // Normal (zorbalık içermeyen) AI mesajlarını karıştır (2 adet)
     if (typeof normalMesajlariKaristir === 'function') {
-        currentSession.messageQueue = await normalMesajlariKaristir(_bullyQueue, 5);
+        currentSession.messageQueue = await normalMesajlariKaristir(_bullyQueue, 2);
     } else {
         currentSession.messageQueue = _bullyQueue;
     }
