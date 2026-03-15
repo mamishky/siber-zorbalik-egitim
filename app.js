@@ -177,11 +177,11 @@ const SESSION_LABELS = {
 };
 
 const BULLYING_TYPE_LABELS = {
-    'sozel':   'Sözel/Psikolojik Saldırı',
-    'dislama': 'Dışlama',
-    'tehdit':  'Tehdit/Şantaj',
-    'iftira':  'Karalama/Aşağılama',
-    'kimlik':  'Kimliğe Bürünme'
+    'sozel':   'Kötü Söz',
+    'dislama': 'Yalnız Bırakma',
+    'tehdit':  'Tehdit',
+    'iftira':  'Yalan Yaymak',
+    'kimlik':  'Sahte Hesap'
 };
 
 // Current user state
@@ -2485,7 +2485,9 @@ function showComplaintReasonDialog() {
         
         optionDiv.innerHTML = `
             <input type="radio" name="complaint-reason" id="reason-${reason.id}" value="${reason.id}">
-            <label for="reason-${reason.id}">${reason.label}</label>
+            <label for="reason-${reason.id}">
+                ${reason.icon ? `<i class="${reason.icon}" style="margin-right:7px;opacity:0.85"></i>` : ''}${reason.label}
+            </label>
         `;
         
         optionDiv.addEventListener('click', function() {
@@ -2957,8 +2959,8 @@ function displaySkillsAnalysis(data) {
         html += `<h4 style="padding:12px 20px 4px;color:#6c63ff;">📈 Oturumlar Arası Gelişim</h4>
         <table><thead><tr>
             <th>Öğrenci</th><th>Oturum</th><th>Tür</th>
-            <th>Doğru %</th><th>İpucu</th><th>Sözel</th><th>Dışlama</th>
-            <th>Tehdit</th><th>Karalama</th><th>Kimlik</th><th>Süre (dk)</th>
+            <th>Doğru %</th><th>İpucu</th><th>💬 Kötü Söz</th><th>👤 Yalnız Bırakma</th>
+            <th>⚠️ Tehdit</th><th>📢 Yalan Yaymak</th><th>🎭 Sahte Hesap</th><th>Süre (dk)</th>
         </tr></thead><tbody>`;
 
         multiSessions.forEach(sessions => {
@@ -2987,8 +2989,8 @@ function displaySkillsAnalysis(data) {
         <th>Katılımcı</th><th>Yaş</th><th>Oturum Türü</th>
         <th>Başlangıç</th><th>Süre (dk)</th>
         <th>Doğru %</th><th>İpucu</th>
-        <th>Sözel ✓%</th><th>Dışlama ✓%</th>
-        <th>Tehdit ✓%</th><th>Karalama ✓%</th><th>Kimlik ✓%</th>
+        <th>💬 Kötü Söz ✓%</th><th>👤 Yalnız Bırakma ✓%</th>
+        <th>⚠️ Tehdit ✓%</th><th>📢 Yalan Yaymak ✓%</th><th>🎭 Sahte Hesap ✓%</th>
     </tr></thead><tbody>`;
 
     data.forEach(item => {
@@ -3111,7 +3113,7 @@ if (exportSkillsBtn) {
                 return;
             }
             
-            const rows = [['Oturum ID', 'Katılımcı', 'Yaş', 'Oturum Türü', 'Başlangıç', 'Bitiş', 'Süre (dk)', 'Doğru %', 'İpucu Sayısı', 'Sözel %', 'Dışlama %', 'Tehdit %', 'Karalama %', 'Kimlik Bürünme %']];
+            const rows = [['Oturum ID', 'Katılımcı', 'Yaş', 'Oturum Türü', 'Başlangıç', 'Bitiş', 'Süre (dk)', 'Doğru %', 'İpucu Sayısı', 'Kötü Söz %', 'Yalnız Bırakma %', 'Tehdit %', 'Yalan Yaymak %', 'Sahte Hesap %']];
             
             for (const doc of sessionsSnapshot.docs) {
                 const data = doc.data();

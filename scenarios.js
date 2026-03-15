@@ -28,11 +28,11 @@ const BULLYING_TYPES = ['sozel', 'dislama', 'tehdit', 'iftira', 'kimlik'];
 
 // Siber zorbalık türleri ve şikayet sebepleri
 const COMPLAINT_REASONS = [
-    { id: 'sozel', label: 'Sözel/Psikolojik Saldırı' },
-    { id: 'dislama', label: 'Dışlama' },
-    { id: 'tehdit', label: 'Tehdit/Şantaj' },
-    { id: 'iftira', label: 'Karalama/Aşağılama' },
-    { id: 'kimlik', label: 'Kimliğe Bürünme/Taklit' }
+    { id: 'sozel',   label: 'Kötü Söz',        icon: 'fas fa-comment-slash' },
+    { id: 'dislama', label: 'Yalnız Bırakma',   icon: 'fas fa-user-slash'   },
+    { id: 'tehdit',  label: 'Tehdit',            icon: 'fas fa-exclamation-triangle' },
+    { id: 'iftira',  label: 'Yalan Yaymak',      icon: 'fas fa-bullhorn'     },
+    { id: 'kimlik',  label: 'Sahte Hesap',       icon: 'fas fa-user-secret'  }
 ];
 
 // 100 POST - Gerçek Ünlüler ve Influencerlar ile Güncel İçerikler
