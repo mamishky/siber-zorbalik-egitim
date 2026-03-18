@@ -2563,9 +2563,10 @@ document.getElementById('submit-complaint').addEventListener('click', () => {
             
             const reactionTime = (Date.now() - currentSession.currentMessageStartTime) / 1000;
             saveMessageData('cyberbullying', 'report', reactionTime, hintUsed, true);
-            
-            currentSession.stats.correct++;
-            
+
+            // correct++ burada YOK — engelle adımında (block) sayılır
+            // Böylece her mesaj için tek bir doğru cevap kaydedilir
+
             // Engelle butonunu yanıp söndür
             showNextStepHint('block');
         }, 500);
