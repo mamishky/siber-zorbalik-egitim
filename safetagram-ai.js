@@ -6,13 +6,12 @@
 
 // API anahtarı Cloudflare Worker'da tutuluyor — burada anahtar yok
 const OR_API_KEY = ''; // Artık kullanılmıyor, Worker hallediyor
-// openrouter/free: müsait ücretsiz modellerden otomatik seçim (Gemma rate-limit olunca başka model deneyebilir)
-// Yedek modeller 429 alındığında sırayla denenir
-const OR_MODEL_PRIMARY = 'openrouter/free';
+// Google modelleri sık 429 veriyor — Meta/Mistral kullan (farklı sağlayıcı kotası)
+const OR_MODEL_PRIMARY = 'meta-llama/llama-3.3-70b-instruct:free';
 const OR_MODEL_FALLBACKS = [
-    'google/gemma-3-27b-it:free',
-    'meta-llama/llama-3.3-70b-instruct:free',
-    'mistralai/mistral-small-3.1-24b-instruct:free'
+    'mistralai/mistral-small-3.1-24b-instruct:free',
+    'nvidia/nemotron-nano-12b-v2:free',
+    'stepfun/step-3.5-flash:free'
 ];
 const OR_URL     = 'https://safetagramai.m-farukerdogan.workers.dev';
 const OR_TIMEOUT_MS = 25000;
