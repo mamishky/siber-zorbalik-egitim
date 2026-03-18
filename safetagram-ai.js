@@ -124,8 +124,17 @@ function baglamliYedekCevap(kullaniciMesaji, sohbetGecmisi) {
     return kisaYanitlar[Math.floor(Math.random() * kisaYanitlar.length)];
 }
 
-// ── OpenRouter API isteği (timeout + 429 retry + fallback model) ─
-async function orIstekAt(messages, maxTokens, modelIndex = 0, sameModelRetry = 0) {
+// Son 429 zamanı — kısa sürede tekrar denemeyi atla, hemen yerel yedeğe düş
+let _last429At = 0;
+const _429_COOLDOWN_MS = 30000; // 30 sn 429 sonrası API atlanır, yerel mesaj kullanılır
+
+// ── OpenRouter API isteği (timeout + 429'da hemen yedek modele geç) ─
+async function orIstekAt(messages, maxTokens, modelIndex = 0) {
+    // Son 1 dakikada 429 alındıysa API'yi atla, çağıran yedek kullanacak
+    if (Date.now() - _last429At < _429_COOLDOWN_MS && modelIndex === 0) {
+        throw new Error('OpenRouter HTTP 429 (cooldown)');
+    }
+
     const models = [OR_MODEL_PRIMARY, ...OR_MODEL_FALLBACKS];
     const model = models[Math.min(modelIndex, models.length - 1)];
 
@@ -149,18 +158,16 @@ async function orIstekAt(messages, maxTokens, modelIndex = 0, sameModelRetry = 0
         clearTimeout(timer);
     }
 
-    // 429 rate limit: önce aynı modelle 1 kez tekrar dene, sonra yedek modele geç
+    // 429: Aynı modelle bekleyip tekrar deneme — hemen yedek modele geç
     if (res.status === 429) {
-        if (modelIndex === 0 && sameModelRetry < 1) {
-            console.warn('[SafetagAI] 429 rate limit — 5sn sonra tekrar deneniyor...');
-            await new Promise(r => setTimeout(r, 5000));
-            return orIstekAt(messages, maxTokens, 0, 1);
-        }
+        _last429At = Date.now();
         if (modelIndex < models.length - 1) {
             console.warn('[SafetagAI] 429 — yedek modele geçiliyor:', models[modelIndex + 1]);
-            await new Promise(r => setTimeout(r, 2000));
-            return orIstekAt(messages, maxTokens, modelIndex + 1, 0);
+            await new Promise(r => setTimeout(r, 1000)); // 1sn kısa bekleme
+            return orIstekAt(messages, maxTokens, modelIndex + 1);
         }
+        console.warn('[SafetagAI] Tüm modeller 429 — yerel yedek kullanılacak');
+        throw new Error('OpenRouter HTTP 429');
     }
 
     if (!res.ok) {
