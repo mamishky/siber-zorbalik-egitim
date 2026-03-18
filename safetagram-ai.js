@@ -6,7 +6,14 @@
 
 // API anahtarı Cloudflare Worker'da tutuluyor — burada anahtar yok
 const OR_API_KEY = ''; // Artık kullanılmıyor, Worker hallediyor
-const OR_MODEL   = 'google/gemma-3-12b-it:free';
+// openrouter/free: müsait ücretsiz modellerden otomatik seçim (Gemma rate-limit olunca başka model deneyebilir)
+// Yedek modeller 429 alındığında sırayla denenir
+const OR_MODEL_PRIMARY = 'openrouter/free';
+const OR_MODEL_FALLBACKS = [
+    'google/gemma-3-27b-it:free',
+    'meta-llama/llama-3.3-70b-instruct:free',
+    'mistralai/mistral-small-3.1-24b-instruct:free'
+];
 const OR_URL     = 'https://safetagramai.m-farukerdogan.workers.dev';
 const OR_TIMEOUT_MS = 25000;
 
@@ -118,8 +125,11 @@ function baglamliYedekCevap(kullaniciMesaji, sohbetGecmisi) {
     return kisaYanitlar[Math.floor(Math.random() * kisaYanitlar.length)];
 }
 
-// ── OpenRouter API isteği (timeout + retry destekli) ─────────
-async function orIstekAt(messages, maxTokens, deneme = 0) {
+// ── OpenRouter API isteği (timeout + 429 retry + fallback model) ─
+async function orIstekAt(messages, maxTokens, modelIndex = 0, sameModelRetry = 0) {
+    const models = [OR_MODEL_PRIMARY, ...OR_MODEL_FALLBACKS];
+    const model = models[Math.min(modelIndex, models.length - 1)];
+
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), OR_TIMEOUT_MS);
 
@@ -128,11 +138,9 @@ async function orIstekAt(messages, maxTokens, deneme = 0) {
         res = await fetch(OR_URL, {
             method: 'POST',
             signal: controller.signal,
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: OR_MODEL,
+                model,
                 messages,
                 max_tokens: maxTokens,
                 temperature: 0.8
@@ -142,10 +150,18 @@ async function orIstekAt(messages, maxTokens, deneme = 0) {
         clearTimeout(timer);
     }
 
-    if (res.status === 429 && deneme < 1) {
-        console.warn('[SafetagAI] 429 — 3sn sonra tekrar deneniyor...');
-        await new Promise(r => setTimeout(r, 3000));
-        return orIstekAt(messages, maxTokens, deneme + 1);
+    // 429 rate limit: önce aynı modelle 1 kez tekrar dene, sonra yedek modele geç
+    if (res.status === 429) {
+        if (modelIndex === 0 && sameModelRetry < 1) {
+            console.warn('[SafetagAI] 429 rate limit — 5sn sonra tekrar deneniyor...');
+            await new Promise(r => setTimeout(r, 5000));
+            return orIstekAt(messages, maxTokens, 0, 1);
+        }
+        if (modelIndex < models.length - 1) {
+            console.warn('[SafetagAI] 429 — yedek modele geçiliyor:', models[modelIndex + 1]);
+            await new Promise(r => setTimeout(r, 2000));
+            return orIstekAt(messages, maxTokens, modelIndex + 1, 0);
+        }
     }
 
     if (!res.ok) {
@@ -155,7 +171,7 @@ async function orIstekAt(messages, maxTokens, deneme = 0) {
     }
 
     const data = await res.json();
-    console.log('[SafetagAI] OpenRouter yanıtı OK, model:', data?.model);
+    console.log('[SafetagAI] OpenRouter OK, model:', data?.model || model);
     return data;
 }
 
@@ -189,7 +205,7 @@ async function normalMesajlarUret(adet) {
 // ── OpenRouter ile sohbet yanıtı üret ───────────────────────
 async function geminiCevapUret(kullaniciMesaji, sohbetGecmisi, participantAge) {
     try {
-        console.log('[SafetagAI] Worker üzerinden istek atılıyor, model:', OR_MODEL);
+        console.log('[SafetagAI] Worker üzerinden istek atılıyor, model:', OR_MODEL_PRIMARY);
 
         // Sohbet geçmişini OpenAI formatına çevir (son 6 mesaj).
         // sohbetGecmisi DOM'dan geliyor — son eleman kullanıcının mesajı, slice(0,-1) ile çıkar.
