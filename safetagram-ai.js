@@ -1,20 +1,19 @@
 // ============================================================
-// Safetagram AI — OpenRouter API ile normal mesaj üretimi
+// Safetagram AI — Groq API ile normal mesaj üretimi
 // Sadece zorbalık İÇERMEYEN mesajlar bu dosya üzerinden gelir.
 // Zorbalık senaryolarına DOKUNMA — onlar scenarios.js'de.
 // ============================================================
 
 // API anahtarı Cloudflare Worker'da tutuluyor — burada anahtar yok
 const OR_API_KEY = ''; // Artık kullanılmıyor, Worker hallediyor
-// Google modelleri sık 429 veriyor — Meta/Mistral kullan (farklı sağlayıcı kotası)
-const OR_MODEL_PRIMARY = 'meta-llama/llama-3.3-70b-instruct:free';
+// Groq modelleri — ücretsiz, 30 istek/dakika, çok hızlı yanıt süresi
+const OR_MODEL_PRIMARY = 'llama-3.3-70b-versatile';
 const OR_MODEL_FALLBACKS = [
-    'mistralai/mistral-small-3.1-24b-instruct:free',
-    'nvidia/nemotron-nano-12b-v2:free',
-    'stepfun/step-3.5-flash:free'
+    'llama3-70b-8192',
+    'llama3-8b-8192',
 ];
 const OR_URL     = 'https://safetagramai.m-farukerdogan.workers.dev';
-const OR_TIMEOUT_MS = 25000;
+const OR_TIMEOUT_MS = 8000;
 
 // ── System prompt — ilk normal mesajlar için ─────────────────
 const NORMAL_MESAJ_SYSTEM_PROMPT = `Sen "Safetagram" adlı bir Instagram benzeri eğitim platformunda mesaj üreten bir yardımcısın.
@@ -126,7 +125,7 @@ function baglamliYedekCevap(kullaniciMesaji, sohbetGecmisi) {
 
 // Son 429 zamanı — kısa sürede tekrar denemeyi atla, hemen yerel yedeğe düş
 let _last429At = 0;
-const _429_COOLDOWN_MS = 30000; // 30 sn 429 sonrası API atlanır, yerel mesaj kullanılır
+const _429_COOLDOWN_MS = 300000; // 5 dk 429 sonrası API atlanır, yerel mesaj kullanılır
 
 // ── OpenRouter API isteği (timeout + 429'da hemen yedek modele geç) ─
 async function orIstekAt(messages, maxTokens, modelIndex = 0) {
@@ -271,16 +270,11 @@ function normalSenaryoyaDonustur(mesajObj) {
     };
 }
 
-// ── Kuyruğa normal mesajları karıştır (async) ────────────────
-async function normalMesajlariKaristir(queue, adet) {
-    let mesajlar;
-    try {
-        mesajlar = await normalMesajlarUret(adet);
-    } catch (err) {
-        console.warn('[SafetagAI] API ulaşılamadı, yedek mesajlar kullanılıyor:', err.message);
-        mesajlar = yedekMesajlar(adet);
-    }
-
+// ── Kuyruğa normal mesajları karıştır (sync) ─────────────────
+// Simülasyon açılışını bloke etmemek için API çağrısı yapılmaz,
+// yedek havuzdan anında seçilir.
+function normalMesajlariKaristir(queue, adet) {
+    const mesajlar = yedekMesajlar(adet);
     const senaryolar = mesajlar.map(normalSenaryoyaDonustur);
     const karisik = [...queue];
     senaryolar.forEach(s => {

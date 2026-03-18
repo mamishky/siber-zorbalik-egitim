@@ -226,7 +226,7 @@ async function startDevSimulation() {
     // Dev modu kuyruk: 3 zorbalık + 2 normal AI mesajı karıştır
     const _devBullyQueue = (typeof buildMessageQueue === 'function') ? buildMessageQueue('Test', 'all') : [];
     if (typeof normalMesajlariKaristir === 'function') {
-        currentSession.messageQueue = await normalMesajlariKaristir(_devBullyQueue, 2);
+        currentSession.messageQueue = normalMesajlariKaristir(_devBullyQueue, 2);
     } else {
         currentSession.messageQueue = _devBullyQueue;
     }
@@ -801,7 +801,7 @@ function initSessionFormHandler() {
     }
     // Normal (zorbalık içermeyen) AI mesajlarını karıştır (2 adet)
     if (typeof normalMesajlariKaristir === 'function') {
-        currentSession.messageQueue = await normalMesajlariKaristir(_bullyQueue, 2);
+        currentSession.messageQueue = normalMesajlariKaristir(_bullyQueue, 2);
     } else {
         currentSession.messageQueue = _bullyQueue;
     }
