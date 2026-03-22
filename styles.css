@@ -224,6 +224,98 @@ body {
     display: block;
 }
 
+/* Admin: oturum kartı — mesaj tablosu + beceri tablosu yan yana */
+.admin-session-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin: 16px 20px;
+    overflow: hidden;
+}
+
+.admin-session-header {
+    padding: 14px 16px;
+    background: linear-gradient(135deg, #f5f3ff 0%, #eef2ff 100%);
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.admin-session-meta {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.admin-score-highlight {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 4px 12px;
+    background: #fff;
+    border-radius: 8px;
+    font-weight: 700;
+    color: #0f172a;
+    border: 1px solid #c7d2fe;
+}
+
+.admin-session-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 16px;
+    align-items: start;
+}
+
+@media (max-width: 960px) {
+    .admin-session-split {
+        grid-template-columns: 1fr;
+    }
+}
+
+.admin-session-col h5 {
+    margin: 0 0 10px 0;
+    font-size: 0.9rem;
+    color: #4338ca;
+}
+
+.admin-nested-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+
+.admin-nested-table th,
+.admin-nested-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f1f5f9;
+    text-align: left;
+}
+
+.admin-nested-table th {
+    background: #f1f5f9;
+    font-weight: 600;
+    color: #334155;
+}
+
+.admin-skills-mini td:last-child {
+    text-align: center;
+    width: 48px;
+}
+
+.admin-skills-note {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin: 8px 0 0 0;
+    line-height: 1.35;
+}
+
+.summary-score-line {
+    min-height: 1.2em;
+}
+
 .data-table {
     padding: 20px;
     overflow-x: auto;

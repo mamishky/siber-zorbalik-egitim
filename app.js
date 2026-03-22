@@ -184,6 +184,23 @@ const BULLYING_TYPE_LABELS = {
     'kimlik':  'Sahte Hesap'
 };
 
+// 6 beceri adı (özet + admin tabloları)
+const SKILL_LABELS = [
+    { key: 'navigation',    label: '1. Sosyal medya uygulamasında gezinme' },
+    { key: 'reading',       label: '2. Gelen mesajı okuma' },
+    { key: 'replying',      label: '3. Siber zorbalık içermeyen mesajı cevaplama' },
+    { key: 'reporting',     label: '4. Siber zorbalık içeren mesajı şikâyet etme' },
+    { key: 'complaintType', label: '5. Siber zorbalık şikayet türünü seçme' },
+    { key: 'blocking',      label: '6. Siber zorbalık yapan kişiyi engelleme' }
+];
+
+function formatMesajSkoru(correct, wrong, total) {
+    const t = total != null ? total : (correct + wrong);
+    if (t === 0) return '0 mesaj';
+    if (wrong === 0) return `${correct} doğru (${t} mesaj)`;
+    return `${correct} doğru / ${wrong} yanlış (${t} mesaj)`;
+}
+
 // Current user state
 let currentUser = null;
 
@@ -2708,9 +2725,18 @@ function saveMessageData(messageType, action, reactionTime, hintUsed, correct) {
 
 // Özet ekranını göster
 function showSummary() {
-    document.getElementById('correct-count').textContent = currentSession.stats.correct;
-    document.getElementById('wrong-count').textContent = currentSession.stats.wrong;
+    const c = currentSession.stats.correct;
+    const w = currentSession.stats.wrong;
+    const totalAns = c + w;
+    document.getElementById('correct-count').textContent = c;
+    document.getElementById('wrong-count').textContent = w;
     document.getElementById('hint-count').textContent = currentSession.stats.hints;
+    const scoreLine = document.getElementById('summary-score-line');
+    if (scoreLine) {
+        scoreLine.textContent = totalAns > 0
+            ? formatMesajSkoru(c, w, totalAns)
+            : 'Henüz kayıt yok';
+    }
     
     // Becerileri göster
     document.getElementById('skill-navigation').textContent = currentSession.skills.navigation ? '✓' : '✗';
@@ -2752,7 +2778,20 @@ document.getElementById('finish-session').addEventListener('click', async () => 
                     .update({
                         endedAt: firebase.firestore.FieldValue.serverTimestamp(),
                         totalDurationSec: currentSession.totalDurationSec,
-                        status: 'completed'
+                        status: 'completed',
+                        skillsSnapshot: {
+                            navigation: !!currentSession.skills.navigation,
+                            reading: !!currentSession.skills.reading,
+                            replying: !!currentSession.skills.replying,
+                            reporting: !!currentSession.skills.reporting,
+                            complaintType: !!currentSession.skills.complaintType,
+                            blocking: !!currentSession.skills.blocking
+                        },
+                        statsSnapshot: {
+                            correct: currentSession.stats.correct,
+                            wrong: currentSession.stats.wrong,
+                            hints: currentSession.stats.hints
+                        }
                     });
             } else {
                 console.warn('Oturum bitişi kaydedilirken currentUser bulunamadı.');
@@ -2835,6 +2874,7 @@ async function loadAdminData() {
         
         const allSkillsData = [];
         const allSessionData = [];
+        const messagesBySession = {};
         const pct = (s) => s.t > 0 ? ((s.c / s.t) * 100).toFixed(0) + '%' : '-';
 
         // Filtrele
@@ -2875,14 +2915,17 @@ async function loadAdminData() {
                 correctCount: 0, wrongCount: 0,
                 correctPercent: '0%', wrongPercent: '0%',
                 hintCount: 0,
-                bullyStats: { sozel: {c:0,t:0}, dislama: {c:0,t:0}, tehdit: {c:0,t:0}, iftira: {c:0,t:0}, kimlik: {c:0,t:0} }
+                bullyStats: { sozel: {c:0,t:0}, dislama: {c:0,t:0}, tehdit: {c:0,t:0}, iftira: {c:0,t:0}, kimlik: {c:0,t:0} },
+                skillsSnapshot: sessionData.skillsSnapshot || null,
+                statsSnapshot: sessionData.statsSnapshot || null
             };
 
             let correctCount = 0, wrongCount = 0, hintCount = 0;
 
+            const sessionMsgs = [];
             dataSnapshot.forEach(doc => {
                 const data = doc.data();
-                allSessionData.push({
+                const row = {
                     sessionId,
                     participantName: data.participantName || 'Bilinmiyor',
                     sessionLabel: data.sessionLabel || 'Bilinmiyor',
@@ -2894,7 +2937,9 @@ async function loadAdminData() {
                     correctBool: data.correct,
                     hintUsed: data.hintUsed ? 'Evet' : 'Hayır',
                     timestamp: data.timestamp || '-'
-                });
+                };
+                allSessionData.push(row);
+                sessionMsgs.push(row);
 
                 if (data.correct) correctCount++;
                 else wrongCount++;
@@ -2920,11 +2965,26 @@ async function loadAdminData() {
             skillsRecord.bully_tehdit  = pct(skillsRecord.bullyStats.tehdit);
             skillsRecord.bully_iftira  = pct(skillsRecord.bullyStats.iftira);
             skillsRecord.bully_kimlik  = pct(skillsRecord.bullyStats.kimlik);
+            skillsRecord.totalMessages = total;
+            skillsRecord.scoreLine = formatMesajSkoru(correctCount, wrongCount, total);
+
+            sessionMsgs.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            messagesBySession[sessionId] = sessionMsgs;
 
             allSkillsData.push(skillsRecord);
         });
         
-        displaySkillsAnalysis(allSkillsData);
+        allSessionData.sort((a, b) => {
+            if (a.sessionId !== b.sessionId) return String(a.sessionId).localeCompare(String(b.sessionId));
+            return new Date(a.timestamp) - new Date(b.timestamp);
+        });
+        const msgNoBySession = {};
+        allSessionData.forEach(row => {
+            msgNoBySession[row.sessionId] = (msgNoBySession[row.sessionId] || 0) + 1;
+            row._msgNo = msgNoBySession[row.sessionId];
+        });
+
+        displaySkillsAnalysis(allSkillsData, messagesBySession);
         displaySessionRecords(allSessionData);
     } catch (error) {
         console.error('Error loading admin data:', error);
@@ -2935,8 +2995,13 @@ async function loadAdminData() {
     }
 }
 
-// ALAN 1: Beceri Analizi Tablosu
-function displaySkillsAnalysis(data) {
+function skillSnapshotCell(sk, key) {
+    if (!sk || typeof sk[key] === 'undefined') return '—';
+    return sk[key] ? '✓' : '✗';
+}
+
+// ALAN 1: Mesaj sonuçları + 6 beceri yan yana (oturum kartları)
+function displaySkillsAnalysis(data, messagesBySession = {}) {
     const container = document.getElementById('skills-analysis-display');
     
     if (!data || data.length === 0) {
@@ -2944,7 +3009,6 @@ function displaySkillsAnalysis(data) {
         return;
     }
 
-    // Oturumlar arası karşılaştırma: aynı öğrenci, birden fazla oturum
     const byParticipant = {};
     data.forEach(item => {
         const key = `${item.participantName}_${item.participantAge}`;
@@ -2954,12 +3018,12 @@ function displaySkillsAnalysis(data) {
 
     let html = '';
 
-    // Oturumlar arası karşılaştırma bölümü
     const multiSessions = Object.values(byParticipant).filter(arr => arr.length > 1);
     if (multiSessions.length > 0) {
         html += `<h4 style="padding:12px 20px 4px;color:#6c63ff;">📈 Oturumlar Arası Gelişim</h4>
         <table><thead><tr>
             <th>Öğrenci</th><th>Oturum</th><th>Tür</th>
+            <th>Mesaj özeti</th>
             <th>Doğru %</th><th>İpucu</th><th>💬 Kötü Söz</th><th>👤 Yalnız Bırakma</th>
             <th>⚠️ Tehdit</th><th>📢 Yalan Yaymak</th><th>🎭 Sahte Hesap</th><th>Süre (dk)</th>
         </tr></thead><tbody>`;
@@ -2972,6 +3036,7 @@ function displaySkillsAnalysis(data) {
                     <td>${item.participantName} (${item.participantAge})</td>
                     <td>${i + 1}. Oturum ${trend}</td>
                     <td>${item.sessionLabel}</td>
+                    <td><strong>${item.scoreLine || item.correctPercent}</strong></td>
                     <td><strong>${item.correctPercent}</strong></td>
                     <td>${item.hintCount}</td>
                     <td>${item.bully_sozel}</td><td>${item.bully_dislama}</td>
@@ -2984,34 +3049,66 @@ function displaySkillsAnalysis(data) {
         html += '</tbody></table>';
     }
 
-    // Tüm oturumlar tablosu
-    html += `<h4 style="padding:12px 20px 4px;color:#6c63ff;">📋 Tüm Oturumlar</h4>
-    <table><thead><tr>
-        <th>Katılımcı</th><th>Yaş</th><th>Oturum Türü</th>
-        <th>Başlangıç</th><th>Süre (dk)</th>
-        <th>Doğru %</th><th>İpucu</th>
-        <th>💬 Kötü Söz ✓%</th><th>👤 Yalnız Bırakma ✓%</th>
-        <th>⚠️ Tehdit ✓%</th><th>📢 Yalan Yaymak ✓%</th><th>🎭 Sahte Hesap ✓%</th>
-    </tr></thead><tbody>`;
+    html += `<h4 style="padding:12px 20px 4px;color:#6c63ff;">📋 Oturumlar — Mesaj kayıtları ve 6 beceri (yan yana)</h4>`;
+
+    data.sort((a, b) => (b.startedAtRaw || 0) - (a.startedAtRaw || 0));
 
     data.forEach(item => {
-        html += `<tr>
-            <td>${item.participantName}</td>
-            <td>${item.participantAge}</td>
-            <td>${item.sessionLabel}</td>
-            <td>${item.startedAt}</td>
-            <td>${item.totalDurationMin}</td>
-            <td><strong>${item.correctPercent}</strong></td>
-            <td>${item.hintCount}</td>
-            <td>${item.bully_sozel}</td>
-            <td>${item.bully_dislama}</td>
-            <td>${item.bully_tehdit}</td>
-            <td>${item.bully_iftira}</td>
-            <td>${item.bully_kimlik}</td>
-        </tr>`;
+        const msgs = messagesBySession[item.sessionId] || [];
+        const sk = item.skillsSnapshot;
+
+        let skillsRows = '';
+        SKILL_LABELS.forEach(({ key, label }) => {
+            const v = skillSnapshotCell(sk, key);
+            const cls = sk && sk[key] ? 'skill-positive' : (sk && sk[key] === false ? 'skill-negative' : '');
+            skillsRows += `<tr><td style="text-align:left;font-size:0.85rem;">${label}</td><td class="${cls}" style="font-weight:700;">${v}</td></tr>`;
+        });
+
+        let msgRows = '';
+        msgs.forEach((m, idx) => {
+            const rc = m.correctBool ? 'skill-positive' : 'skill-negative';
+            msgRows += `<tr>
+                <td>${idx + 1}</td>
+                <td>${m.messageType}</td>
+                <td>${m.bullyingLabel}</td>
+                <td>${m.action}</td>
+                <td class="${rc}">${m.correct}</td>
+                <td>${m.hintUsed}</td>
+            </tr>`;
+        });
+        if (msgRows === '') {
+            msgRows = '<tr><td colspan="6" style="text-align:center;color:#64748b;">Mesaj kaydı yok</td></tr>';
+        }
+
+        html += `
+        <div class="admin-session-card">
+            <div class="admin-session-header">
+                <strong>${item.participantName}</strong> (${item.participantAge} yaş) · ${item.sessionLabel}<br>
+                <span class="admin-session-meta">${item.startedAt} · Süre: ${item.totalDurationMin} dk · İpucu: ${item.hintCount}</span><br>
+                <span class="admin-score-highlight">${item.scoreLine}</span>
+            </div>
+            <div class="admin-session-split">
+                <div class="admin-session-col">
+                    <h5>Mesajlara verilen cevaplar</h5>
+                    <table class="admin-nested-table">
+                        <thead><tr>
+                            <th>#</th><th>Mesaj türü</th><th>Zorbalık türü</th><th>Aksiyon</th><th>Sonuç</th><th>İpucu</th>
+                        </tr></thead>
+                        <tbody>${msgRows}</tbody>
+                    </table>
+                </div>
+                <div class="admin-session-col">
+                    <h5>6 beceri analizi (oturum sonu)</h5>
+                    <table class="admin-nested-table admin-skills-mini">
+                        <thead><tr><th>Beceri</th><th>Durum</th></tr></thead>
+                        <tbody>${skillsRows}</tbody>
+                    </table>
+                    <p class="admin-skills-note">${sk ? 'Oturum bitiminde kaydedilen beceri durumlarıdır.' : 'Eski oturum: beceri özeti yok (yeni oturumlarda otomatik kaydedilir).'}</p>
+                </div>
+            </div>
+        </div>`;
     });
 
-    html += '</tbody></table>';
     container.innerHTML = html;
 }
 
@@ -3028,6 +3125,7 @@ function displaySessionRecords(data) {
         <table>
             <thead>
                 <tr>
+                    <th>#</th>
                     <th>Oturum ID</th>
                     <th>Katılımcı</th>
                     <th>Oturum</th>
@@ -3045,8 +3143,10 @@ function displaySessionRecords(data) {
     
     data.forEach(item => {
         const resultClass = item.correct === '+' ? 'skill-positive' : 'skill-negative';
+        const no = item._msgNo != null ? item._msgNo : '—';
         html += `
             <tr>
+                <td>${no}</td>
                 <td>${item.sessionId.substring(0, 8)}...</td>
                 <td>${item.participantName}</td>
                 <td>${item.sessionLabel}</td>
@@ -3114,7 +3214,7 @@ if (exportSkillsBtn) {
                 return;
             }
             
-            const rows = [['Oturum ID', 'Katılımcı', 'Yaş', 'Oturum Türü', 'Başlangıç', 'Bitiş', 'Süre (dk)', 'Doğru %', 'İpucu Sayısı', 'Kötü Söz %', 'Yalnız Bırakma %', 'Tehdit %', 'Yalan Yaymak %', 'Sahte Hesap %']];
+            const rows = [['Oturum ID', 'Katılımcı', 'Yaş', 'Oturum Türü', 'Başlangıç', 'Bitiş', 'Süre (dk)', 'Mesaj özeti (doğru/yanlış)', 'Doğru %', 'İpucu Sayısı', 'Kötü Söz %', 'Yalnız Bırakma %', 'Tehdit %', 'Yalan Yaymak %', 'Sahte Hesap %', 'Beceri 1', 'Beceri 2', 'Beceri 3', 'Beceri 4', 'Beceri 5', 'Beceri 6']];
             
             for (const doc of sessionsSnapshot.docs) {
                 const data = doc.data();
@@ -3128,12 +3228,13 @@ if (exportSkillsBtn) {
                     .collection('sessions').doc(sessionId)
                     .collection('data').get();
                 
-                let correct = 0, total = 0, hints = 0;
+                let correct = 0, wrong = 0, total = 0, hints = 0;
                 const bs = { sozel:{c:0,t:0}, dislama:{c:0,t:0}, tehdit:{c:0,t:0}, iftira:{c:0,t:0}, kimlik:{c:0,t:0} };
                 dataSnapshot.forEach(d => {
                     const dd = d.data();
                     total++;
                     if (dd.correct) correct++;
+                    else wrong++;
                     if (dd.hintUsed) hints++;
                     if (dd.messageType === 'cyberbullying' && dd.bullyingType && bs[dd.bullyingType]) {
                         bs[dd.bullyingType].t++;
@@ -3142,6 +3243,9 @@ if (exportSkillsBtn) {
                 });
                 const pct = (s) => s.t > 0 ? ((s.c/s.t)*100).toFixed(1)+'%' : '-';
                 const correctPct = total > 0 ? ((correct/total)*100).toFixed(1)+'%' : '0%';
+                const scoreLine = formatMesajSkoru(correct, wrong, total);
+                const sk = data.skillsSnapshot || {};
+                const b = (k) => (sk[k] === true ? 'Doğru' : sk[k] === false ? 'Yanlış' : '—');
                 
                 rows.push([
                     sessionId,
@@ -3149,8 +3253,10 @@ if (exportSkillsBtn) {
                     data.participantAge || '-',
                     SESSION_LABELS[data.sessionType] || 'Bilinmiyor',
                     startedAt, endedAt, parseFloat(duration),
+                    scoreLine,
                     correctPct, hints,
-                    pct(bs.sozel), pct(bs.dislama), pct(bs.tehdit), pct(bs.iftira), pct(bs.kimlik)
+                    pct(bs.sozel), pct(bs.dislama), pct(bs.tehdit), pct(bs.iftira), pct(bs.kimlik),
+                    b('navigation'), b('reading'), b('replying'), b('reporting'), b('complaintType'), b('blocking')
                 ]);
             }
             
