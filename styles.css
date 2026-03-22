@@ -265,6 +265,22 @@ body {
     align-items: start;
 }
 
+/* İki ayrı tablo: mesaj cevapları üstte, beceri analizi altta (tam genişlik) */
+.admin-session-tables-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 16px;
+}
+
+.admin-session-block {
+    width: 100%;
+}
+
+.admin-nested-table-wide {
+    width: 100%;
+}
+
 @media (max-width: 960px) {
     .admin-session-split {
         grid-template-columns: 1fr;

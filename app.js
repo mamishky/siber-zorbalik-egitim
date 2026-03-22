@@ -197,8 +197,62 @@ const SKILL_LABELS = [
 function formatMesajSkoru(correct, wrong, total) {
     const t = total != null ? total : (correct + wrong);
     if (t === 0) return '0 mesaj';
-    if (wrong === 0) return `${correct} doğru (${t} mesaj)`;
-    return `${correct} doğru / ${wrong} yanlış (${t} mesaj)`;
+    if (wrong === 0) return `${correct} doğru`;
+    if (correct === 0) return `${wrong} yanlış`;
+    return `${correct} doğru ${wrong} yanlış`;
+}
+
+/** Firestore mesaj satırlarından kuyruk bazlı özet (5 mesaj = 5 satır mantığı) */
+function computeSlotSummaryFromRows(rows) {
+    if (!rows || rows.length === 0) return { correct: 0, wrong: 0, total: 0 };
+    const allHaveSlot = rows.every(r => r.queueSlotIndex != null && r.queueSlotIndex !== undefined);
+    if (!allHaveSlot) {
+        const replies = rows.filter(r => r.action === 'reply');
+        const blocks = rows.filter(r => r.action === 'block');
+        const abandons = rows.filter(r => r.action === 'abandon_home');
+        let correct = 0, wrong = 0;
+        replies.forEach(r => { if (r.correct) correct++; else wrong++; });
+        blocks.forEach(r => { if (r.correct) correct++; else wrong++; });
+        abandons.forEach(() => { wrong++; });
+        const total = replies.length + blocks.length + abandons.length;
+        return { correct, wrong, total: total || rows.length };
+    }
+    const bySlot = {};
+    rows.forEach(r => {
+        const s = r.queueSlotIndex;
+        if (!bySlot[s]) bySlot[s] = [];
+        bySlot[s].push(r);
+    });
+    let correct = 0, wrong = 0;
+    const keys = Object.keys(bySlot).sort((a, b) => Number(a) - Number(b));
+    keys.forEach(sk => {
+        const slotRows = bySlot[sk];
+        const hasAbandon = slotRows.some(x => x.action === 'abandon_home');
+        const reply = slotRows.find(x => x.action === 'reply');
+        const block = slotRows.find(x => x.action === 'block');
+        const reportWrong = slotRows.some(x => x.action === 'report' && !x.correct);
+        if (reply) {
+            if (reply.correct) correct++;
+            else wrong++;
+        } else if (hasAbandon) {
+            wrong++;
+        } else if (block) {
+            if (block.correct && !reportWrong) correct++;
+            else wrong++;
+        } else {
+            wrong++;
+        }
+    });
+    return { correct, wrong, total: keys.length };
+}
+
+function recordQueueSlotOutcome(outcome) {
+    const idx = currentSession.currentMessageIndex;
+    if (!currentSession.slotRecorded) currentSession.slotRecorded = {};
+    if (currentSession.slotRecorded[idx]) return;
+    currentSession.slotRecorded[idx] = true;
+    if (outcome === 'correct') currentSession.stats.correct++;
+    else currentSession.stats.wrong++;
 }
 
 // Current user state
@@ -731,7 +785,8 @@ function initSessionFormHandler() {
     const name = document.getElementById('participant-name').value.trim();
     const age = document.getElementById('participant-age').value;
     const sessionType = document.getElementById('session-type').value;
-    const hintEnabled = document.getElementById('hint-use').checked;
+    const hintRadio = document.querySelector('input[name="hint-option"]:checked');
+    const hintEnabled = hintRadio ? hintRadio.value === 'use' : true;
         
         console.log('📋 Form değerleri:', { name, age, sessionType, hintEnabled });
     
@@ -864,6 +919,8 @@ function getEmptySession(overrides = {}) {
             blocking: false
         },
         stats: { correct: 0, wrong: 0, hints: 0 },
+        slotRecorded: {},
+        reportWrongForSlot: false,
         currentMessageStartTime: null,
         hintTimeout: null,
         messageTimeout: null,
@@ -1841,6 +1898,11 @@ function openSpecificDM(scenario) {
     currentSession.currentScenario = scenario;
     currentSession.messageIndex = 0;
     currentSession.conversationIndex = 0;
+    currentSession.reportWrongForSlot = false;
+    if (currentSession.hintTimeout) {
+        clearTimeout(currentSession.hintTimeout);
+        currentSession.hintTimeout = null;
+    }
     
     // Mark reading skill as true
     currentSession.skills.reading = true;
@@ -1949,12 +2011,27 @@ document.getElementById('back-to-inbox').addEventListener('click', () => {
     
     // Siber zorbalık senaryosunda hem şikayet hem engelleme yapıldıysa mesajı tamamla.
     // Normal mesajlarda (conversation formatı) her zaman tamamla.
-    const isNormal = scenario && scenario.conversation !== undefined;
+    const isNormal = scenario && (scenario.conversation !== undefined || scenario.isNormal === true);
     const isCyberbullyingDone = scenario && scenario.messages &&
         currentSession.reportClicked && currentSession.blockClicked;
-    
+    const isCyber = scenario && scenario.messages && !scenario.conversation && !scenario.isNormal;
+    const idx = currentSession.currentMessageIndex;
+
     if (isNormal || isCyberbullyingDone) {
         console.log('📱 Mesaj tamamlandı, 10 saniye sonra sonraki mesaj gelecek...');
+        scheduleNextMessage();
+    } else if (isCyber && !currentSession.blockClicked) {
+        // Şikayet etti ama engellemeden veya hiç tamamlamadan ana sayfaya döndü → yanlış, sonraki mesaj
+        if (currentSession.hintTimeout) {
+            clearTimeout(currentSession.hintTimeout);
+            currentSession.hintTimeout = null;
+        }
+        if (!currentSession.slotRecorded[idx]) {
+            const reactionTime = (Date.now() - (currentSession.currentMessageStartTime || Date.now())) / 1000;
+            saveMessageData('cyberbullying', 'abandon_home', reactionTime, false, false);
+            recordQueueSlotOutcome('wrong');
+        }
+        console.log('📱 Siber zorbalık mesajı tamamlanmadan dönüldü — yanlış sayıldı, sonraki mesaj planlanıyor.');
         scheduleNextMessage();
     } else {
         console.log('📱 Ana sayfaya dönüldü ama mesaj henüz tamamlanmadı, kuyruk ilerletilmedi.');
@@ -2242,7 +2319,7 @@ document.getElementById('dm-send').addEventListener('click', async () => {
     // Veri kaydet
     const reactionTime = (Date.now() - currentSession.currentMessageStartTime) / 1000;
     saveMessageData('safe', 'reply', reactionTime, false, true);
-    currentSession.stats.correct++;
+    recordQueueSlotOutcome('correct');
     
     // Mevcut mesajın tipini kontrol et - güvenli mesaj mı siber zorbalık mı?
     // Safe messages use conversation array, cyberbullying messages use messages array
@@ -2438,7 +2515,7 @@ document.getElementById('block-btn').addEventListener('click', () => {
     const reactionTime = (Date.now() - currentSession.currentMessageStartTime) / 1000;
     saveMessageData('cyberbullying', 'block', reactionTime, hintUsed, true);
     
-    currentSession.stats.correct++;
+    recordQueueSlotOutcome(currentSession.reportWrongForSlot ? 'wrong' : 'correct');
     
     // Save blocked status to message history
     const scenario = currentSession.currentScenario;
@@ -2580,9 +2657,9 @@ document.getElementById('submit-complaint').addEventListener('click', () => {
             
             const reactionTime = (Date.now() - currentSession.currentMessageStartTime) / 1000;
             saveMessageData('cyberbullying', 'report', reactionTime, hintUsed, true);
+            currentSession.reportWrongForSlot = false;
 
-            // correct++ burada YOK — engelle adımında (block) sayılır
-            // Böylece her mesaj için tek bir doğru cevap kaydedilir
+            // Kuyruk skoru tek seferde engellemede sayılır (recordQueueSlotOutcome)
 
             // Engelle butonunu yanıp söndür
             showNextStepHint('block');
@@ -2596,7 +2673,7 @@ document.getElementById('submit-complaint').addEventListener('click', () => {
             // İpucu KAPALI: yanlışı kaydet, doğruyu kısaca göster, devam et
             const reactionTime = (Date.now() - currentSession.currentMessageStartTime) / 1000;
             saveMessageData('cyberbullying', 'report', reactionTime, false, false);
-            currentSession.stats.wrong++;
+            currentSession.reportWrongForSlot = true;
 
             // Yanlış seçimi kırmızı, doğru seçimi yeşil göster
             if (selectedOption) selectedOption.classList.add('wrong');
@@ -2703,6 +2780,7 @@ function saveMessageData(messageType, action, reactionTime, hintUsed, correct) {
         bullyingLabel: BULLYING_TYPE_LABELS[scenarioBullyingType] || 'Bilinmiyor',
         messageType: messageType,
         action: action,
+        queueSlotIndex: currentSession.currentMessageIndex,
         reactionSec: reactionSec,               // tam saniye (örn: 5)
         reactionLabel: reactionSec != null ? reactionSec + ' saniye' : '-',
         hintUsed: hintUsed,
@@ -2727,14 +2805,14 @@ function saveMessageData(messageType, action, reactionTime, hintUsed, correct) {
 function showSummary() {
     const c = currentSession.stats.correct;
     const w = currentSession.stats.wrong;
-    const totalAns = c + w;
+    const expected = (currentSession.messageQueue && currentSession.messageQueue.length) ? currentSession.messageQueue.length : (c + w);
     document.getElementById('correct-count').textContent = c;
     document.getElementById('wrong-count').textContent = w;
     document.getElementById('hint-count').textContent = currentSession.stats.hints;
     const scoreLine = document.getElementById('summary-score-line');
     if (scoreLine) {
-        scoreLine.textContent = totalAns > 0
-            ? formatMesajSkoru(c, w, totalAns)
+        scoreLine.textContent = (c + w) > 0
+            ? formatMesajSkoru(c, w, expected)
             : 'Henüz kayıt yok';
     }
     
@@ -2920,7 +2998,7 @@ async function loadAdminData() {
                 statsSnapshot: sessionData.statsSnapshot || null
             };
 
-            let correctCount = 0, wrongCount = 0, hintCount = 0;
+            let hintCount = 0;
 
             const sessionMsgs = [];
             dataSnapshot.forEach(doc => {
@@ -2932,6 +3010,7 @@ async function loadAdminData() {
                     bullyingLabel: data.bullyingLabel || 'Bilinmiyor',
                     messageType: data.messageType || '-',
                     action: data.action || '-',
+                    queueSlotIndex: data.queueSlotIndex,
                     reactionLabel: data.reactionLabel || (data.reactionSec != null ? data.reactionSec + ' saniye' : '-'),
                     correct: data.correct ? '+' : '-',
                     correctBool: data.correct,
@@ -2941,8 +3020,6 @@ async function loadAdminData() {
                 allSessionData.push(row);
                 sessionMsgs.push(row);
 
-                if (data.correct) correctCount++;
-                else wrongCount++;
                 if (data.hintUsed) hintCount++;
 
                 if (data.messageType === 'cyberbullying' && data.bullyingType) {
@@ -2954,7 +3031,17 @@ async function loadAdminData() {
                 }
             });
 
-            const total = correctCount + wrongCount;
+            sessionMsgs.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            const slotSum = computeSlotSummaryFromRows(sessionMsgs.map(r => ({
+                action: r.action,
+                correct: r.correctBool,
+                queueSlotIndex: r.queueSlotIndex,
+                messageType: r.messageType
+            })));
+            const correctCount = slotSum.correct;
+            const wrongCount = slotSum.wrong;
+            const total = slotSum.total;
+
             skillsRecord.correctCount = correctCount;
             skillsRecord.wrongCount = wrongCount;
             skillsRecord.hintCount = hintCount;
@@ -2967,8 +3054,6 @@ async function loadAdminData() {
             skillsRecord.bully_kimlik  = pct(skillsRecord.bullyStats.kimlik);
             skillsRecord.totalMessages = total;
             skillsRecord.scoreLine = formatMesajSkoru(correctCount, wrongCount, total);
-
-            sessionMsgs.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
             messagesBySession[sessionId] = sessionMsgs;
 
             allSkillsData.push(skillsRecord);
@@ -3087,19 +3172,19 @@ function displaySkillsAnalysis(data, messagesBySession = {}) {
                 <span class="admin-session-meta">${item.startedAt} · Süre: ${item.totalDurationMin} dk · İpucu: ${item.hintCount}</span><br>
                 <span class="admin-score-highlight">${item.scoreLine}</span>
             </div>
-            <div class="admin-session-split">
-                <div class="admin-session-col">
-                    <h5>Mesajlara verilen cevaplar</h5>
-                    <table class="admin-nested-table">
+            <div class="admin-session-tables-stack">
+                <div class="admin-session-block">
+                    <h5>1) Mesajlara verilen cevaplar (ham kayıt)</h5>
+                    <table class="admin-nested-table admin-nested-table-wide">
                         <thead><tr>
                             <th>#</th><th>Mesaj türü</th><th>Zorbalık türü</th><th>Aksiyon</th><th>Sonuç</th><th>İpucu</th>
                         </tr></thead>
                         <tbody>${msgRows}</tbody>
                     </table>
                 </div>
-                <div class="admin-session-col">
-                    <h5>6 beceri analizi (oturum sonu)</h5>
-                    <table class="admin-nested-table admin-skills-mini">
+                <div class="admin-session-block">
+                    <h5>2) 6 beceri analizi (oturum sonu özeti)</h5>
+                    <table class="admin-nested-table admin-skills-mini admin-nested-table-wide">
                         <thead><tr><th>Beceri</th><th>Durum</th></tr></thead>
                         <tbody>${skillsRows}</tbody>
                     </table>
