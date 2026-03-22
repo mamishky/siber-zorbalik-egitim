@@ -1100,42 +1100,65 @@
                 </div>
             </div>
 
-            <div class="skills-table">
-                <h3>Beceri Analizi</h3>
-                <table id="skills-summary">
-                    <thead>
-                        <tr>
-                            <th>Beceri</th>
-                            <th>Durum</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1. Sosyal medya uygulamasında gezinme</td>
-                            <td id="skill-navigation">-</td>
-                        </tr>
-                        <tr>
-                            <td>2. Gelen mesajı okuma</td>
-                            <td id="skill-reading">-</td>
-                        </tr>
-                        <tr>
-                            <td>3. Siber zorbalık içermeyen mesajı cevaplama</td>
-                            <td id="skill-replying">-</td>
-                        </tr>
-                        <tr>
-                            <td>4. Siber zorbalık içeren mesajı şikâyet etme</td>
-                            <td id="skill-reporting">-</td>
-                        </tr>
-                        <tr>
-                            <td>5. Siber zorbalık şikayet türünü seçme</td>
-                            <td id="skill-complaint-type">-</td>
-                        </tr>
-                        <tr>
-                            <td>6. Siber zorbalık yapan kişiyi engelleme</td>
-                            <td id="skill-blocking">-</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="summary-tables-stack">
+                <div class="skills-table summary-messages-block">
+                    <h3>1. Mesajlara verilen cevaplar</h3>
+                    <div class="summary-table-wrap">
+                        <table class="summary-messages-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Mesaj türü</th>
+                                    <th>Zorbalık türü</th>
+                                    <th>Aksiyon</th>
+                                    <th>Sonuç</th>
+                                    <th>İpucu</th>
+                                </tr>
+                            </thead>
+                            <tbody id="summary-messages-body">
+                                <!-- showSummary() doldurur -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="skills-table summary-skills-block">
+                    <h3>2. Beceri analizi</h3>
+                    <table id="skills-summary">
+                        <thead>
+                            <tr>
+                                <th>Beceri</th>
+                                <th>Durum</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1. Sosyal medya uygulamasında gezinme</td>
+                                <td id="skill-navigation">-</td>
+                            </tr>
+                            <tr>
+                                <td>2. Gelen mesajı okuma</td>
+                                <td id="skill-reading">-</td>
+                            </tr>
+                            <tr>
+                                <td>3. Siber zorbalık içermeyen mesajı cevaplama</td>
+                                <td id="skill-replying">-</td>
+                            </tr>
+                            <tr>
+                                <td>4. Siber zorbalık içeren mesajı şikâyet etme</td>
+                                <td id="skill-reporting">-</td>
+                            </tr>
+                            <tr>
+                                <td>5. Siber zorbalık şikayet türünü seçme</td>
+                                <td id="skill-complaint-type">-</td>
+                            </tr>
+                            <tr>
+                                <td>6. Siber zorbalık yapan kişiyi engelleme</td>
+                                <td id="skill-blocking">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <button class="btn-primary" id="finish-session">Bitir</button>

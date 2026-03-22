@@ -1243,8 +1243,46 @@ body {
 /* Özet Ekranı */
 .summary-container {
     padding: 40px 20px;
-    max-width: 600px;
+    max-width: 720px;
     margin: 0 auto;
+}
+
+.summary-tables-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+
+.summary-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.summary-messages-table {
+    width: 100%;
+    min-width: 480px;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.summary-messages-table th,
+.summary-messages-table td {
+    padding: 10px 8px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.summary-messages-table th {
+    background: #f3f4f6;
+    font-weight: 600;
+    color: #374151;
+}
+
+.summary-messages-block h3,
+.summary-skills-block h3 {
+    margin-bottom: 14px;
 }
 
 .summary-container h2 {

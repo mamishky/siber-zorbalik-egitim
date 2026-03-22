@@ -2801,6 +2801,40 @@ function saveMessageData(messageType, action, reactionTime, hintUsed, correct) {
     }
 }
 
+/** Özet ekranı — mesaj kayıtları tablosu (öğrenci) */
+function renderStudentSummaryMessagesTable() {
+    const tbody = document.getElementById('summary-messages-body');
+    if (!tbody) return;
+    const SUMMARY_MSG_TYPE = { safe: 'Güvenli', cyberbullying: 'Siber zorbalık' };
+    const SUMMARY_ACTION = {
+        reply: 'Cevap',
+        report: 'Şikayet',
+        block: 'Engelle',
+        abandon_home: 'Yarım bırakıldı'
+    };
+    const rows = (currentSession.sessionData || []).slice();
+    rows.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    if (rows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#64748b;padding:16px;">Henüz kayıt yok.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = rows.map((r, i) => {
+        const mt = SUMMARY_MSG_TYPE[r.messageType] || r.messageType || '-';
+        const bl = r.bullyingLabel || '-';
+        const act = SUMMARY_ACTION[r.action] || r.action || '-';
+        const ok = r.correct ? 'Doğru' : 'Yanlış';
+        const okClass = r.correct ? 'skill-positive' : 'skill-negative';
+        const hint = r.hintUsed ? 'Evet' : 'Hayır';
+        return `<tr><td>${i + 1}</td><td>${escapeHtml(String(mt))}</td><td>${escapeHtml(String(bl))}</td><td>${escapeHtml(String(act))}</td><td class="${okClass}">${ok}</td><td>${hint}</td></tr>`;
+    }).join('');
+}
+
+function escapeHtml(s) {
+    const div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+}
+
 // Özet ekranını göster
 function showSummary() {
     const c = currentSession.stats.correct;
@@ -2815,6 +2849,8 @@ function showSummary() {
             ? formatMesajSkoru(c, w, expected)
             : 'Henüz kayıt yok';
     }
+
+    renderStudentSummaryMessagesTable();
     
     // Becerileri göster
     document.getElementById('skill-navigation').textContent = currentSession.skills.navigation ? '✓' : '✗';
