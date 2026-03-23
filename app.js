@@ -255,6 +255,15 @@ function recordQueueSlotOutcome(outcome) {
     else currentSession.stats.wrong++;
 }
 
+/** Olumlu (güvenli) mesaj turu mu? — şikayet/engel burada yanlış kabul edilir */
+function isSafeScenario(scenario) {
+    if (!scenario) return false;
+    if (scenario.isNormal === true) return true;
+    if (scenario.conversation && scenario.conversation.length) return true;
+    if (!scenario.messages || !scenario.messages.length) return true;
+    return !scenario.messages.some(m => m.type === 'cyberbullying');
+}
+
 // Current user state
 let currentUser = null;
 
@@ -920,6 +929,7 @@ function getEmptySession(overrides = {}) {
         },
         stats: { correct: 0, wrong: 0, hints: 0 },
         slotRecorded: {},
+        slotScheduledAdvance: {},
         reportWrongForSlot: false,
         currentMessageStartTime: null,
         hintTimeout: null,
@@ -1899,6 +1909,9 @@ function openSpecificDM(scenario) {
     currentSession.messageIndex = 0;
     currentSession.conversationIndex = 0;
     currentSession.reportWrongForSlot = false;
+    currentSession.reportClicked = false;
+    currentSession.blockClicked = false;
+    currentSession.selectedComplaintReason = null;
     if (currentSession.hintTimeout) {
         clearTimeout(currentSession.hintTimeout);
         currentSession.hintTimeout = null;
@@ -1978,12 +1991,62 @@ function scheduleNextMessage() {
     }, 10000);
 }
 
+/** Aynı kuyruk slotu için scheduleNextMessage yalnızca bir kez (çift atlama önlemi) */
+function scheduleNextMessageIfNotYetForSlot(slotIndex) {
+    if (slotIndex === undefined || slotIndex === null) {
+        slotIndex = currentSession.currentMessageIndex;
+    }
+    if (!currentSession.slotScheduledAdvance) currentSession.slotScheduledAdvance = {};
+    if (currentSession.slotScheduledAdvance[slotIndex]) return;
+    currentSession.slotScheduledAdvance[slotIndex] = true;
+    scheduleNextMessage();
+}
+
+/**
+ * DM'den geri / ana sayfa ile çıkınca skor + kuyruk.
+ * Slot zaten kayıtlıysa (doğru/yanlış) sadece kuyruk ilerletilir.
+ */
+function finalizeDmExitAndQueue(hasUserReply) {
+    const scenario = currentSession.currentScenario;
+    if (!scenario) return;
+    const idx = currentSession.currentMessageIndex;
+
+    if (currentSession.hintTimeout) {
+        clearTimeout(currentSession.hintTimeout);
+        currentSession.hintTimeout = null;
+    }
+
+    if (currentSession.slotRecorded && currentSession.slotRecorded[idx]) {
+        scheduleNextMessageIfNotYetForSlot(idx);
+        return;
+    }
+
+    const reactionTime = (Date.now() - (currentSession.currentMessageStartTime || Date.now())) / 1000;
+    const safe = isSafeScenario(scenario);
+
+    if (safe) {
+        if (hasUserReply) {
+            saveMessageData('safe', 'reply', reactionTime, false, true);
+            recordQueueSlotOutcome('correct');
+            currentSession.skills.replying = true;
+        } else {
+            saveMessageData('safe', 'abandon_no_reply', reactionTime, false, false);
+            recordQueueSlotOutcome('wrong');
+        }
+    } else {
+        saveMessageData('cyberbullying', 'abandon_home', reactionTime, false, false);
+        recordQueueSlotOutcome('wrong');
+    }
+    scheduleNextMessageIfNotYetForSlot(idx);
+}
+
 // Geri butonları
 document.getElementById('back-to-inbox').addEventListener('click', () => {
     // DM'den direk ana sayfaya dön (Madde 4 - kullanıcı manuel olarak dönmeli)
     const messagesContainer = document.getElementById('dm-messages');
     const scenario = currentSession.currentScenario;
-    
+    let hasUserReply = false;
+
     // Save conversation state if not already saved
     if (scenario && messagesContainer) {
         const allMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
@@ -1991,50 +2054,22 @@ document.getElementById('back-to-inbox').addEventListener('click', () => {
             sender: msg.classList.contains('sent') ? 'user' : scenario.sender,
             time: msg.querySelector('.message-time').textContent
         }));
-        
-        // Mesaj durumunu kontrol et - eğer kullanıcı cevap vermişse "completed", yoksa "in-progress"
+
+        hasUserReply = allMessages.some(msg => msg.sender === 'user');
+
         const messageHistory = loadMessageHistory(currentSession.participantName);
         const senderHistory = messageHistory[scenario.sender];
-        
-        // Kullanıcının cevap verip vermediğini kontrol et
-        const hasUserReply = allMessages.some(msg => msg.sender === 'user');
-        
+
         if (!senderHistory || senderHistory.status !== 'blocked') {
-            // Eğer kullanıcı cevap vermişse "completed", yoksa "in-progress" olarak kaydet
             const status = hasUserReply ? 'completed' : 'in-progress';
             saveConversationState(scenario.sender, allMessages, status);
         }
     }
-    
-    // DİREK ANA SAYFAYA DÖN (inbox'a değil)
-    showScreen('main-app');
-    
-    // Siber zorbalık senaryosunda hem şikayet hem engelleme yapıldıysa mesajı tamamla.
-    // Normal mesajlarda (conversation formatı) her zaman tamamla.
-    const isNormal = scenario && (scenario.conversation !== undefined || scenario.isNormal === true);
-    const isCyberbullyingDone = scenario && scenario.messages &&
-        currentSession.reportClicked && currentSession.blockClicked;
-    const isCyber = scenario && scenario.messages && !scenario.conversation && !scenario.isNormal;
-    const idx = currentSession.currentMessageIndex;
 
-    if (isNormal || isCyberbullyingDone) {
-        console.log('📱 Mesaj tamamlandı, 10 saniye sonra sonraki mesaj gelecek...');
-        scheduleNextMessage();
-    } else if (isCyber && !currentSession.blockClicked) {
-        // Şikayet etti ama engellemeden veya hiç tamamlamadan ana sayfaya döndü → yanlış, sonraki mesaj
-        if (currentSession.hintTimeout) {
-            clearTimeout(currentSession.hintTimeout);
-            currentSession.hintTimeout = null;
-        }
-        if (!currentSession.slotRecorded[idx]) {
-            const reactionTime = (Date.now() - (currentSession.currentMessageStartTime || Date.now())) / 1000;
-            saveMessageData('cyberbullying', 'abandon_home', reactionTime, false, false);
-            recordQueueSlotOutcome('wrong');
-        }
-        console.log('📱 Siber zorbalık mesajı tamamlanmadan dönüldü — yanlış sayıldı, sonraki mesaj planlanıyor.');
-        scheduleNextMessage();
-    } else {
-        console.log('📱 Ana sayfaya dönüldü ama mesaj henüz tamamlanmadı, kuyruk ilerletilmedi.');
+    showScreen('main-app');
+
+    if (scenario && messagesContainer) {
+        finalizeDmExitAndQueue(hasUserReply);
     }
 });
 
@@ -2281,9 +2316,6 @@ document.getElementById('dm-send').addEventListener('click', async () => {
     
     if (!text) return;
     
-    // Cevaplama becerisini true yap
-    currentSession.skills.replying = true;
-    
     const messagesContainer = document.getElementById('dm-messages');
     const scenario = currentSession.currentScenario;
     
@@ -2316,19 +2348,33 @@ document.getElementById('dm-send').addEventListener('click', async () => {
         time: msg.querySelector('.message-time').textContent
     }));
     
-    // Veri kaydet
     const reactionTime = (Date.now() - currentSession.currentMessageStartTime) / 1000;
+    const safe = isSafeScenario(scenario);
+
+    // Siber zorbalıkta metinle cevap = yanlış (şikayet + engelle beklenir)
+    if (!safe) {
+        saveMessageData('cyberbullying', 'reply_inappropriate', reactionTime, false, false);
+        recordQueueSlotOutcome('wrong');
+        currentSession.skills.replying = false;
+        showNotification('Yanlış', 'Olumsuz mesajlarda sohbetle cevap verilmez. Şikayet et ve engelle kullanılmalıydı.', 'error');
+        document.getElementById('action-buttons').style.display = 'none';
+        document.getElementById('dm-input-container').style.display = 'none';
+        const slotIdx = currentSession.currentMessageIndex;
+        showScreen('main-app');
+        scheduleNextMessageIfNotYetForSlot(slotIdx);
+        return;
+    }
+
+    // Olumlu mesajda metin cevabı = doğru
     saveMessageData('safe', 'reply', reactionTime, false, true);
     recordQueueSlotOutcome('correct');
+    currentSession.skills.replying = true;
     
-    // Mevcut mesajın tipini kontrol et - güvenli mesaj mı siber zorbalık mı?
-    // Safe messages use conversation array, cyberbullying messages use messages array
     const currentMessage = scenario.messages ? scenario.messages[currentSession.messageIndex] : null;
     const isSafeMessage = scenario.conversation !== undefined || 
                           (currentMessage && currentMessage.type !== 'cyberbullying') ||
                           !currentMessage;
     
-    // Check if conversation continues or it's a safe message
     if (isSafeMessage) {
         // Güvenli mesajlar için input her zaman aktif olmalı
         // Input'u gizleme - kullanıcı mesaj yazabilmeli
@@ -2400,16 +2446,6 @@ document.getElementById('dm-send').addEventListener('click', async () => {
                     }
                 }, 1500);
             }, 1000);
-    } else {
-        // Siber zorbalık mesajı - kullanıcı cevap verdi
-        // Cevabı kaydet ve butonları göster
-        saveConversationState(scenario.sender, allMessages, 'in-progress');
-        
-        // Input alanını gizle ama action-buttons'ı GÖSTER
-        showSafeModeForCyberbullying();
-        
-        // NOT: Kullanıcı şikayet + engelle yapana kadar feed'e dönmemeli
-        // returnToFeed() çağrısı KALDIRILDI - engelleme sonrası thank-you modal'dan dönecek
     }
 });
 
@@ -2424,45 +2460,33 @@ document.getElementById('dm-input').addEventListener('keypress', (e) => {
 function returnToFeed() {
     const currentScreen = document.querySelector('.screen.active');
     const scenario = currentSession.currentScenario;
-    
-    // DM ekranından geliyorsak mesajı tamamlandı olarak işaretle
+
     if (currentScreen && currentScreen.id === 'dm-screen') {
-        // Conversation state'i kaydet
         const messagesContainer = document.getElementById('dm-messages');
+        let hasUserReply = false;
+
         if (scenario && messagesContainer) {
             const allMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
                 text: msg.querySelector('.message-content').textContent,
                 sender: msg.classList.contains('sent') ? 'user' : scenario.sender,
                 time: msg.querySelector('.message-time').textContent
             }));
-            
-            // Kullanıcının cevap verip vermediğini kontrol et
-            const hasUserReply = allMessages.some(msg => msg.sender === 'user');
-            
-            // Save as completed if not blocked and user has replied
+
+            hasUserReply = allMessages.some(msg => msg.sender === 'user');
+
             const messageHistory = loadMessageHistory(currentSession.participantName);
             const senderHistory = messageHistory[scenario.sender];
             if (!senderHistory || senderHistory.status !== 'blocked') {
-                // Eğer kullanıcı cevap vermişse "completed", yoksa "in-progress"
                 const status = hasUserReply ? 'completed' : 'in-progress';
                 saveConversationState(scenario.sender, allMessages, status);
             }
-            
-            // Ana sayfaya dön
+
             showScreen('main-app');
-            
-            // Sadece kullanıcı cevap vermişse sonraki mesajı planla
-            if (hasUserReply) {
-                // Mesaj tamamlandı - 10 saniye sonra sonraki mesajı gönder
-                scheduleNextMessage();
-            }
-            // Eğer kullanıcı cevap vermemişse zamanlayıcı kurma, mesaj "in-progress" olarak kalacak
+            finalizeDmExitAndQueue(hasUserReply);
         } else {
-            // Inbox'tan veya başka bir yerden geliyorsak sadece ekranı değiştir
             showScreen('main-app');
         }
     } else {
-        // Inbox'tan veya başka bir yerden geliyorsak sadece ekranı değiştir
         showScreen('main-app');
     }
 }
@@ -2480,13 +2504,29 @@ document.getElementById('report-btn').addEventListener('click', () => {
     if (currentSession.hintTimeout) {
         clearTimeout(currentSession.hintTimeout);
     }
-    
+
+    const scenario = currentSession.currentScenario;
+    if (scenario && isSafeScenario(scenario)) {
+        const idx = currentSession.currentMessageIndex;
+        if (!currentSession.slotRecorded[idx]) {
+            const reactionTime = (Date.now() - (currentSession.currentMessageStartTime || Date.now())) / 1000;
+            saveMessageData('safe', 'report_inappropriate', reactionTime, false, false);
+            recordQueueSlotOutcome('wrong');
+        }
+        showNotification('Yanlış', 'Olumlu mesajlarda şikayet etme.', 'error');
+        document.getElementById('complaint-modal').style.display = 'none';
+        document.getElementById('action-buttons').style.display = 'none';
+        showScreen('main-app');
+        scheduleNextMessageIfNotYetForSlot(idx);
+        return;
+    }
+
     // Önce engelle butonuna tıkladıysa sadece doğru butonu yanıp sönsün
     if (currentSession.blockClicked && !currentSession.reportClicked) {
         showWrongOrderHint('report');
         return;
     }
-    
+
     // Şikayet nedeni modalını göster
     showComplaintReasonDialog();
 });
@@ -2496,9 +2536,24 @@ document.getElementById('block-btn').addEventListener('click', () => {
     if (currentSession.hintTimeout) {
         clearTimeout(currentSession.hintTimeout);
     }
-    
+
+    const scenario = currentSession.currentScenario;
+    if (scenario && isSafeScenario(scenario)) {
+        const idx = currentSession.currentMessageIndex;
+        if (!currentSession.slotRecorded[idx]) {
+            const reactionTime = (Date.now() - (currentSession.currentMessageStartTime || Date.now())) / 1000;
+            saveMessageData('safe', 'block_inappropriate', reactionTime, false, false);
+            recordQueueSlotOutcome('wrong');
+        }
+        showNotification('Yanlış', 'Olumlu mesajlarda engelle kullanılmaz.', 'error');
+        document.getElementById('action-buttons').style.display = 'none';
+        showScreen('main-app');
+        scheduleNextMessageIfNotYetForSlot(idx);
+        return;
+    }
+
     const hintUsed = document.getElementById('block-btn').classList.contains('blink');
-    
+
     if (!currentSession.reportClicked) {
         // Önce şikayet etmeden engelleyemez - sadece doğru butonu yanıp sönsün
         showWrongOrderHint('block');
@@ -2516,9 +2571,8 @@ document.getElementById('block-btn').addEventListener('click', () => {
     saveMessageData('cyberbullying', 'block', reactionTime, hintUsed, true);
     
     recordQueueSlotOutcome(currentSession.reportWrongForSlot ? 'wrong' : 'correct');
-    
+
     // Save blocked status to message history
-    const scenario = currentSession.currentScenario;
     const messagesContainer = document.getElementById('dm-messages');
     const allMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
         text: msg.querySelector('.message-content').textContent,
@@ -2810,7 +2864,11 @@ function renderStudentSummaryMessagesTable() {
         reply: 'Cevap',
         report: 'Şikayet',
         block: 'Engelle',
-        abandon_home: 'Yarım bırakıldı'
+        abandon_home: 'Yarım bırakıldı',
+        abandon_no_reply: 'Cevapsız çıkış',
+        reply_inappropriate: 'Olumsuzda sohbet cevabı',
+        report_inappropriate: 'Güvenlide şikayet',
+        block_inappropriate: 'Güvenlide engelle'
     };
     const rows = (currentSession.sessionData || []).slice();
     rows.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
