@@ -430,6 +430,65 @@
             display: inline-block;
         }
 
+        /* Refresh sırasında auth-screen flash'ını engelleyen başlangıç loading katmanı */
+        #boot-loading-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 20% 20%, #1e3a8a 0%, #0f172a 55%, #020617 100%);
+            transition: opacity 0.28s ease, visibility 0.28s ease;
+        }
+        #boot-loading-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .boot-loading-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            color: #e2e8f0;
+            font-family: 'Poppins', sans-serif;
+        }
+        .boot-loading-logo {
+            width: 112px;
+            height: 112px;
+            object-fit: contain;
+            filter: drop-shadow(0 8px 28px rgba(56, 189, 248, 0.35));
+            animation: bootPulse 1.5s ease-in-out infinite;
+        }
+        .boot-loading-text {
+            font-size: 15px;
+            letter-spacing: 0.02em;
+            opacity: 0.92;
+        }
+        .boot-loading-dots {
+            display: flex;
+            gap: 7px;
+        }
+        .boot-loading-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: #22d3ee;
+            opacity: 0.35;
+            animation: bootDot 1s ease-in-out infinite;
+        }
+        .boot-loading-dots span:nth-child(2) { animation-delay: 0.18s; }
+        .boot-loading-dots span:nth-child(3) { animation-delay: 0.36s; }
+        @keyframes bootPulse {
+            0%, 100% { transform: scale(1); opacity: 0.95; }
+            50% { transform: scale(1.06); opacity: 1; }
+        }
+        @keyframes bootDot {
+            0%, 100% { transform: translateY(0); opacity: 0.35; }
+            50% { transform: translateY(-4px); opacity: 1; }
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .cyber-welcome-container {
@@ -453,6 +512,16 @@
     </style>
 </head>
 <body>
+    <div id="boot-loading-overlay" aria-live="polite" aria-label="Safetagram yukleniyor">
+        <div class="boot-loading-content">
+            <img src="assets/logo_only.svg" alt="Safetagram" class="boot-loading-logo">
+            <div class="boot-loading-text">Safetagram yukleniyor...</div>
+            <div class="boot-loading-dots" aria-hidden="true">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </div>
+
     <!-- Authentication Screen - Login & Signup -->
     <div id="auth-screen" class="screen active">
         <!-- Cyber background -->

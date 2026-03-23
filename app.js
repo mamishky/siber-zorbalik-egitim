@@ -266,6 +266,27 @@ function isSafeScenario(scenario) {
 
 // Current user state
 let currentUser = null;
+let bootLoadingHidden = false;
+
+function showBootLoading() {
+    const overlay = document.getElementById('boot-loading-overlay');
+    if (!overlay) return;
+    overlay.classList.remove('hidden');
+}
+
+function hideBootLoading() {
+    if (bootLoadingHidden) return;
+    const overlay = document.getElementById('boot-loading-overlay');
+    if (!overlay) return;
+    overlay.classList.add('hidden');
+    bootLoadingHidden = true;
+    setTimeout(() => {
+        if (overlay.parentElement) overlay.remove();
+    }, 320);
+}
+
+// Uygulama ilk açılışında auth sonucu gelene kadar loading göster
+showBootLoading();
 
 // Dev modu: localhost + ?dev=1 ile simülasyon formunu atla, direkt main-app'e git
 function isDevMode() {
@@ -360,6 +381,7 @@ auth.onAuthStateChanged(async (user) => {
                 await auth.signOut();
                 currentUser = null;
                 showScreen('auth-screen');
+                hideBootLoading();
                 return;
             }
         }
@@ -384,15 +406,21 @@ auth.onAuthStateChanged(async (user) => {
                 console.warn('User document not found in Firestore');
         }
         
-        // Show panel screen if on auth screen (veya dev modda direkt simülasyona git)
-        if (document.getElementById('auth-screen').classList.contains('active')) {
-            if (isDevMode()) {
-                console.log('🔧 Dev mod: Simülasyona direkt gidiliyor...');
-                await startDevSimulation();
-            } else {
-                console.log('Switching to panel screen');
-                showScreen('panel-screen');
-                updatePanelUserInfo();
+        await updatePanelUserInfo();
+
+        // REFRESH KONTROLÜ: Hafızada eski oturum var mı?
+        const restored = loadAppState();
+
+        if (!restored || restored.currentScreen === 'auth-screen') {
+            // Show panel screen if on auth screen (veya dev modda direkt simülasyona git)
+            if (document.getElementById('auth-screen').classList.contains('active')) {
+                if (isDevMode()) {
+                    console.log('🔧 Dev mod: Simülasyona direkt gidiliyor...');
+                    await startDevSimulation();
+                } else {
+                    console.log('Switching to panel screen');
+                    showScreen('panel-screen');
+                }
             }
         }
         } catch (error) {
@@ -408,19 +436,24 @@ auth.onAuthStateChanged(async (user) => {
                 showNotification('Uyarı', 'Kullanıcı bilgileri yüklenemedi.', 'warning');
             }
         }
+        hideBootLoading();
     } else {
         // Dev modda dummy currentUser varsa auth observer'ın onu sıfırlamasına izin verme
         if (isDevMode()) {
             console.log('🔧 Dev mod: auth observer redirect engellendi');
+            hideBootLoading();
             return;
         }
         currentUser = null;
+        currentSession = getEmptySession();
+        clearAppState();
         console.log('User logged out');
         // Show auth screen if not on it
         const authScreen = document.getElementById('auth-screen');
         if (authScreen && !authScreen.classList.contains('active')) {
             showScreen('auth-screen');
         }
+        hideBootLoading();
     }
 });
 
@@ -742,6 +775,7 @@ const adminLogoutBtn = document.getElementById('admin-logout');
 if (adminLogoutBtn) {
     adminLogoutBtn.addEventListener('click', async () => {
         try {
+            clearAppState();
             await auth.signOut();
             showNotification('Başarılı', 'Çıkış yapıldı.', 'success');
         } catch (error) {
@@ -756,6 +790,8 @@ if (adminLogoutBtn) {
     if (panelLogoutBtn) {
         panelLogoutBtn.addEventListener('click', async () => {
             try {
+                clearAppState();
+                currentSession = getEmptySession();
                 await auth.signOut();
                 showNotification('Başarılı', 'Çıkış yapıldı.', 'success');
             } catch (error) {
@@ -841,6 +877,7 @@ function initSessionFormHandler() {
         userId: currentUser.uid,
         hintEnabled
     });
+    saveAppState();
         
         console.log('✅ currentSession oluşturuldu:', sessionId);
         
@@ -934,6 +971,7 @@ function getEmptySession(overrides = {}) {
         currentMessageStartTime: null,
         hintTimeout: null,
         messageTimeout: null,
+        nextMessageDueAt: null,
         reportClicked: false,
         blockClicked: false,
         pendingMessages: 0,
@@ -958,6 +996,124 @@ function getEmptySession(overrides = {}) {
 
 // Global değişkenler - YENİ YAPI (Madde 6)
 let currentSession = getEmptySession();
+
+// Uygulama durumunu yerel depolamaya kaydet
+function saveAppState() {
+    if (!currentUser) return;
+    try {
+        const state = {
+            currentScreen: document.querySelector('.screen.active')?.id || 'panel-screen',
+            session: currentSession,
+            lastUpdate: Date.now()
+        };
+        localStorage.setItem('safetagram_persistence', JSON.stringify(state));
+    } catch (e) {
+        console.error('State kaydetme hatası:', e);
+    }
+}
+
+// Uygulama durumunu geri yükle
+function loadAppState() {
+    const savedState = localStorage.getItem('safetagram_persistence');
+    if (!savedState) return null;
+
+    try {
+        const state = JSON.parse(savedState);
+
+        const sessionState = state.session || state.currentSession;
+        if (sessionState) {
+            currentSession = {
+                ...getEmptySession(),
+                ...sessionState
+            };
+
+            // JSON sonrası Date alanlarını geri dönüştür
+            if (currentSession.startTime) currentSession.startTime = new Date(currentSession.startTime);
+            if (currentSession.endTime) currentSession.endTime = new Date(currentSession.endTime);
+            if (currentSession.deliveredMessages) {
+                currentSession.deliveredMessages.forEach(msg => {
+                    if (msg.createdAt) msg.createdAt = new Date(msg.createdAt);
+                    if (msg.deliveredAt) msg.deliveredAt = new Date(msg.deliveredAt);
+                    if (msg.readAt) msg.readAt = new Date(msg.readAt);
+                });
+            }
+
+            // Timer referansları restore edilmez
+            currentSession.messageTimeout = null;
+            currentSession.hintTimeout = null;
+        }
+
+        if (state.currentScreen && state.currentScreen !== 'auth-screen') {
+            showScreen(state.currentScreen);
+
+            // Ekran bazlı arayüzü yeniden kur
+            if (state.currentScreen === 'main-app') {
+                generateFeed();
+                renderStories();
+                if (currentSession.pendingMessages === 0 &&
+                    currentSession.currentMessageIndex < currentSession.messageQueue.length) {
+                    const currentQueueIndex = currentSession.currentMessageIndex;
+                    const alreadyDelivered = (currentSession.deliveredMessages || []).some(
+                        m => m.queueIndex === currentQueueIndex
+                    );
+                    if (!alreadyDelivered) {
+                        if (currentSession.nextMessageDueAt) {
+                            const remainingMs = currentSession.nextMessageDueAt - Date.now();
+                            if (remainingMs <= 0) {
+                                console.log('🔄 Akış kaldığı yerden devam ediyor: süresi dolan bildirim hemen tetikleniyor');
+                                currentSession.nextMessageDueAt = null;
+                                sendNextMessageNotification();
+                                saveAppState();
+                            } else {
+                                console.log('🔄 Akış kaldığı yerden devam ediyor: kalan süreyle zamanlayıcı geri yüklendi', { remainingMs });
+                                currentSession.messageTimeout = setTimeout(() => {
+                                    currentSession.messageTimeout = null;
+                                    currentSession.nextMessageDueAt = null;
+                                    clearScenarioCountdownDebug();
+                                    sendNextMessageNotification();
+                                    saveAppState();
+                                }, remainingMs);
+
+                                let remainingSec = Math.ceil(remainingMs / 1000);
+                                clearScenarioCountdownDebug();
+                                scenarioCountdownInterval = setInterval(() => {
+                                    remainingSec -= 1;
+                                    if (remainingSec > 0) {
+                                        console.log(`[DEBUG][schedule] kalan: ${remainingSec}s (restore idx=${currentSession.currentMessageIndex})`);
+                                    } else {
+                                        clearScenarioCountdownDebug();
+                                    }
+                                }, 1000);
+                            }
+                        }
+                    } else if (currentSession.nextMessageDueAt) {
+                        currentSession.nextMessageDueAt = null;
+                        saveAppState();
+                    }
+                }
+            } else if (state.currentScreen === 'dm-screen' && currentSession.currentScenario) {
+                openSpecificDM(currentSession.currentScenario);
+            } else if (state.currentScreen === 'inbox-screen') {
+                renderInboxList();
+            }
+
+            // Senaryo koruyucu: refresh sonrası asılı akışları otomatik ittir
+            if (state.currentScreen === 'main-app' || state.currentScreen === 'panel-screen') {
+                setTimeout(checkAndResumeScenario, 2000);
+            }
+        }
+
+        return state;
+    } catch (e) {
+        console.error('State yükleme hatası:', e);
+        return null;
+    }
+}
+
+// Tüm persistence verilerini temizle
+function clearAppState() {
+    localStorage.removeItem('safetagram_persistence');
+}
 
 // Persistent message history functions
 function loadMessageHistory(participantName) {
@@ -1007,7 +1163,7 @@ function saveConversationState(sender, conversation, status, blockedAt = null) {
 // This is a realistic notification beep that sounds like Instagram
 const notificationSound = new Audio('data:audio/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAADhgCqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr/////////////////////////////////////////8AAABhTEFNRTMuMTAwA6oAAAAAAAAAABQ4JALYQgAAOAAABBoF8kCYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/+xDEAAPAAAGkAAAAIAAANIAAAARMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=');
 
-function playNotificationSound() {
+function playNotificationSoundLegacy() {
     try {
         notificationSound.currentTime = 0;
         notificationSound.play().catch(err => {
@@ -1036,6 +1192,7 @@ function showScreen(screenId) {
     const el = document.getElementById(screenId);
     if (el) {
         el.classList.add('active');
+        saveAppState();
     } else {
         console.error('[showScreen] Ekran bulunamadı:', screenId);
     }
@@ -1615,125 +1772,238 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('story-close').addEventListener('click', closeStory);
 });
 
-// Mesaj bildirimi göster (Instagram DM style) - mesaj kuyruğu kapalıyken çağrılmaz
-// Instagram benzeri DM bildirim sesi (Web Audio API — harici dosya gerekmez)
-function playNotificationSound() {
+// Mesaj bildirimi sesi - autoplay kısıtına dayanıklı sürüm
+let notificationAudioUnlocked = false;
+let notificationAudioUnlockBound = false;
+let audioUnlockHintShown = false;
+let notificationAudioCtx = null;
+
+function playBeepFallback() {
     try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        if (!notificationAudioCtx) notificationAudioCtx = new Ctx();
+        if (notificationAudioCtx.state === 'suspended') return;
 
-        // İlk ding
-        const osc1 = ctx.createOscillator();
-        const gain1 = ctx.createGain();
-        osc1.connect(gain1);
-        gain1.connect(ctx.destination);
-        osc1.frequency.setValueAtTime(1046, ctx.currentTime);       // Do6
-        osc1.frequency.setValueAtTime(1318, ctx.currentTime + 0.1); // Mi6
-        gain1.gain.setValueAtTime(0.25, ctx.currentTime);
-        gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-        osc1.start(ctx.currentTime);
-        osc1.stop(ctx.currentTime + 0.4);
-
-        // İkinci ding (kısa gecikme)
-        const osc2 = ctx.createOscillator();
-        const gain2 = ctx.createGain();
-        osc2.connect(gain2);
-        gain2.connect(ctx.destination);
-        osc2.frequency.setValueAtTime(1568, ctx.currentTime + 0.15); // Sol6
-        gain2.gain.setValueAtTime(0.18, ctx.currentTime + 0.15);
-        gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.55);
-        osc2.start(ctx.currentTime + 0.15);
-        osc2.stop(ctx.currentTime + 0.55);
+        const osc = notificationAudioCtx.createOscillator();
+        const gain = notificationAudioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(notificationAudioCtx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1200, notificationAudioCtx.currentTime);
+        gain.gain.setValueAtTime(0, notificationAudioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.1, notificationAudioCtx.currentTime + 0.01);
+        gain.gain.linearRampToValueAtTime(0, notificationAudioCtx.currentTime + 0.28);
+        osc.start();
+        osc.stop(notificationAudioCtx.currentTime + 0.3);
     } catch (e) {
-        // Ses desteklenmiyorsa sessizce geç
+        // no-op
+    }
+}
+
+async function unlockNotificationAudio() {
+    if (notificationAudioUnlocked) return;
+    console.log('[DEBUG][audio] unlock tetiklendi');
+
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (Ctx && !notificationAudioCtx) notificationAudioCtx = new Ctx();
+    if (notificationAudioCtx && notificationAudioCtx.state === 'suspended') {
+        try {
+            await notificationAudioCtx.resume();
+        } catch (e) {
+            // resume başarısızsa HTMLAudio ile devam edilir
+        }
+    }
+
+    // HTMLAudio prime
+    try {
+        notificationSound.volume = 0;
+        const p = notificationSound.play();
+        if (p && typeof p.then === 'function') {
+            p.then(() => {
+                notificationSound.pause();
+                notificationSound.currentTime = 0;
+                notificationSound.volume = 1;
+                notificationAudioUnlocked = true;
+                console.log('[DEBUG][audio] notification audio unlocked');
+                if (notificationAudioUnlockBound) {
+                    window.removeEventListener('pointerdown', unlockNotificationAudio, true);
+                    window.removeEventListener('mousedown', unlockNotificationAudio, true);
+                    window.removeEventListener('click', unlockNotificationAudio, true);
+                    window.removeEventListener('keydown', unlockNotificationAudio, true);
+                    window.removeEventListener('touchstart', unlockNotificationAudio, true);
+                }
+            }).catch(() => {
+                notificationSound.volume = 1;
+                // HTMLAudio başarısızsa WebAudio üzerinden unlock kabul et
+                notificationAudioUnlocked = !!notificationAudioCtx && notificationAudioCtx.state === 'running';
+                if (notificationAudioUnlocked) {
+                    console.log('[DEBUG][audio] webaudio ile unlock tamam');
+                    if (notificationAudioUnlockBound) {
+                        window.removeEventListener('pointerdown', unlockNotificationAudio, true);
+                        window.removeEventListener('mousedown', unlockNotificationAudio, true);
+                        window.removeEventListener('click', unlockNotificationAudio, true);
+                        window.removeEventListener('keydown', unlockNotificationAudio, true);
+                        window.removeEventListener('touchstart', unlockNotificationAudio, true);
+                    }
+                }
+            });
+        } else {
+            notificationSound.pause();
+            notificationSound.currentTime = 0;
+            notificationSound.volume = 1;
+            notificationAudioUnlocked = true;
+            if (notificationAudioUnlockBound) {
+                window.removeEventListener('pointerdown', unlockNotificationAudio, true);
+                window.removeEventListener('mousedown', unlockNotificationAudio, true);
+                window.removeEventListener('click', unlockNotificationAudio, true);
+                window.removeEventListener('keydown', unlockNotificationAudio, true);
+                window.removeEventListener('touchstart', unlockNotificationAudio, true);
+            }
+        }
+    } catch (e) {
+        notificationSound.volume = 1;
+        notificationAudioUnlocked = !!notificationAudioCtx && notificationAudioCtx.state === 'running';
+        if (notificationAudioUnlocked && notificationAudioUnlockBound) {
+            window.removeEventListener('pointerdown', unlockNotificationAudio, true);
+            window.removeEventListener('mousedown', unlockNotificationAudio, true);
+            window.removeEventListener('click', unlockNotificationAudio, true);
+            window.removeEventListener('keydown', unlockNotificationAudio, true);
+            window.removeEventListener('touchstart', unlockNotificationAudio, true);
+        }
+    }
+}
+
+function bindNotificationAudioUnlock() {
+    if (notificationAudioUnlockBound) return;
+    notificationAudioUnlockBound = true;
+    window.addEventListener('pointerdown', unlockNotificationAudio, { once: true, capture: true });
+    window.addEventListener('mousedown', unlockNotificationAudio, { once: true, capture: true });
+    window.addEventListener('click', unlockNotificationAudio, { once: true, capture: true });
+    window.addEventListener('keydown', unlockNotificationAudio, { once: true, capture: true });
+    window.addEventListener('touchstart', unlockNotificationAudio, { once: true, capture: true });
+}
+
+bindNotificationAudioUnlock();
+
+function playNotificationSound() {
+    if (!notificationAudioUnlocked) {
+        console.log('[DEBUG][audio] kilitli, user gesture bekleniyor');
+        if (!audioUnlockHintShown) {
+            audioUnlockHintShown = true;
+            showNotification('Ses kapali', 'Bildirim sesi icin ekranda bir kez tiklayin.', 'warning');
+        }
+        return;
+    }
+
+    // Önce HTMLAudio dene, olmazsa beep fallback
+    try {
+        notificationSound.currentTime = 0;
+        const playPromise = notificationSound.play();
+        if (playPromise && typeof playPromise.then === 'function') {
+            playPromise.catch(() => {
+                playBeepFallback();
+            });
+        }
+    } catch (e) {
+        playBeepFallback();
+    }
+}
+
+let scenarioCountdownInterval = null;
+
+function clearScenarioCountdownDebug() {
+    if (scenarioCountdownInterval) {
+        clearInterval(scenarioCountdownInterval);
+        scenarioCountdownInterval = null;
     }
 }
 
 function sendNextMessageNotification() {
-    if (!currentSession.messageQueue || currentSession.messageQueue.length === 0) {
-        return;
-    }
-    // Tüm mesajlar tamamlandı mı?
-    if (currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
-        // Tüm mesajlar tamamlandı - show summary
-        setTimeout(() => {
-            showSummary();
-        }, 2000);
+    console.log('[DEBUG][notify] start', {
+        idx: currentSession.currentMessageIndex,
+        queueLen: currentSession.messageQueue ? currentSession.messageQueue.length : 0,
+        pendingMessages: currentSession.pendingMessages,
+        hasTimer: !!currentSession.messageTimeout
+    });
+    currentSession.nextMessageDueAt = null;
+    clearScenarioCountdownDebug();
+    if (!currentSession.messageQueue || currentSession.messageQueue.length === 0) return;
+    const idx = currentSession.currentMessageIndex;
+    if (idx >= currentSession.messageQueue.length) {
+        showSummary();
         return;
     }
 
-    playNotificationSound();
-    currentSession.pendingMessages++;
-    const badge = document.getElementById('message-badge');
-    if (badge) {
-    badge.textContent = currentSession.pendingMessages;
-    badge.style.display = 'flex';
-    }
-    
-    // Get current message info for notification
-    const scenario = currentSession.messageQueue[currentSession.currentMessageIndex];
-    
-    // Mesajı delivered olarak işaretle ve deliveredMessages'a ekle (Madde 5)
-    if (scenario) {
+    const scenario = currentSession.messageQueue[idx];
+    if (!scenario) return;
+
+    if (!currentSession.deliveredMessages) currentSession.deliveredMessages = [];
+
+    const isAlreadyInInbox = currentSession.deliveredMessages.some(m => m.queueIndex === idx);
+    if (!isAlreadyInInbox) {
+        console.log('📬 Yeni mesaj Inboxta yaratılıyor:', scenario.sender);
+        currentSession.pendingMessages++;
+
         scenario._deliveredAt = new Date();
         scenario._status = 'delivered';
-        
-        // deliveredMessages'a ekle (inbox'ta görünsün)
-        if (!currentSession.deliveredMessages) {
-            currentSession.deliveredMessages = [];
-        }
-        
-        // Mesaj önizlemesi için ilk mesajı al
+
         let previewText = 'Yeni mesaj';
         if (scenario.messages && scenario.messages.length > 0) {
             previewText = scenario.messages[0].text || 'Yeni mesaj';
         } else if (scenario.conversation && scenario.conversation.length > 0) {
-            previewText = scenario.conversation[0].text || 'Yeni mesaj';
+            previewText = scenario.conversation[0].incoming || 'Yeni mesaj';
         }
-        
+
         currentSession.deliveredMessages.push({
             sender: scenario.sender,
             avatar: scenario.avatar || scenario.sender,
-            previewText: previewText,
+            previewText,
             createdAt: new Date(),
             deliveredAt: new Date(),
             status: 'delivered',
             readAt: null,
-            scenario: scenario
+            queueIndex: idx,
+            scenario
         });
+    } else {
+        console.log('[DEBUG][notify] mesaj zaten inbox\'ta', { idx, sender: scenario.sender });
     }
-    
+
+    const badge = document.getElementById('message-badge');
+    if (badge) {
+        badge.textContent = currentSession.pendingMessages;
+        badge.style.display = currentSession.pendingMessages > 0 ? 'flex' : 'none';
+    }
+    console.log('[DEBUG][notify] badge durumu', {
+        pendingMessages: currentSession.pendingMessages,
+        badgeVisible: !!(badge && currentSession.pendingMessages > 0)
+    });
+
+    playNotificationSound();
+
     const toast = document.getElementById('dm-notification-toast');
     const avatar = document.getElementById('dm-notif-avatar');
     const sender = document.getElementById('dm-notif-sender');
     const preview = document.getElementById('dm-notif-preview');
-    
+
     if (!toast || !avatar || !sender || !preview || !scenario) return;
-    
-    // Set notification content
+
     avatar.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}`;
     sender.textContent = scenario.sender;
-    
-    // Get preview text - sadece "Yeni mesaj" göster, içeriği gösterme
     preview.textContent = 'Yeni mesaj';
-    
-    // Show toast
     toast.style.display = 'flex';
-    
-    // Bildirim sesini çal
-    playNotificationSound();
-    
-    // Click handler to open message
+
     toast.onclick = () => {
         toast.style.display = 'none';
-        if (currentSession.pendingMessages > 0) {
-            showInbox();
-        }
+        showInbox();
     };
-    
-    // Auto hide after 10 seconds
+
     setTimeout(() => {
         toast.style.display = 'none';
     }, 10000);
+
+    saveAppState();
 }
 
 // Mesaj ikonuna tıklandığında - Inbox'ı göster
@@ -1769,6 +2039,27 @@ function formatRelativeTime(timestamp) {
     } else {
         return `${diffDays} gün önce`;
     }
+}
+
+// Mesajı ekrana basan standart fonksiyon
+function renderMessageToUI(text, type, time, avatarSeed) {
+    const messagesContainer = document.getElementById('dm-messages');
+    if (!messagesContainer) return;
+
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type || ''}`.trim();
+    const avatar = type === 'sent' ? 'user1' : avatarSeed;
+
+    messageDiv.innerHTML = `
+        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${avatar}" alt="Avatar" class="message-avatar">
+        <div>
+            <div class="message-content">${text}</div>
+            <div class="message-time">${time}</div>
+        </div>
+    `;
+
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
 // Inbox listesini oluştur (Madde 5 - deliveredMessages kullan)
@@ -1893,14 +2184,8 @@ document.getElementById('inbox-back-to-feed').addEventListener('click', () => {
     // Ana sayfaya dönüldü - eğer mesaj tamamlanmışsa sonraki mesajı planla (Madde 4)
     console.log('📱 Inbox\'tan ana sayfaya dönüldü');
     
-    // Eğer pending mesaj yoksa ve henüz tüm mesajlar gönderilmemişse, zamanlayıcı başlat
-    if (currentSession.pendingMessages === 0 && 
-        currentSession.currentMessageIndex > 0 && 
-        currentSession.currentMessageIndex < currentSession.messageQueue.length) {
-        // Son mesaj tamamlandı, 10 saniye sonra sonrakini gönder
-        console.log('⏱️ 10 saniye sonra sonraki mesaj gelecek...');
-        scheduleNextMessage();
-    }
+    // Ekran geçişinde doğrudan schedule çağırmak yerine guard kararı verdir
+    checkAndResumeScenario();
 });
 
 // Belirli bir DM'i aç
@@ -1917,78 +2202,105 @@ function openSpecificDM(scenario) {
         currentSession.hintTimeout = null;
     }
     
-    // Mark reading skill as true
     currentSession.skills.reading = true;
-    
-    showScreen('dm-screen');
-    
+
     document.getElementById('dm-username').textContent = scenario.sender;
     document.getElementById('dm-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}`;
-    
-    document.getElementById('dm-messages').innerHTML = '';
-    document.getElementById('dm-input-container').style.display = 'none';
-    document.getElementById('action-buttons').style.display = 'none';
-    
-    // Her oturumda mesaj geçmişi sıfırlanacak - Instagram benzeri deneyim
-    // Geçmiş mesajlar gösterilmeyecek, her oturum temiz başlayacak
-    // NOT: Geçmiş mesaj kontrolü tamamen kaldırıldı - her oturum sıfırdan başlıyor
-    
-    // Her zaman yeni mesaj akışı başlat - geçmiş mesaj kontrolü yok
-    // Check if it's a conversation or messages format
+
+    const messagesContainer = document.getElementById('dm-messages');
+    const inputContainer = document.getElementById('dm-input-container');
+    const actionButtons = document.getElementById('action-buttons');
+    messagesContainer.innerHTML = '';
+    const history = loadMessageHistory(currentSession.participantName)[scenario.sender];
+
+    showScreen('dm-screen');
+
+    if (history && history.messages && history.messages.length > 0) {
+        console.log('📜 Eski konuşma yükleniyor...');
+        history.messages.forEach(msg => {
+            const msgType = msg.sender === 'user' ? 'sent' : (msg.text && msg.text.includes('zorbalık') ? 'cyberbullying' : '');
+            renderMessageToUI(msg.text, msgType, msg.time, scenario.avatar);
+        });
+
+        inputContainer.style.display = history.status === 'blocked' ? 'none' : 'flex';
+        actionButtons.style.display = history.status === 'blocked' ? 'none' : 'flex';
+
+        currentSession.messageIndex = scenario.messages ? scenario.messages.length : 0;
+        currentSession.conversationIndex = scenario.conversation ? scenario.conversation.length : 0;
+        return;
+    }
+
+    inputContainer.style.display = 'none';
+    actionButtons.style.display = 'none';
     if (scenario.conversation) {
-        // New conversation format - turn-based
-        setTimeout(() => {
-            sendConversationMessage();
-        }, 1000);
+        setTimeout(sendConversationMessage, 1000);
     } else {
-        // Siber zorbalık mesaj formatı — sendMessage zinciri son mesajdan sonra butonları gösterir
-        setTimeout(() => {
-            sendMessage();
-        }, 1000);
+        setTimeout(sendMessage, 1000);
     }
 }
 
 // Yardımcı fonksiyon: Mesaj tamamlandı, sonraki mesaj için zamanlayıcıyı kur (Madde 4)
 // ZAMANLAMA KURALI: Ana sayfaya dönüldükten sonra 10 saniye bekle
 function scheduleNextMessage() {
-    // Mesaj kuyruğu kapalı – hiçbir mesaj gönderilmez
-    if (!currentSession.messageQueue || currentSession.messageQueue.length === 0) {
+    console.log('[DEBUG][schedule] çağrıldı', {
+        beforeIdx: currentSession.currentMessageIndex,
+        queueLen: currentSession.messageQueue ? currentSession.messageQueue.length : 0,
+        pendingMessages: currentSession.pendingMessages,
+        hasTimer: !!currentSession.messageTimeout
+    });
+    if (!currentSession.messageQueue || currentSession.messageQueue.length === 0) return;
+    if (currentSession.messageTimeout) {
+        console.log('[DEBUG][schedule] aktif timeout referansı var, yeniden planlama atlandı');
         return;
     }
-    // Önceki zamanlayıcıyı temizle
-    if (currentSession.messageTimeout) {
-        clearTimeout(currentSession.messageTimeout);
-        currentSession.messageTimeout = null;
+    const now = Date.now();
+    if (currentSession.nextMessageDueAt && currentSession.nextMessageDueAt > now) {
+        console.log('[DEBUG][schedule] aktif zamanlayıcı zaten var, yeniden planlanmıyor', {
+            dueInMs: currentSession.nextMessageDueAt - now
+        });
+        return;
     }
-    
-    // Mevcut mesajı completed olarak işaretle
-    if (currentSession.currentMessageIndex < currentSession.messageQueue.length) {
-        const currentMsg = currentSession.messageQueue[currentSession.currentMessageIndex];
-        if (currentMsg) {
-            currentMsg._status = 'completed';
-        }
-    }
-    
-    // Sonraki mesaj indeksine geç
+    clearScenarioCountdownDebug();
+
+    // Akış bir sonraki slota anında geçsin; bildirim ise gecikmeli gelsin.
     currentSession.currentMessageIndex++;
-    
-    // Mesaj indeksini kontrol et
-    if (currentSession.currentMessageIndex >= currentSession.messageQueue.length) {
-        // Tüm mesajlar tamamlandı - 2 saniye sonra özet ekranı
+    currentSession.pendingMessages = 0;
+    saveAppState();
+    const nextIndex = currentSession.currentMessageIndex;
+
+    if (nextIndex >= currentSession.messageQueue.length) {
+        console.log('[DEBUG][schedule] queue bitti, summary açılacak');
         setTimeout(() => {
             showSummary();
         }, 2000);
         return;
     }
-    
-    // 10 saniye sonra sonraki mesajı gönder (Madde 4)
+
+    console.log(`⏱️ 10 saniye içinde ${nextIndex}. mesaj tetiklenecek...`);
+    currentSession.nextMessageDueAt = Date.now() + 10000;
     currentSession.messageTimeout = setTimeout(() => {
-        if (currentSession.messageQueue[currentSession.currentMessageIndex]) {
-            currentSession.messageQueue[currentSession.currentMessageIndex]._deliveredAt = new Date();
-            currentSession.messageQueue[currentSession.currentMessageIndex]._status = 'delivered';
-        }
+        currentSession.messageTimeout = null;
+        currentSession.nextMessageDueAt = null;
+        clearScenarioCountdownDebug();
+        console.log('[DEBUG][schedule] timeout doldu, notify tetikleniyor', {
+            idx: nextIndex
+        });
         sendNextMessageNotification();
+        saveAppState();
     }, 10000);
+
+    let remainingSec = 10;
+    console.log(`[DEBUG][schedule] geri sayım başladı: ${remainingSec}s`);
+    scenarioCountdownInterval = setInterval(() => {
+        remainingSec -= 1;
+        if (remainingSec > 0) {
+            console.log(`[DEBUG][schedule] kalan: ${remainingSec}s (nextIdx=${nextIndex})`);
+        } else {
+            clearScenarioCountdownDebug();
+        }
+    }, 1000);
+
+    saveAppState();
 }
 
 /** Aynı kuyruk slotu için scheduleNextMessage yalnızca bir kez (çift atlama önlemi) */
@@ -1997,9 +2309,70 @@ function scheduleNextMessageIfNotYetForSlot(slotIndex) {
         slotIndex = currentSession.currentMessageIndex;
     }
     if (!currentSession.slotScheduledAdvance) currentSession.slotScheduledAdvance = {};
-    if (currentSession.slotScheduledAdvance[slotIndex]) return;
+    if (currentSession.slotScheduledAdvance[slotIndex]) {
+        // Timer kaybolduysa (refresh/restore vb.) aynı slot için yeniden planlamaya izin ver.
+        if (!currentSession.messageTimeout && currentSession.currentMessageIndex === slotIndex) {
+            console.log('[DEBUG][schedule-guard] slot planlı görünüyordu ama timer yok, yeniden planlanıyor', { slotIndex });
+            currentSession.slotScheduledAdvance[slotIndex] = false;
+        } else {
+        console.log('[DEBUG][schedule-guard] aynı slot daha önce planlandı, atlanıyor', { slotIndex });
+        return;
+        }
+    }
     currentSession.slotScheduledAdvance[slotIndex] = true;
+    console.log('[DEBUG][schedule-guard] slot planlandı', { slotIndex });
     scheduleNextMessage();
+}
+
+// Senaryonun durup durmadığını kontrol eden ve gerekirse ittiren ana mekanizma
+function checkAndResumeScenario() {
+    console.log('[DEBUG][guard] kontrol başladı', {
+        idx: currentSession.currentMessageIndex,
+        queueLen: currentSession.messageQueue ? currentSession.messageQueue.length : 0,
+        pendingMessages: currentSession.pendingMessages,
+        hasTimer: !!currentSession.messageTimeout
+    });
+    if (!currentSession || !currentSession.messageQueue || currentSession.messageQueue.length === 0) return;
+
+    const idx = currentSession.currentMessageIndex;
+
+    // Tüm mesajlar bittiyse özet ekranını garanti et
+    if (idx >= currentSession.messageQueue.length) {
+        const activeScreenId = document.querySelector('.screen.active')?.id;
+        if (activeScreenId !== 'summary-screen') {
+            showSummary();
+        }
+        return;
+    }
+
+    const currentScenario = currentSession.messageQueue[idx];
+    if (!currentScenario) return;
+
+    const deliveredMsg = (currentSession.deliveredMessages || []).find(m => m.queueIndex === idx);
+    const history = loadMessageHistory(currentSession.participantName)[currentScenario.sender];
+    const isFinished = history && (history.status === 'completed' || history.status === 'blocked');
+
+    // DURUM 1: Mevcut mesaj bittiyse bir sonrakini planla
+    if (isFinished) {
+        console.log('🛡️ Guard: Bitmiş mesaj tespit edildi, sonraki planlanıyor...');
+        console.log('[DEBUG][guard] isFinished=true', { idx, sender: currentScenario.sender, historyStatus: history && history.status });
+        scheduleNextMessage();
+        return;
+    }
+
+    // DURUM 2: Mesaj henüz inbox'ta yoksa ve timer da yoksa hemen bildirimi tetikle
+    if (!deliveredMsg && !currentSession.messageTimeout && currentSession.pendingMessages === 0) {
+        console.log('🛡️ Guard: Bekleyen mesaj bildirimini hemen tetikliyor...');
+        console.log('[DEBUG][guard] notify koşulu sağlandı', { idx });
+        sendNextMessageNotification();
+    } else {
+        console.log('[DEBUG][guard] bekleme/kilit durumu', {
+            hasDeliveredMsg: !!deliveredMsg,
+            hasTimer: !!currentSession.messageTimeout,
+            pendingMessages: currentSession.pendingMessages,
+            isFinished: !!isFinished
+        });
+    }
 }
 
 /**
@@ -2086,21 +2459,8 @@ function sendMessage() {
     currentSession.currentMessageStartTime = Date.now();
     
     const messagesContainer = document.getElementById('dm-messages');
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${message.type === 'cyberbullying' ? 'cyberbullying' : ''}`;
-    
     const time = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-    
-    messageDiv.innerHTML = `
-        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}" alt="Avatar" class="message-avatar">
-        <div>
-            <div class="message-content">${message.text}</div>
-            <div class="message-time">${time}</div>
-        </div>
-    `;
-    
-    messagesContainer.appendChild(messageDiv);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    renderMessageToUI(message.text, message.type === 'cyberbullying' ? 'cyberbullying' : '', time, scenario.avatar);
     
     // Save conversation state after each message
     const allMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
@@ -2109,6 +2469,7 @@ function sendMessage() {
         time: msg.querySelector('.message-time').textContent
     }));
     saveConversationState(scenario.sender, allMessages, 'in-progress');
+    saveAppState();
     
     if (message.type === 'safe') {
         // Güvenli mesaj - eğer birden fazla mesaj varsa otomatik olarak devam et
@@ -2213,21 +2574,8 @@ function sendConversationMessage() {
     currentSession.currentMessageStartTime = Date.now();
     
     const messagesContainer = document.getElementById('dm-messages');
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'message';
-    
     const time = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-    
-    messageDiv.innerHTML = `
-        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}" alt="Avatar" class="message-avatar">
-        <div>
-            <div class="message-content">${turnData.incoming}</div>
-            <div class="message-time">${time}</div>
-        </div>
-    `;
-    
-    messagesContainer.appendChild(messageDiv);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    renderMessageToUI(turnData.incoming, '', time, scenario.avatar);
     
     // Save conversation state after each incoming message
     const allMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
@@ -2236,6 +2584,7 @@ function sendConversationMessage() {
         time: msg.querySelector('.message-time').textContent
     }));
     saveConversationState(scenario.sender, allMessages, 'in-progress');
+    saveAppState();
     
     // Check if we need to wait for user reply
     if (turnData.waitForReply) {
@@ -2319,22 +2668,8 @@ document.getElementById('dm-send').addEventListener('click', async () => {
     const messagesContainer = document.getElementById('dm-messages');
     const scenario = currentSession.currentScenario;
     
-    // Kullanıcı mesajını ekle
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'message sent';
-    
     const time = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-    
-    messageDiv.innerHTML = `
-        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user1" alt="You" class="message-avatar">
-        <div>
-            <div class="message-content">${text}</div>
-            <div class="message-time">${time}</div>
-        </div>
-    `;
-    
-    messagesContainer.appendChild(messageDiv);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    renderMessageToUI(text, 'sent', time, scenario.avatar);
     input.value = '';
     
     // Input'u devre dışı bırak (AI cevap beklenirken)
@@ -2399,21 +2734,8 @@ document.getElementById('dm-send').addEventListener('click', async () => {
             
             // AI cevabını göster
             setTimeout(() => {
-                const aiMessageDiv = document.createElement('div');
-                aiMessageDiv.className = 'message';
-                
                 const aiTime = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-                
-                aiMessageDiv.innerHTML = `
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}" alt="Avatar" class="message-avatar">
-                    <div>
-                        <div class="message-content">${aiResponse}</div>
-                        <div class="message-time">${aiTime}</div>
-                    </div>
-                `;
-                
-                messagesContainer.appendChild(aiMessageDiv);
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                renderMessageToUI(aiResponse, '', aiTime, scenario.avatar);
                 
                 // Conversation state'i güncelle
                 const updatedMessages = Array.from(messagesContainer.querySelectorAll('.message')).map(msg => ({
@@ -2494,9 +2816,15 @@ function returnToFeed() {
 // Thank you modal'ı kapat ve akışa devam et
 document.getElementById('close-thank-you-modal').addEventListener('click', () => {
     document.getElementById('thank-you-modal').style.display = 'none';
-    // Modalı kapat, DM ekranında kal. Kullanıcı geri butonuna basacak.
-    // scheduleNextMessage() back-to-inbox handler'ında çağrılacak.
-    // Burada çağrılırsa back-to-inbox ile çift increment oluşur → mesajlar atlanır.
+
+    // Engelleme sonrası DM ekranında bekletme yerine ana akışa geri dön
+    showScreen('main-app');
+
+    // Sonraki mesajı planla (index artırımı schedule içinde yapılır)
+    scheduleNextMessage();
+
+    saveAppState();
+    console.log('✅ Engelleme tamamlandı, bir sonraki mesaj planlandı.');
 });
 
 // Şikayet et butonu
@@ -2584,7 +2912,8 @@ document.getElementById('block-btn').addEventListener('click', () => {
     
     // Teşekkür mesajını göster
     document.getElementById('thank-you-modal').style.display = 'flex';
-    
+    saveAppState();
+
     // Not: thank you modal'ın close butonu otomatik olarak timer'ı başlatacak
 });
 
@@ -2843,6 +3172,7 @@ function saveMessageData(messageType, action, reactionTime, hintUsed, correct) {
     };
     
     currentSession.sessionData.push(data);
+    saveAppState();
     
     // Save to Firestore
     if (currentUser && currentSession.sessionId) {
@@ -2860,29 +3190,51 @@ function renderStudentSummaryMessagesTable() {
     const tbody = document.getElementById('summary-messages-body');
     if (!tbody) return;
     const SUMMARY_MSG_TYPE = { safe: 'Güvenli', cyberbullying: 'Siber zorbalık' };
-    const SUMMARY_ACTION = {
-        reply: 'Cevap',
-        report: 'Şikayet',
-        block: 'Engelle',
+    const ACTION_LABELS = {
+        reply: 'Cevap verildi',
+        report: 'Şikayet edildi',
+        block: 'Engellendi',
         abandon_home: 'Yarım bırakıldı',
         abandon_no_reply: 'Cevapsız çıkış',
-        reply_inappropriate: 'Olumsuzda sohbet cevabı',
-        report_inappropriate: 'Güvenlide şikayet',
-        block_inappropriate: 'Güvenlide engelle'
+        reply_inappropriate: 'Hatalı cevap',
+        report_inappropriate: 'Gereksiz şikayet',
+        block_inappropriate: 'Gereksiz engelleme'
     };
-    const rows = (currentSession.sessionData || []).slice();
-    rows.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+    const groupedBySlot = {};
+    (currentSession.sessionData || []).forEach((r) => {
+        const idx = r.queueSlotIndex;
+        if (idx === undefined || idx === null) return;
+
+        if (!groupedBySlot[idx]) {
+            groupedBySlot[idx] = {
+                messageType: r.messageType,
+                bullyingLabel: r.bullyingLabel,
+                actions: new Set(),
+                isCorrect: false,
+                isHintUsed: false
+            };
+        }
+
+        groupedBySlot[idx].actions.add(ACTION_LABELS[r.action] || r.action || '-');
+        if (r.correct) groupedBySlot[idx].isCorrect = true;
+        if (r.hintUsed) groupedBySlot[idx].isHintUsed = true;
+    });
+
+    const rows = Object.keys(groupedBySlot).sort((a, b) => Number(a) - Number(b));
     if (rows.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#64748b;padding:16px;">Henüz kayıt yok.</td></tr>';
         return;
     }
-    tbody.innerHTML = rows.map((r, i) => {
-        const mt = SUMMARY_MSG_TYPE[r.messageType] || r.messageType || '-';
-        const bl = r.bullyingLabel || '-';
-        const act = SUMMARY_ACTION[r.action] || r.action || '-';
-        const ok = r.correct ? 'Doğru' : 'Yanlış';
-        const okClass = r.correct ? 'skill-positive' : 'skill-negative';
-        const hint = r.hintUsed ? 'Evet' : 'Hayır';
+
+    tbody.innerHTML = rows.map((slotIdx, i) => {
+        const data = groupedBySlot[slotIdx];
+        const mt = SUMMARY_MSG_TYPE[data.messageType] || data.messageType || '-';
+        const bl = data.bullyingLabel || '-';
+        const act = Array.from(data.actions).join(', ');
+        const ok = data.isCorrect ? 'Doğru' : 'Yanlış';
+        const okClass = data.isCorrect ? 'skill-positive' : 'skill-negative';
+        const hint = data.isHintUsed ? 'Evet' : 'Hayır';
         return `<tr><td>${i + 1}</td><td>${escapeHtml(String(mt))}</td><td>${escapeHtml(String(bl))}</td><td>${escapeHtml(String(act))}</td><td class="${okClass}">${ok}</td><td>${hint}</td></tr>`;
     }).join('');
 }
