@@ -67,7 +67,7 @@ const POSTS_100 = [
 ];
 
 
-// Story üretimi için gerçek ünlü isimleri
+// Story üretimi için gerçek ünlü isimleri (STORY_ITEMS yoksa veya boşsa kullanılır)
 const STORY_USERS = [
     "elraenn", "pqueen", "jahrein", "unlost", "kendine_muzisyen", "wtcn", "pinky", "irmak_tuzun",
     "xqc", "pokimane", "ninja", "valkyrae", "hasanabi", "ludwig", "mizkif", "kai_cenat", "ishowspeed", "adin_ross",
@@ -75,6 +75,40 @@ const STORY_USERS = [
     "cem_yilmaz", "hadise", "acun_ilicali", "aleyna_tilki", "kenan_imirzalioglu", "demet_ozdemir", "baris_arduc", "hande_ercel", "cagatay_ulusoy", "serenay_sarikaya",
     "elonmusk", "therock", "kyliejenner", "travisscott", "kimkardashian", "badbunny", "margotrobbie", "ryangosling", "zendaya", "timotheechalamet",
     "netflix", "instagram", "tiktok", "youtube", "twitter", "spotify", "snapchat", "bereal", "disney", "hbo", "marvel", "crunchyroll", "amc"
+];
+
+/**
+ * 25 story — gerçek fotoğraflar için URL girin (tercihen Cloudinary / CDN).
+ * - image: Tam ekran story fotoğrafı (zorunlu alan; boşsa geçici Picsum kullanılır).
+ * - thumb: Üstteki yuvarlak halka (opsiyonel; boşsa önce image, o da yoksa çizim avatarı).
+ * - avatar: DiceBear seed yedeği (opsiyonel; yoksa username kullanılır).
+ */
+const STORY_ITEMS = [
+    { username: "elraenn", image: "", thumb: "" },
+    { username: "pqueen", image: "", thumb: "" },
+    { username: "jahrein", image: "", thumb: "" },
+    { username: "unlost", image: "", thumb: "" },
+    { username: "kendine_muzisyen", image: "", thumb: "" },
+    { username: "wtcn", image: "", thumb: "" },
+    { username: "pinky", image: "", thumb: "" },
+    { username: "irmak_tuzun", image: "", thumb: "" },
+    { username: "xqc", image: "", thumb: "" },
+    { username: "pokimane", image: "", thumb: "" },
+    { username: "ninja", image: "", thumb: "" },
+    { username: "valkyrae", image: "", thumb: "" },
+    { username: "hasanabi", image: "", thumb: "" },
+    { username: "ludwig", image: "", thumb: "" },
+    { username: "mizkif", image: "", thumb: "" },
+    { username: "kai_cenat", image: "", thumb: "" },
+    { username: "ishowspeed", image: "", thumb: "" },
+    { username: "adin_ross", image: "", thumb: "" },
+    { username: "messi", image: "", thumb: "" },
+    { username: "ronaldo", image: "", thumb: "" },
+    { username: "haaland", image: "", thumb: "" },
+    { username: "cem_yilmaz", image: "", thumb: "" },
+    { username: "hadise", image: "", thumb: "" },
+    { username: "acun_ilicali", image: "", thumb: "" },
+    { username: "aleyna_tilki", image: "", thumb: "" }
 ];
 
 // Rastgele zorba kullanıcı adları havuzu

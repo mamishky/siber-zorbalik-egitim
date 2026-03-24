@@ -1604,21 +1604,47 @@ let storyState = {
     progressTimeout: null
 };
 
-// Story üretimi - 100 gerçek ünlü/influencer story
+const STORY_STRIP_COUNT = 25;
+
+function storyDicebearUrl(seed) {
+    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(String(seed || 'user'))}`;
+}
+
+// Story üretimi — önce scenarios.js STORY_ITEMS (gerçek foto URL), yoksa STORY_USERS + Picsum/DiceBear
 function generateStories() {
     storyState.stories = [];
-    
-    // STORY_USERS dizisini kullanarak 100 story oluştur
+
+    const rawItems = (typeof window !== 'undefined' && window.STORY_ITEMS && window.STORY_ITEMS.length)
+        ? window.STORY_ITEMS
+        : (typeof STORY_ITEMS !== 'undefined' && STORY_ITEMS.length ? STORY_ITEMS : null);
     const storyUsers = (typeof window !== 'undefined' && window.STORY_USERS) ? window.STORY_USERS : (typeof STORY_USERS !== 'undefined' ? STORY_USERS : []);
-    
-    if (storyUsers.length > 0) {
-    for (let i = 0; i < 100; i++) {
+
+    if (rawItems) {
+        for (let i = 0; i < Math.min(STORY_STRIP_COUNT, rawItems.length); i++) {
+            const it = rawItems[i];
+            const username = it.username != null ? String(it.username) : `user${i}`;
+            const imageTrim = it.image != null ? String(it.image).trim() : '';
+            const thumbTrim = it.thumb != null ? String(it.thumb).trim() : '';
+            storyState.stories.push({
+                username,
+                storyKey: 'story-' + i,
+                imageUrl: imageTrim || null,
+                thumbUrl: thumbTrim || null,
+                avatarSeed: (it.avatar != null && String(it.avatar).trim()) ? String(it.avatar).trim() : username,
+                watched: false
+            });
+        }
+    } else if (storyUsers.length > 0) {
+        for (let i = 0; i < STORY_STRIP_COUNT; i++) {
             const username = storyUsers[i % storyUsers.length];
-        storyState.stories.push({
+            storyState.stories.push({
                 username: username + (i > storyUsers.length - 1 ? Math.floor(i / storyUsers.length) : ''),
-                avatar: username,
-            watched: false
-        });
+                storyKey: 'story-' + i,
+                imageUrl: null,
+                thumbUrl: null,
+                avatarSeed: username,
+                watched: false
+            });
         }
     }
 }
@@ -1636,19 +1662,21 @@ function renderStories() {
     storyState.stories.forEach((story, index) => {
         const storyDiv = document.createElement('div');
         storyDiv.className = 'story';
-        storyDiv.dataset.story = story.avatar;
-        
+        storyDiv.dataset.story = story.storyKey;
+
+        const ringSrc = story.thumbUrl || story.imageUrl || storyDicebearUrl(story.avatarSeed);
+
         storyDiv.innerHTML = `
             <div class="story-avatar ${story.watched ? 'watched' : 'unwatched'}">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${story.avatar}" alt="Story">
+                <img src="${ringSrc}" alt="Story">
             </div>
             <span>${story.username}</span>
         `;
-        
+
         storyDiv.addEventListener('click', function() {
-            openStory(story.username, story.avatar, index);
+            openStory(index);
         });
-        
+
         storiesContainer.appendChild(storyDiv);
     });
 }
@@ -1675,7 +1703,7 @@ function saveStoryStates() {
 // Update story avatar classes based on watched state
 function updateStoryAvatars() {
     storyState.stories.forEach((story, index) => {
-        const storyEl = document.querySelector(`.story[data-story="${story.avatar}"]`);
+        const storyEl = document.querySelector(`.story[data-story="${story.storyKey}"]`);
         if (storyEl) {
             const avatar = storyEl.querySelector('.story-avatar');
             if (story.watched) {
@@ -1689,15 +1717,20 @@ function updateStoryAvatars() {
     });
 }
 
-// Hikaye overlay'i aç
-function openStory(username, avatar, storyIndex) {
-    storyState.currentStoryIndex = storyIndex;
+// Hikaye overlay'i aç (storyIndex = storyState.stories içindeki sıra)
+function openStory(storyIndex) {
     const story = storyState.stories[storyIndex];
-    
+    if (!story) return;
+
+    storyState.currentStoryIndex = storyIndex;
+
     const storyOverlay = document.getElementById('story-overlay');
-    document.getElementById('story-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${avatar}`;
-    document.getElementById('story-username').textContent = username;
-    document.getElementById('story-image').src = `https://picsum.photos/400/700?random=${storyIndex}`;
+    const ringSrc = story.thumbUrl || story.imageUrl || storyDicebearUrl(story.avatarSeed);
+    const fullSrc = story.imageUrl || `https://picsum.photos/400/700?random=${storyIndex}`;
+
+    document.getElementById('story-avatar').src = ringSrc;
+    document.getElementById('story-username').textContent = story.username;
+    document.getElementById('story-image').src = fullSrc;
     
     // Create progress segments
     const progressContainer = document.getElementById('story-progress-container');
@@ -1730,8 +1763,7 @@ function nextStory() {
     
     if (storyState.currentStoryIndex < storyState.stories.length - 1) {
         const nextIndex = storyState.currentStoryIndex + 1;
-        const nextStory = storyState.stories[nextIndex];
-        openStory(nextStory.username, nextStory.avatar, nextIndex);
+        openStory(nextIndex);
     } else {
         closeStory();
     }
@@ -1743,8 +1775,7 @@ function previousStory() {
     
     if (storyState.currentStoryIndex > 0) {
         const prevIndex = storyState.currentStoryIndex - 1;
-        const prevStory = storyState.stories[prevIndex];
-        openStory(prevStory.username, prevStory.avatar, prevIndex);
+        openStory(prevIndex);
     }
 }
 
