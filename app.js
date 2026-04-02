@@ -2244,6 +2244,12 @@ function openSpecificDM(scenario) {
     if (dmInputEl) { dmInputEl.disabled = false; dmInputEl.value = ''; }
     if (dmSendEl) dmSendEl.disabled = false;
 
+    // "Takip etmediğin birinden gelen mesaj" ibaresi: sadece olumsuz (siber zorbalık) senaryolarda göster
+    const unfollowedMsgEl = document.getElementById('unfollowed-message');
+    if (unfollowedMsgEl) {
+        unfollowedMsgEl.style.display = isSafeScenario(scenario) ? 'none' : '';
+    }
+
     const messagesContainer = document.getElementById('dm-messages');
     const inputContainer = document.getElementById('dm-input-container');
     const actionButtons = document.getElementById('action-buttons');
