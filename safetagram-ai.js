@@ -15,6 +15,23 @@ const OR_MODEL_FALLBACKS = [
 const OR_URL     = 'https://safetagramai.m-farukerdogan.workers.dev';
 const OR_TIMEOUT_MS = 8000;
 
+/**
+ * Olumlu (güvenli) DM'lerde gönderen yalnızca bu listeden seçilir — yabancı / tanınmayan hesap adı gösterilmez.
+ * Siber zorbalık mesajları scenarios.js / BULLY_USERNAMES ile ayrı kalır.
+ */
+const TANIDIK_ARKADAS_GONDERENLER = [
+    'can_okul_arkadas',
+    'elif_sinif_10a',
+    'burak_beraber_ders',
+    'zeynep_sinif',
+    'emre_takim'
+];
+
+function tanidikArkadasGonderen(sira) {
+    const i = Math.abs(Number(sira)) || 0;
+    return TANIDIK_ARKADAS_GONDERENLER[i % TANIDIK_ARKADAS_GONDERENLER.length];
+}
+
 // ── System prompt — ilk normal mesajlar için ─────────────────
 const NORMAL_MESAJ_SYSTEM_PROMPT = `Sen "Safetagram" adlı bir Instagram benzeri eğitim platformunda mesaj üreten bir yardımcısın.
 
@@ -34,7 +51,8 @@ KURAL VE KISITLAMALAR:
 5. Mesajlar kesinlikle zorbalık, alay, tehdit, dışlama veya aşağılama içermesin.
 6. Mesajlar sıcak, arkadaşça ve pozitif olsun.
 7. Her mesaj bağımsız olsun, önceki mesajlara referans verme.
-8. Gerçek kişi isimleri veya marka isimleri kullanma.
+8. Gerçek ünlü / marka ismi kullanma.
+9. Mesajı tanıdık bir sınıf arkadaşının yazdığını varsay; karşı tarafta "yabancı biri" izlenimi verme.
 
 KONU HAVUZU (karışık olarak seç):
 - Okul ve dersler: sınav, ödev, okul etkinlikleri
@@ -45,12 +63,9 @@ KONU HAVUZU (karışık olarak seç):
 
 MESAJ FORMATI:
 Yanıtını SADECE JSON dizisi olarak ver, başka hiçbir şey yazma:
-[{"gonderen":"kullanici_adi","mesaj":"Mesaj metni"},...]
+[{"mesaj":"Mesaj metni"},...]
 
-KULLANICI ADI KURALLARI:
-- Instagram tarzı, küçük harf, nokta veya alt çizgi
-- Türk isimleri kullan
-- Her seferinde farklı kullanıcı adı üret`;
+ÖNEMLİ: JSON içinde "gonderen" veya kullanıcı adı alanı ekleme. Uygulama göndereni otomatik olarak tanıdık arkadaş olarak atar.`;
 
 // ── System prompt — sohbet yanıtı için ──────────────────────
 const CEVAP_SYSTEM_PROMPT = `Sen "Safetagram" adlı bir eğitim platformunda arkadaş rolünü oynayan yardımcısın.
@@ -67,28 +82,28 @@ KURALLAR:
 6. Sıcak ve arkadaşça ol.
 7. SADECE cevap metnini yaz, başka hiçbir şey ekleme.`;
 
-// ── Yedek mesaj havuzu (API başarısız olursa kullanılır) ─────
+// ── Yedek mesaj havuzu (API başarısız olursa kullanılır) — gönderen uygulama tarafından atanır ─────
 const YEDEK_MESAJ_HAVUZU = [
-    { gonderen: 'ece.yildiz_',      mesaj: 'Bugün hava çok güzeldi. Okuldan sonra biraz dışarıda oturduk.' },
-    { gonderen: 'kaan.futbol07',    mesaj: 'Dün akşam maç izledik. Çok heyecanlı bir maçtı. Sen izledin mi?' },
-    { gonderen: 'zeynep.resim_',    mesaj: 'Resim dersinde deniz manzarası çizdim. Öğretmen çok beğendi.' },
-    { gonderen: 'ali.oyuncu35',     mesaj: 'Yeni bir oyun indirdim telefona. Çok eğlenceli. Beraber oynayalım mı?' },
-    { gonderen: 'elif.muzik_',      mesaj: 'Bugün müzik dersinde şarkı söyledik. Çok eğlenceliydi.' },
-    { gonderen: 'can.basket_',      mesaj: 'Yarın okuldan sonra basketbol oynayacağız. Sen de gelir misin?' },
-    { gonderen: 'defne.cicek07',    mesaj: 'Anneannemlere gittik hafta sonu. Bahçedeki çiçekler çok güzeldi.' },
-    { gonderen: 'berk.bilim_',      mesaj: 'Fen dersinde deney yaptık bugün. Volkan deneyi çok eğlenceliydi.' },
-    { gonderen: 'sude.kedi_',       mesaj: 'Kedim bugün çok komik bir şey yaptı. Kutuya girmeye çalıştı ama sığmadı.' },
-    { gonderen: 'emre.pizza_',      mesaj: 'Akşam yemeğinde pizza yaptık evde. Çok güzel oldu.' },
-    { gonderen: 'yagmur.kitap_',    mesaj: 'Yeni bir kitap okumaya başladım. Çok güzel bir hikaye.' },
-    { gonderen: 'arda.gitar35',     mesaj: 'Gitar çalmayı öğreniyorum. İlk şarkımı öğrendim.' },
-    { gonderen: 'doga.yuruyus_',    mesaj: 'Hafta sonu ailecek pikniğe gittik. Hava çok güzeldi.' },
-    { gonderen: 'mira.boya_',       mesaj: 'Bugün suluboya ile boyama yaptım. Çok rahatlatıcıydı.' },
-    { gonderen: 'tuna.kamp_',       mesaj: 'Geçen hafta okul kampına gittik. Çok güzel bir deneyimdi.' },
-    { gonderen: 'selin.dans_',      mesaj: 'Dans kursuna başladım bu hafta. Çok eğlenceli geliyor.' },
-    { gonderen: 'ahmet.satranc_',   mesaj: 'Satranç turnuvasına katıldım bugün. İkinci oldum.' },
-    { gonderen: 'nisan.kek_',       mesaj: 'Annemle birlikte kek yaptık bugün. Çikolatalı oldu, çok güzeldi.' },
-    { gonderen: 'furkan.bisiklet_', mesaj: 'Bisikletle parkta tur attık. Hava güzeldi, çok keyifli geçti.' },
-    { gonderen: 'lale.origami_',    mesaj: 'Origami yapmayı öğreniyorum. Bugün kurbağa yaptım.' }
+    { mesaj: 'Bugün hava çok güzeldi. Okuldan sonra biraz dışarıda oturduk.' },
+    { mesaj: 'Dün akşam maç izledik. Çok heyecanlı bir maçtı. Sen izledin mi?' },
+    { mesaj: 'Resim dersinde deniz manzarası çizdim. Öğretmen çok beğendi.' },
+    { mesaj: 'Yeni bir oyun indirdim telefona. Çok eğlenceli. Beraber oynayalım mı?' },
+    { mesaj: 'Bugün müzik dersinde şarkı söyledik. Çok eğlenceliydi.' },
+    { mesaj: 'Yarın okuldan sonra basketbol oynayacağız. Sen de gelir misin?' },
+    { mesaj: 'Anneannemlere gittik hafta sonu. Bahçedeki çiçekler çok güzeldi.' },
+    { mesaj: 'Fen dersinde deney yaptık bugün. Volkan deneyi çok eğlenceliydi.' },
+    { mesaj: 'Kedim bugün çok komik bir şey yaptı. Kutuya girmeye çalıştı ama sığmadı.' },
+    { mesaj: 'Akşam yemeğinde pizza yaptık evde. Çok güzel oldu.' },
+    { mesaj: 'Yeni bir kitap okumaya başladım. Çok güzel bir hikaye.' },
+    { mesaj: 'Gitar çalmayı öğreniyorum. İlk şarkımı öğrendim.' },
+    { mesaj: 'Hafta sonu ailecek pikniğe gittik. Hava çok güzeldi.' },
+    { mesaj: 'Bugün suluboya ile boyama yaptım. Çok rahatlatıcıydı.' },
+    { mesaj: 'Geçen hafta okul kampına gittik. Çok güzel bir deneyimdi.' },
+    { mesaj: 'Dans kursuna başladım bu hafta. Çok eğlenceli geliyor.' },
+    { mesaj: 'Satranç turnuvasına katıldım bugün. İkinci oldum.' },
+    { mesaj: 'Annemle birlikte kek yaptık bugün. Çikolatalı oldu, çok güzeldi.' },
+    { mesaj: 'Bisikletle parkta tur attık. Hava güzeldi, çok keyifli geçti.' },
+    { mesaj: 'Origami yapmayı öğreniyorum. Bugün kurbağa yaptım.' }
 ];
 
 // ── Yedek mesajlardan rastgele seç ──────────────────────────
@@ -198,7 +213,15 @@ async function normalMesajlarUret(adet) {
         if (!Array.isArray(parsed)) throw new Error('Beklenen dizi değil');
 
         return parsed
-            .filter(m => m.gonderen && m.mesaj)
+            .map((m, i) => {
+                const text = (m && (m.mesaj != null ? m.mesaj : m.message)) ? String(m.mesaj != null ? m.mesaj : m.message).trim() : '';
+                if (!text) return null;
+                return {
+                    gonderen: tanidikArkadasGonderen(i),
+                    mesaj: text
+                };
+            })
+            .filter(Boolean)
             .slice(0, adet);
 
     } catch (err) {
@@ -255,14 +278,16 @@ async function geminiCevapUret(kullaniciMesaji, sohbetGecmisi, participantAge) {
 }
 
 // ── Normal mesaj objesini conversation formatına çevir ───────
-function normalSenaryoyaDonustur(mesajObj) {
+function normalSenaryoyaDonustur(mesajObj, arkadasSira) {
+    const sender = tanidikArkadasGonderen(arkadasSira != null ? arkadasSira : 0);
+    const incoming = mesajObj && mesajObj.mesaj != null ? String(mesajObj.mesaj).trim() : '';
     return {
-        sender: mesajObj.gonderen,
-        avatar: mesajObj.gonderen,
+        sender,
+        avatar: sender,
         isNormal: true,
         conversation: [
             {
-                incoming: mesajObj.mesaj,
+                incoming,
                 waitForReply: true,
                 endsConversation: false
             }
@@ -275,7 +300,7 @@ function normalSenaryoyaDonustur(mesajObj) {
 // yedek havuzdan anında seçilir.
 function normalMesajlariKaristir(queue, adet) {
     const mesajlar = yedekMesajlar(adet);
-    const senaryolar = mesajlar.map(normalSenaryoyaDonustur);
+    const senaryolar = mesajlar.map((m, i) => normalSenaryoyaDonustur(m, i));
     const karisik = [...queue];
     senaryolar.forEach(s => {
         const pos = Math.floor(Math.random() * (karisik.length + 1));
