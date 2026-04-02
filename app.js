@@ -2238,6 +2238,12 @@ function openSpecificDM(scenario) {
     document.getElementById('dm-username').textContent = scenario.sender;
     document.getElementById('dm-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}`;
 
+    // Önceki DM'den kalabilecek disabled durumunu her zaman sıfırla
+    const dmInputEl = document.getElementById('dm-input');
+    const dmSendEl = document.getElementById('dm-send');
+    if (dmInputEl) { dmInputEl.disabled = false; dmInputEl.value = ''; }
+    if (dmSendEl) dmSendEl.disabled = false;
+
     const messagesContainer = document.getElementById('dm-messages');
     const inputContainer = document.getElementById('dm-input-container');
     const actionButtons = document.getElementById('action-buttons');
