@@ -3103,28 +3103,21 @@ document.getElementById('submit-complaint').addEventListener('click', () => {
         const selectedOption = document.querySelector(`[data-reason="${selectedReason}"]`);
 
         if (!currentSession.hintEnabled) {
-            // İpucu KAPALI: yanlışı kaydet, doğruyu kısaca göster, devam et
+            // İpucu KAPALI: yanlışı kaydet, doğruyu GÖSTERME, direkt kapat
             const reactionTime = (Date.now() - currentSession.currentMessageStartTime) / 1000;
             saveMessageData('cyberbullying', 'report', reactionTime, false, false);
             currentSession.reportWrongForSlot = true;
 
-            // Yanlış seçimi kırmızı, doğru seçimi yeşil göster
-            if (selectedOption) selectedOption.classList.add('wrong');
-            if (correctOption) correctOption.classList.add('correct');
+            // Hiçbir görsel ipucu göstermeden modalı kapat
+            document.getElementById('complaint-modal').style.display = 'none';
 
-            // 1.5 sn sonra modalı kapat, engelleme adımına geç
-            setTimeout(() => {
-                document.getElementById('complaint-modal').style.display = 'none';
+            currentSession.reportClicked = true;
+            currentSession.skills.reporting = true;
 
-                currentSession.reportClicked = true;
-                currentSession.skills.reporting = true;
-                // complaintType bir kez kazanıldıysa (önceki senaryoda doğru) sıfırlanmaz
+            document.getElementById('report-btn').disabled = true;
+            document.getElementById('report-btn').classList.remove('blink');
 
-                document.getElementById('report-btn').disabled = true;
-                document.getElementById('report-btn').classList.remove('blink');
-
-                showNextStepHint('block');
-            }, 1500);
+            showNextStepHint('block');
         } else {
             // İpucu AÇIK: seçimi sıfırla, doğruyu yanıp söndür, tekrar denesin
             if (selectedOption) {
