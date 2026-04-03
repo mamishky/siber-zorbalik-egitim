@@ -531,47 +531,54 @@ document.addEventListener('DOMContentLoaded', () => {
 // Signup Form Handler
     if (signupForm) {
         signupForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const firstName = document.getElementById('signup-firstname').value.trim();
-    const lastName = document.getElementById('signup-lastname').value.trim();
-    const email = document.getElementById('signup-email').value.trim();
-    const password = document.getElementById('signup-password').value;
-    
-    try {
-        // Create user with email and password
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        const user = userCredential.user;
-        
-        // Save user data to Firestore
-        await db.collection('users').doc(user.uid).set({
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            e.preventDefault();
+
+            const firstName = document.getElementById('signup-firstname').value.trim();
+            const lastName  = document.getElementById('signup-lastname').value.trim();
+            const email     = document.getElementById('signup-email').value.trim().toLowerCase();
+            const password  = document.getElementById('signup-password').value;
+
+            try {
+                // ── Beyaz liste kontrolü ──────────────────────────────────
+                const allowedDoc = await db.collection('allowed_emails')
+                    .doc(email.replace(/\./g, '_'))
+                    .get();
+
+                if (!allowedDoc.exists) {
+                    showNotification(
+                        'Erişim Reddedildi',
+                        'Bu e-posta adresi kayıt için onaylı değil. Lütfen araştırmacıyla iletişime geçin.',
+                        'error'
+                    );
+                    return;
+                }
+                // ─────────────────────────────────────────────────────────
+
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                await db.collection('users').doc(user.uid).set({
+                    firstName,
+                    lastName,
+                    email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                showNotification('Başarılı!', 'Üyeliğiniz onaylandı! Hoş geldiniz.', 'success');
+                document.getElementById('signupForm').reset();
+
+            } catch (error) {
+                // Beyaz liste reddi zaten üstte ele alındı; burası sadece Firebase hataları
+                if (error.code) {
+                    console.error('Signup error:', error);
+                    let errorMessage = 'Kayıt sırasında bir hata oluştu.';
+                    if (error.code === 'auth/email-already-in-use') errorMessage = 'Bu e-posta adresi zaten kullanılıyor.';
+                    else if (error.code === 'auth/invalid-email')   errorMessage = 'Geçersiz e-posta adresi.';
+                    else if (error.code === 'auth/weak-password')   errorMessage = 'Şifre çok zayıf. En az 6 karakter olmalı.';
+                    showNotification('Hata', errorMessage, 'error');
+                }
+            }
         });
-        
-        // Show success notification
-        showNotification('Başarılı!', 'Üyeliğiniz onaylandı! Hoş geldiniz.', 'success');
-        
-        // Clear form
-        document.getElementById('signupForm').reset();
-        
-    } catch (error) {
-        console.error('Signup error:', error);
-        let errorMessage = 'Kayıt sırasında bir hata oluştu.';
-        
-        if (error.code === 'auth/email-already-in-use') {
-            errorMessage = 'Bu e-posta adresi zaten kullanılıyor.';
-        } else if (error.code === 'auth/invalid-email') {
-            errorMessage = 'Geçersiz e-posta adresi.';
-        } else if (error.code === 'auth/weak-password') {
-            errorMessage = 'Şifre çok zayıf. En az 6 karakter olmalı.';
-        }
-        
-        showNotification('Hata', errorMessage, 'error');
-    }
-});
     }
 
     // Login Form Handler - BENİ HATIRLA EKLENDİ + GELİŞTİRİLMİŞ ERROR HANDLING
