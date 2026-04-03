@@ -3632,6 +3632,25 @@ function displaySkillsAnalysis(data, messagesBySession = {}) {
 
     html += `<h4 style="padding:12px 20px 4px;color:#6c63ff;">📋 Oturumlar — Mesaj kayıtları ve 6 beceri (yan yana)</h4>`;
 
+    // Öğrenci başlığı + tüm öğrenciyi silme butonu
+    const participantKeys = Object.keys(byParticipant);
+    if (participantKeys.length > 0) {
+        html += '<div style="display:flex;flex-direction:column;gap:6px;padding:0 20px 12px;">';
+        participantKeys.forEach(key => {
+            const sample = byParticipant[key][0];
+            const sessionIds = byParticipant[key].map(s => s.sessionId);
+            html += `
+            <div style="display:flex;align-items:center;justify-content:space-between;background:#f8f8ff;border-radius:8px;padding:8px 14px;border:1px solid #e0e0f0;">
+                <span style="font-weight:600;color:#4b4ba3;">👤 ${sample.participantName} (${sample.participantAge} yaş) · ${byParticipant[key].length} oturum</span>
+                <button onclick="deleteParticipant('${sample.participantName}', ${sample.participantAge}, ${JSON.stringify(sessionIds).replace(/"/g, "'")})"
+                    style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:6px;padding:4px 12px;font-size:0.78rem;cursor:pointer;">
+                    🗑 Tüm Oturumları Sil
+                </button>
+            </div>`;
+        });
+        html += '</div>';
+    }
+
     data.sort((a, b) => (b.startedAtRaw || 0) - (a.startedAtRaw || 0));
 
     data.forEach(item => {
@@ -3662,11 +3681,19 @@ function displaySkillsAnalysis(data, messagesBySession = {}) {
         }
 
         html += `
-        <div class="admin-session-card">
+        <div class="admin-session-card" data-session-id="${item.sessionId}">
             <div class="admin-session-header">
-                <strong>${item.participantName}</strong> (${item.participantAge} yaş) · ${item.sessionLabel}<br>
-                <span class="admin-session-meta">${item.startedAt} · Süre: ${item.totalDurationMin} dk · İpucu: ${item.hintCount}</span><br>
-                <span class="admin-score-highlight">${item.scoreLine}</span>
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                    <div>
+                        <strong>${item.participantName}</strong> (${item.participantAge} yaş) · ${item.sessionLabel}<br>
+                        <span class="admin-session-meta">${item.startedAt} · Süre: ${item.totalDurationMin} dk · İpucu: ${item.hintCount}</span><br>
+                        <span class="admin-score-highlight">${item.scoreLine}</span>
+                    </div>
+                    <button onclick="deleteSession('${item.sessionId}', '${item.participantName}')"
+                        style="flex-shrink:0;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:6px;padding:4px 10px;font-size:0.78rem;cursor:pointer;white-space:nowrap;">
+                        🗑 Oturumu Sil
+                    </button>
+                </div>
             </div>
             <div class="admin-session-tables-stack">
                 <div class="admin-session-block">
@@ -3903,7 +3930,49 @@ if (exportSessionsBtn) {
     });
 }
 
-// Verileri Temizle
+// Tek oturumu sil
+async function deleteSession(sessionId, participantName) {
+    if (!confirm(`"${participantName}" adlı öğrencinin bu oturumu silinecek. Onaylıyor musunuz?`)) return;
+    if (!currentUser) return;
+    try {
+        const dataSnap = await db.collection('users').doc(currentUser.uid)
+            .collection('sessions').doc(sessionId)
+            .collection('data').get();
+        const batch = db.batch();
+        dataSnap.forEach(doc => batch.delete(doc.ref));
+        batch.delete(db.collection('users').doc(currentUser.uid).collection('sessions').doc(sessionId));
+        await batch.commit();
+        showNotification('Silindi', 'Oturum başarıyla silindi.', 'success');
+        loadAdminData();
+    } catch (err) {
+        console.error('deleteSession error:', err);
+        showNotification('Hata', 'Oturum silinirken hata oluştu.', 'error');
+    }
+}
+
+// Bir öğrenciye ait tüm oturumları sil
+async function deleteParticipant(participantName, participantAge, sessionIds) {
+    if (!confirm(`"${participantName}" adlı öğrencinin TÜM ${sessionIds.length} oturumu silinecek. Bu işlem geri alınamaz!`)) return;
+    if (!currentUser) return;
+    try {
+        const batch = db.batch();
+        for (const sessionId of sessionIds) {
+            const dataSnap = await db.collection('users').doc(currentUser.uid)
+                .collection('sessions').doc(sessionId)
+                .collection('data').get();
+            dataSnap.forEach(doc => batch.delete(doc.ref));
+            batch.delete(db.collection('users').doc(currentUser.uid).collection('sessions').doc(sessionId));
+        }
+        await batch.commit();
+        showNotification('Silindi', `${participantName} adlı öğrencinin tüm oturumları silindi.`, 'success');
+        loadAdminData();
+    } catch (err) {
+        console.error('deleteParticipant error:', err);
+        showNotification('Hata', 'Veriler silinirken hata oluştu.', 'error');
+    }
+}
+
+// Verileri Temizle (toplu — tüm öğrenciler)
 document.getElementById('clear-data').addEventListener('click', async () => {
     if (confirm('Tüm verileri silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!')) {
         if (!currentUser) {
