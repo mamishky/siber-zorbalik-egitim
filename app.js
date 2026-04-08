@@ -528,6 +528,38 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+// Whitelist kontrolü (allowed_emails) - birden fazla ID formatını destekler
+async function isAllowedEmail(email) {
+    const normalized = String(email || '').trim().toLowerCase();
+    if (!normalized) return false;
+
+    const candidates = Array.from(new Set([
+        normalized,                              // ali.veli@gmail.com
+        normalized.replace(/\./g, '_'),          // ali_veli@gmail_com
+        normalized.replace(/[@.]/g, '_'),        // ali_veli_gmail_com
+        normalized.replace(/@/g, '_at_').replace(/\./g, '_') // ali_veli_at_gmail_com
+    ]));
+
+    // 1) Belge ID'den kontrol
+    for (const key of candidates) {
+        const snap = await db.collection('allowed_emails').doc(key).get();
+        if (snap.exists) return true;
+    }
+
+    // 2) Alan bazlı fallback (doc içine email/emailLower yazıldıysa)
+    const byEmail = await db.collection('allowed_emails')
+        .where('email', '==', normalized)
+        .limit(1)
+        .get();
+    if (!byEmail.empty) return true;
+
+    const byEmailLower = await db.collection('allowed_emails')
+        .where('emailLower', '==', normalized)
+        .limit(1)
+        .get();
+    return !byEmailLower.empty;
+}
+
 // Signup Form Handler
     if (signupForm) {
         signupForm.addEventListener('submit', async (e) => {
@@ -540,11 +572,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 // ── Beyaz liste kontrolü ──────────────────────────────────
-                const allowedDoc = await db.collection('allowed_emails')
-                    .doc(email.replace(/\./g, '_'))
-                    .get();
-
-                if (!allowedDoc.exists) {
+                const allowed = await isAllowedEmail(email);
+                if (!allowed) {
                     showNotification(
                         'Erişim Reddedildi',
                         'Bu e-posta adresi kayıt için onaylı değil. Lütfen araştırmacıyla iletişime geçin.',
@@ -568,15 +597,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('signupForm').reset();
 
             } catch (error) {
-                // Beyaz liste reddi zaten üstte ele alındı; burası sadece Firebase hataları
-                if (error.code) {
-                    console.error('Signup error:', error);
-                    let errorMessage = 'Kayıt sırasında bir hata oluştu.';
-                    if (error.code === 'auth/email-already-in-use') errorMessage = 'Bu e-posta adresi zaten kullanılıyor.';
-                    else if (error.code === 'auth/invalid-email')   errorMessage = 'Geçersiz e-posta adresi.';
-                    else if (error.code === 'auth/weak-password')   errorMessage = 'Şifre çok zayıf. En az 6 karakter olmalı.';
-                    showNotification('Hata', errorMessage, 'error');
-                }
+                console.error('Signup error:', error);
+                let errorMessage = 'Kayıt sırasında bir hata oluştu.';
+                if (error.code === 'auth/email-already-in-use') errorMessage = 'Bu e-posta adresi zaten kullanılıyor.';
+                else if (error.code === 'auth/invalid-email')   errorMessage = 'Geçersiz e-posta adresi.';
+                else if (error.code === 'auth/weak-password')   errorMessage = 'Şifre çok zayıf. En az 6 karakter olmalı.';
+                else if (error.code === 'permission-denied')    errorMessage = 'Firestore erişimi reddedildi. Rules bölümünü tekrar Publish edin.';
+                showNotification('Hata', errorMessage, 'error');
             }
         });
     }
