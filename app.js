@@ -171,7 +171,14 @@ function continueConversation(conversationHistory, userMessage) {
 
 // Oturum tipi ve zorbalık türü etiketleri
 const SESSION_LABELS = {
+    'genelleme-on': 'Genelleme Ön-Test',
     'baslama': 'Başlama Düzeyi',
+    'uygulama': 'Uygulama',
+    'genelleme-son': 'Genelleme Son-Test',
+    'izleme-2': 'İzleme (2. Hafta)',
+    'izleme-4': 'İzleme (4. Hafta)',
+    'izleme-8': 'İzleme (8. Hafta)',
+    // Eski oturum değerleriyle geriye dönük uyumluluk
     'orta': 'Orta Düzey',
     'ileri': 'İleri Düzey'
 };
@@ -3228,7 +3235,7 @@ function saveMessageData(messageType, action, reactionTime, hintUsed, correct) {
         participantName: currentSession.participantName,
         participantAge: currentSession.participantAge,
         sessionType: currentSession.sessionType,
-        sessionLabel: SESSION_LABELS[currentSession.sessionType],
+        sessionLabel: SESSION_LABELS[currentSession.sessionType] || currentSession.sessionType || 'Bilinmiyor',
         bullyingType: scenarioBullyingType,
         bullyingLabel: BULLYING_TYPE_LABELS[scenarioBullyingType] || 'Bilinmiyor',
         messageType: messageType,
