@@ -193,7 +193,7 @@ const BULLYING_TYPE_LABELS = {
 
 // 6 beceri adı (özet + admin tabloları)
 const SKILL_LABELS = [
-    { key: 'navigation',    label: '1. Sosyal medya uygulamasında gezinme' },
+    { key: 'navigation',    label: '1. Gelen mesajı açma' },
     { key: 'reading',       label: '2. Gelen mesajı okuma' },
     { key: 'replying',      label: '3. Siber zorbalık içermeyen mesajı cevaplama' },
     { key: 'reporting',     label: '4. Siber zorbalık içeren mesajı şikâyet etme' },
