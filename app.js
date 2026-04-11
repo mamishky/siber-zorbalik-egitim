@@ -2252,11 +2252,34 @@ function openConversationFromInbox(deliveredMsgOrIndex) {
 // Inbox'tan ana sayfaya dön
 document.getElementById('inbox-back-to-feed').addEventListener('click', () => {
     showScreen('main-app');
-    
-    // Ana sayfaya dönüldü - eğer mesaj tamamlanmışsa sonraki mesajı planla (Madde 4)
     console.log('📱 Inbox\'tan ana sayfaya dönüldü');
-    
-    // Ekran geçişinde doğrudan schedule çağırmak yerine guard kararı verdir
+
+    // Mevcut sloттaki mesaj inbox'ta var ama açılmadıysa → Beceri 1 false, sonraki mesaja geç
+    const idx = currentSession.currentMessageIndex;
+    const deliveredMsg = (currentSession.deliveredMessages || []).find(m => m.queueIndex === idx);
+    const scenario = currentSession.messageQueue && currentSession.messageQueue[idx];
+
+    if (deliveredMsg && scenario) {
+        const history = loadMessageHistory(currentSession.participantName)[scenario.sender];
+        const isFinished = history && (history.status === 'completed' || history.status === 'blocked');
+
+        if (!isFinished && !(currentSession.slotRecorded && currentSession.slotRecorded[idx])) {
+            // Kullanıcı mesajı görmedi / açmadı
+            currentSession.skills.navigation = false;
+            const reactionTime = (Date.now() - (currentSession.currentMessageStartTime || Date.now())) / 1000;
+            saveMessageData(
+                scenario.isNormal ? 'safe' : 'cyberbullying',
+                'skip_unread',
+                reactionTime,
+                false,
+                false
+            );
+            recordQueueSlotOutcome('wrong');
+            scheduleNextMessageIfNotYetForSlot(idx);
+            return;
+        }
+    }
+
     checkAndResumeScenario();
 });
 
