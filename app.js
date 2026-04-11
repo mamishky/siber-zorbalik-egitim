@@ -947,8 +947,8 @@ function initSessionFormHandler() {
         return;
     }
     
-    // Navigasyon becerisini başlangıçta true yap
-    currentSession.skills.navigation = true;
+    // Beceri 1 (navigation = "Gelen mesajı açma") başlangıçta false — mesaj açılınca true olacak
+    currentSession.skills.navigation = false;
     
     // Öğrenciye özgü, rastgele ve tekrarsız mesaj kuyruğu oluştur
     let _bullyQueue = [];
@@ -2275,6 +2275,7 @@ function openSpecificDM(scenario) {
     }
     
     currentSession.skills.reading = true;
+    currentSession.skills.navigation = true; // Beceri 1: Kullanıcı mesajı açtı
 
     document.getElementById('dm-username').textContent = scenario.sender;
     document.getElementById('dm-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${scenario.avatar}`;
